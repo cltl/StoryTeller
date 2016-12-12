@@ -78,20 +78,16 @@ public class JsonMakeStoryFromTripleData {
             long estimatedTime = System.currentTimeMillis() - startTime;
             log += " -- Time elapsed to get results from KS:" + estimatedTime / 1000.0+"\n";
             ArrayList<JSONObject> storyObjects = makeUpStory(trigTripleData, 1, 30);
-            addPerspectiveToStory(storyObjects);
-            if (pathToTokenIndexFile.isEmpty()) {
-                addSnippetsToStoryFromKnowledgeStore(storyObjects, KSSERVICE);
+            if (storyObjects.size()>0) {
+                addPerspectiveToStory(storyObjects);
+                if (pathToTokenIndexFile.isEmpty()) {
+                    addSnippetsToStoryFromKnowledgeStore(storyObjects, KSSERVICE);
+                } else {
+                    addSnippetsToStoryFromIndexFile(storyObjects, pathToTokenIndexFile);
+                }
+                JSONObject story = writeStory(storyObjects);
+                System.out.print(story.toString(4));
             }
-            else {
-                addSnippetsToStoryFromIndexFile(storyObjects, pathToTokenIndexFile);
-            }
-            JSONObject story = writeStory(storyObjects);
-/*            String str = "{ \"timeline\":\n";
-            jsonOut.write(str.getBytes());
-            jsonOut.write(timeLineObject.toString(0).getBytes());
-            str = "}\n"*/;
-
-            System.out.print(story.toString(4));
         } catch (Exception e) {
             e.printStackTrace();
         }

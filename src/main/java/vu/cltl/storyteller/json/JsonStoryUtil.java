@@ -27,8 +27,11 @@ public class JsonStoryUtil {
     public static String getValidTimeAnchor (String time) {
         String timeAnchor = "";
         int idx = time.lastIndexOf("/");
+        // http://www.newsreader-project.eu/time/20150126
+        // idx = 37
         if (idx > -1 && idx<time.length()-1) {
             timeAnchor = time.substring(idx + 1);
+            //timeAnchor = 20150126
         }
         if (!timeAnchor.isEmpty()) {
             ////// we need at least have the year!!!!
@@ -36,22 +39,24 @@ public class JsonStoryUtil {
             if (timeAnchor.length() < 4) {
                 timeAnchor = "";
             }
-            if (timeAnchor.length() == 6) {
+            else if (timeAnchor.length() == 6) {
                 //// this is a month so we pick the first day of the month
                 timeAnchor += "01";
             }
-            if (timeAnchor.length() == 4) {
+            else if (timeAnchor.length() == 4) {
                 //// this is a year so we pick the first day of the year
                 timeAnchor += "0101";
             }
-            if (timeAnchor.length() == 3 || timeAnchor.length() == 5 || timeAnchor.length() == 7) {
+            else if (timeAnchor.length() == 3 || timeAnchor.length() == 5 || timeAnchor.length() == 7) {
                 ///date error, e.g. 12-07-198"
                 timeAnchor = "";
             }
+
             ///skipping historic events
-            if (timeAnchor.startsWith("19") || timeAnchor.startsWith("20")) {
+            if (!timeAnchor.startsWith("19") && !timeAnchor.startsWith("20")) {
                 timeAnchor = "";
             }
+
             if (!timeAnchor.isEmpty()) {
                 Integer dateInteger = Integer.parseInt(timeAnchor.substring(0, 4));
                 if (dateInteger < 1999 || dateInteger > 2050) {
