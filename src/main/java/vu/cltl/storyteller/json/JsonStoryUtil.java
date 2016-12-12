@@ -10,12 +10,12 @@ import vu.cltl.storyteller.input.FrameNetReader;
 import vu.cltl.storyteller.objects.PerspectiveJsonObject;
 import vu.cltl.storyteller.objects.PhraseCount;
 import vu.cltl.storyteller.objects.TrigTripleData;
-import vu.cltl.storyteller.trig.TrigKSTripleReader;
+import vu.cltl.storyteller.knowledgestore.GetTriplesFromKnowledgeStore;
 import vu.cltl.storyteller.util.Util;
 
 import java.util.*;
 
-import static vu.cltl.storyteller.trig.TrigKSTripleReader.makeTripleQuery;
+import static vu.cltl.storyteller.knowledgestore.SparqlGenerator.makeTripleQuery;
 
 /**
  * Created by piek on 17/02/16.
@@ -23,6 +23,98 @@ import static vu.cltl.storyteller.trig.TrigKSTripleReader.makeTripleQuery;
 public class JsonStoryUtil {
 
     static public int nMergedEvents = 0;
+
+    public static String getValidTimeAnchor (String time) {
+        String timeAnchor = "";
+        int idx = time.lastIndexOf("/");
+        if (idx > -1 && idx<time.length()-1) {
+            timeAnchor = timeAnchor.substring(idx + 1);
+        }
+        if (!timeAnchor.isEmpty()) {
+            ////// we need at least have the year!!!!
+            ///// this check does not work for historic data!!!!
+            if (timeAnchor.length() < 4) {
+                timeAnchor = "";
+            }
+            if (timeAnchor.length() == 6) {
+                //// this is a month so we pick the first day of the month
+                timeAnchor += "01";
+            }
+            if (timeAnchor.length() == 4) {
+                //// this is a year so we pick the first day of the year
+                timeAnchor += "0101";
+            }
+            if (timeAnchor.length() == 3 || timeAnchor.length() == 5 || timeAnchor.length() == 7) {
+                ///date error, e.g. 12-07-198"
+                timeAnchor = "";
+            }
+            ///skipping historic events
+            if (timeAnchor.startsWith("19") || timeAnchor.startsWith("20")) {
+                timeAnchor = "";
+            }
+            Integer dateInteger = Integer.parseInt(timeAnchor.substring(0, 4));
+            if (dateInteger < 1999 || dateInteger > 2050) {
+                timeAnchor = "";
+            }
+        }
+        return timeAnchor;
+    }
+
+
+    public static ArrayList<JSONObject> getJSONObjectArray(TrigTripleData trigTripleData) throws JSONException {
+        Vector<String> coveredEventInstances = new Vector<String>();
+        ArrayList<JSONObject> jsonObjectArrayList = new ArrayList<JSONObject>();
+        Set keySet = trigTripleData.tripleMapInstances.keySet();
+        Iterator<String> keys = keySet.iterator();
+        while (keys.hasNext()) {
+            String key = keys.next(); //// this is the subject of the triple which should point to an event
+            if (!coveredEventInstances.contains(key)) {
+                coveredEventInstances.add(key);
+                if (trigTripleData.tripleMapOthers.containsKey(key)) {
+                    ArrayList<Statement> instanceTriples = trigTripleData.tripleMapInstances.get(key);
+                    ArrayList<Statement> otherTriples = trigTripleData.tripleMapOthers.get(key);
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("instance", key); /// needs to be the full key otherwise not unique
+                    String timeAnchor = JsonStoryFromRdf.getTimeAnchor(trigTripleData.tripleMapInstances, otherTriples);
+                    if (!getValidTimeAnchor(timeAnchor).isEmpty()) {
+                        try {
+                            jsonObject.put("time", timeAnchor);
+                            JSONObject jsonClasses = JsonStoryFromRdf.getClassesJSONObjectFromInstanceStatement(instanceTriples);
+                            if (jsonClasses.keys().hasNext()) {
+                                jsonObject.put("classes", jsonClasses);
+                            }
+                            JSONObject jsonLabels = JsonStoryFromRdf.getLabelsJSONObjectFromInstanceStatement(instanceTriples);
+                            if (jsonLabels.keys().hasNext()) {
+                                jsonObject.put("labels", jsonLabels.get("labels"));
+                            }
+                            JSONObject jsonprefLabels = JsonStoryFromRdf.getPrefLabelsJSONObjectFromInstanceStatement(instanceTriples);
+                            if (jsonprefLabels.keys().hasNext()) {
+                                jsonObject.put("prefLabel", jsonprefLabels.get("prefLabel"));
+                            }
+                            JSONObject jsonMentions = JsonStoryFromRdf.getMentionsJSONObjectFromInstanceStatement(instanceTriples);
+                            if (jsonMentions.keys().hasNext()) {
+                                jsonObject.put("mentions", jsonMentions.get("mentions"));
+                            }
+                            JSONObject actors = JsonStoryFromRdf.getActorsJSONObjectFromInstanceStatement(otherTriples);
+                            if (actors.keys().hasNext()) {
+                                jsonObject.put("actors", actors);
+                            }
+                            JSONObject topics = JsonStoryFromRdf.getTopicsJSONObjectFromInstanceStatement(instanceTriples);
+                            if (topics.keys().hasNext()) {
+                                jsonObject.put("topics", topics.get("topics"));
+                            }
+                            jsonObjectArrayList.add(jsonObject);
+                        } catch (NumberFormatException e) {
+                            // e.printStackTrace();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        }
+        return jsonObjectArrayList;
+    }
 
     public static ArrayList<JSONObject> getJSONObjectArray(TrigTripleData trigTripleData,
                                                            boolean ALL,
@@ -47,12 +139,12 @@ public class JsonStoryUtil {
                 if (trigTripleData.tripleMapOthers.containsKey(key)) {
                     // System.out.println("key = " + key);
                     ArrayList<Statement> instanceTriples = trigTripleData.tripleMapInstances.get(key);
-                    if (JsonFromRdf.prefLabelInList(instanceTriples, blacklist)) {
+                    if (JsonStoryFromRdf.prefLabelInList(instanceTriples, blacklist)) {
                         continue;
                     }
                     if (SKIPPERSPECTIVEEVENTS) {
                         /// we skip events that are objects of the generatedBy property in the grasp layer
-                       if (JsonFromRdf.mentionInList(instanceTriples, trigTripleData.perspectiveMentions)) {
+                       if (JsonStoryFromRdf.mentionInList(instanceTriples, trigTripleData.perspectiveMentions)) {
                             nSkip++;
                             continue;
                         }
@@ -60,16 +152,16 @@ public class JsonStoryUtil {
                     if (eventTypes.isEmpty() ||
                             eventTypes.equalsIgnoreCase("N") ||
                             eventTypes.equalsIgnoreCase("any") ||
-                            JsonFromRdf.matchEventType(instanceTriples, eventTypes)) {
+                            JsonStoryFromRdf.matchEventType(instanceTriples, eventTypes)) {
                         /// this means it is an instance and has semrelations
                         ArrayList<Statement> otherTriples = trigTripleData.tripleMapOthers.get(key);
-                        if (JsonFromRdf.hasActor(otherTriples) || ALL) {
+                        if (JsonStoryFromRdf.hasActor(otherTriples) || ALL) {
                             /// we ignore events without actors.....
                             JSONObject jsonObject = new JSONObject();
-                            jsonObject.put("event", JsonFromRdf.getValue(JsonFromRdf.getSynsetsFromIli(key, iliMap)));
+                            jsonObject.put("event", JsonStoryFromRdf.getValue(JsonStoryFromRdf.getSynsetsFromIli(key, iliMap)));
                             // jsonObject.put("instance", getValue(key));
                             jsonObject.put("instance", key); /// needs to be the full key otherwise not unique
-                            String timeAnchor = JsonFromRdf.getTimeAnchor(trigTripleData.tripleMapInstances, otherTriples);
+                            String timeAnchor = JsonStoryFromRdf.getTimeAnchor(trigTripleData.tripleMapInstances, otherTriples);
                             //System.out.println("timeAnchor = " + timeAnchor);
                             if (timeAnchor.isEmpty()) {
                                 continue;
@@ -106,34 +198,34 @@ public class JsonStoryUtil {
                                 if (dateInteger>1999 && dateInteger<2050) {
                                 //if (timeAnchor.startsWith("20")) {
                                     jsonObject.put("time", timeAnchor);
-                                    JSONObject jsonClasses = JsonFromRdf.getClassesJSONObjectFromInstanceStatement(instanceTriples);
+                                    JSONObject jsonClasses = JsonStoryFromRdf.getClassesJSONObjectFromInstanceStatement(instanceTriples);
                                     if (jsonClasses.keys().hasNext()) {
                                         jsonObject.put("classes", jsonClasses);
                                     }
                                     if (fnLevel > 0) {
-                                        JsonFromRdf.getFrameNetSuperFramesJSONObjectFromInstanceStatement(frameNetReader, topFrames, jsonObject, instanceTriples);
+                                        JsonStoryFromRdf.getFrameNetSuperFramesJSONObjectFromInstanceStatement(frameNetReader, topFrames, jsonObject, instanceTriples);
                                     } else if (esoLevel > 0) {
-                                        JsonFromRdf.getEsoSuperClassesJSONObjectFromInstanceStatement(esoReader, esoLevel, jsonObject, instanceTriples);
+                                        JsonStoryFromRdf.getEsoSuperClassesJSONObjectFromInstanceStatement(esoReader, esoLevel, jsonObject, instanceTriples);
                                     }
 
-                                    JSONObject jsonLabels = JsonFromRdf.getLabelsJSONObjectFromInstanceStatement(instanceTriples);
+                                    JSONObject jsonLabels = JsonStoryFromRdf.getLabelsJSONObjectFromInstanceStatement(instanceTriples);
                                     if (jsonLabels.keys().hasNext()) {
                                         jsonObject.put("labels", jsonLabels.get("labels"));
                                     }
-                                    JSONObject jsonprefLabels = JsonFromRdf.getPrefLabelsJSONObjectFromInstanceStatement(instanceTriples);
+                                    JSONObject jsonprefLabels = JsonStoryFromRdf.getPrefLabelsJSONObjectFromInstanceStatement(instanceTriples);
                                     if (jsonprefLabels.keys().hasNext()) {
                                         jsonObject.put("prefLabel", jsonprefLabels.get("prefLabel"));
                                     }
-                                    JSONObject jsonMentions = JsonFromRdf.getMentionsJSONObjectFromInstanceStatement(instanceTriples);
+                                    JSONObject jsonMentions = JsonStoryFromRdf.getMentionsJSONObjectFromInstanceStatement(instanceTriples);
                                     if (jsonMentions.keys().hasNext()) {
                                         jsonObject.put("mentions", jsonMentions.get("mentions"));
                                     }
-                                    JSONObject actors = JsonFromRdf.getActorsJSONObjectFromInstanceStatement(otherTriples, blacklist);
+                                    JSONObject actors = JsonStoryFromRdf.getActorsJSONObjectFromInstanceStatement(otherTriples, blacklist);
                                     //JSONObject actors = JsonFromRdf.getActorsJSONObjectFromInstanceStatementSimple(otherTriples);
                                     if (actors.keys().hasNext()) {
                                         jsonObject.put("actors", actors);
                                     }
-                                    JSONObject topics = JsonFromRdf.getTopicsJSONObjectFromInstanceStatement(instanceTriples);
+                                    JSONObject topics = JsonStoryFromRdf.getTopicsJSONObjectFromInstanceStatement(instanceTriples);
                                     if (topics.keys().hasNext()) {
                                         //  System.out.println("topics.length() = " + topics.length());
                                         jsonObject.put("topics", topics.get("topics"));
@@ -152,7 +244,7 @@ public class JsonStoryUtil {
                         //// wrong event types
                     //    System.out.println("eventTypes = " + eventTypes);
                     //    System.out.println("key = " + key);
-                        JSONObject jsonprefLabels = JsonFromRdf.getPrefLabelsJSONObjectFromInstanceStatement(instanceTriples);
+                        JSONObject jsonprefLabels = JsonStoryFromRdf.getPrefLabelsJSONObjectFromInstanceStatement(instanceTriples);
                      //   System.out.println("jsonprefLabels.toString() = " + jsonprefLabels.toString());
 
                     }
@@ -300,6 +392,184 @@ public class JsonStoryUtil {
             }
         }
         return jsonObjectArrayList;
+    }
+
+
+    public static ArrayList<JSONObject> createStoryLinesForJSONArrayList(ArrayList<JSONObject> jsonObjects, int climaxThreshold, int topicThreshold
+    )  throws JSONException {
+        boolean DEBUG = false;
+        ArrayList<JSONObject> groupedObjects = new ArrayList<JSONObject>(); /// keeps track which events are already in a story so that the same event does not end up in multiple stories
+        ArrayList<JSONObject> singletonObjects = new ArrayList<JSONObject>(); /// keeps track of singleton stories, without bridging relations
+        ArrayList<JSONObject> selectedEvents  = new ArrayList<JSONObject>();/// set of events above the climax threshold sorted according to this threshold
+        ArrayList<JSONObject> storyObjects = new ArrayList<JSONObject>(); /// data struture for a story
+
+        /// We build up a climax index over all the events
+        //Vector<Integer> climaxIndex = new Vector<Integer>();
+        //1. We determine the climax score for each individual event
+        // We sum the inverse sentence numbers of all mentions
+        TreeSet climaxObjects = determineClimaxValues(jsonObjects, climaxThreshold);
+        Iterator<JSONObject> sortedObjects = climaxObjects.iterator();
+        while (sortedObjects.hasNext()) {
+            JSONObject jsonObject = sortedObjects.next();
+            selectedEvents.add(jsonObject);
+        }
+      //  System.out.println("Events above climax threshold = " + climaxObjects.size());
+        sortedObjects = climaxObjects.iterator();
+        ArrayList<String> coveredEvents = new ArrayList<String>();
+        int eventCounter = 0;
+        while (sortedObjects.hasNext()) {
+            JSONObject jsonObject = sortedObjects.next();
+            eventCounter++;
+            String instance = jsonObject.getString("instance");
+            if (!coveredEvents.contains(instance)) {
+                coveredEvents.add(instance);
+                //// this event is not yet part of a story and is the next event with climax value
+                //// we use this to create a new story by adding other events with bridging relations into the storyObjects ArrayList
+                try {
+                    storyObjects = new ArrayList<JSONObject>(); /// initialise the ArrayList for the story events
+
+                    /// create the administrative fields in the JSON structure for a event that define story membership
+                    Integer groupClimax = Integer.parseInt(jsonObject.get("climax").toString());
+                    String group = "";
+                    String labels = "";
+                    try {
+                        labels = jsonObject.get("labels").toString();
+                    } catch (JSONException e) {
+                        try {
+                            labels = jsonObject.get("prefLabel").toString();
+                        } catch (JSONException e1) {
+                           // e1.printStackTrace();
+                        }
+                       //  e.printStackTrace();
+                    }
+                    group = climaxString(groupClimax) + ":" + labels;
+
+                    String groupName = labels;
+                    String groupScore = climaxString(groupClimax);
+                    String mainActor = getfirstActorByRoleFromEvent(jsonObject, "pb/A1"); /// for representation purposes
+                    if (mainActor.isEmpty()) {
+                        mainActor = getfirstActorByRoleFromEvent(jsonObject, "pb/A0");
+                    }
+                    if (mainActor.isEmpty()) {
+                        mainActor = getfirstActorByRoleFromEvent(jsonObject, "pb/A2");
+                    }
+                    group += mainActor;
+                    groupName += mainActor;
+                    jsonObject.put("group", group);
+                    jsonObject.put("groupName", groupName);
+                    jsonObject.put("groupScore", groupScore);
+/*                    labels += mainActor;
+                    jsonObject.put("prefLabel", labels);*/
+
+                    //// add the climax event to the story ArrayList
+                    storyObjects.add(jsonObject);
+
+
+                    //// now we look for other events with bridging relations
+                    ArrayList<JSONObject> bridgedEvents = new ArrayList<JSONObject>();
+
+                    ArrayList<JSONObject> coevents =  new ArrayList<JSONObject>();
+                    coevents = getEventsThroughCoparticipation(selectedEvents, jsonObject, 1);
+                    ArrayList<JSONObject> topicevents = new ArrayList<JSONObject>();
+                    topicevents = getEventsThroughTopicBridging(selectedEvents, jsonObject, topicThreshold);
+
+
+                    //// strict variant: there must be overlap of participants and topics
+                    if (topicThreshold>0) {
+                        bridgedEvents = intersectEventObjects(coevents, topicevents);
+                        if (bridgedEvents.size() > 5) {
+                           // System.out.println("intersection co-participating events and topical events = " + bridgedEvents.size());
+                            int prop = (100*coveredEvents.size())/climaxObjects.size();
+                          //  System.out.println("covered Events = " + prop +"%");
+                        }
+                    }
+                    else {
+                        bridgedEvents = coevents;
+                        if (bridgedEvents.size() > 5) {
+                          //  System.out.println("intersection co-participating events = " + bridgedEvents.size());
+                            int prop = (100*coveredEvents.size())/climaxObjects.size();
+                         //   System.out.println("covered Events = " + prop +"%");
+                        }
+                    }
+
+
+                    for (int i = 0; i < bridgedEvents.size(); i++) {
+                        JSONObject object = bridgedEvents.get(i);
+                        String eventInstance = object.getString("instance");
+                        if (!coveredEvents.contains(eventInstance)) {
+                        //if (!hasObject(groupedObjects, object)) {
+                            addObjectToGroup(
+                                    storyObjects,
+                                    group,
+                                    groupName,
+                                    groupScore,
+                                    object,
+                                    8,
+                                    climaxThreshold);
+                            selectedEvents.remove(object); /// no longer available for linking
+                           // System.out.println("selectedEvents = " + selectedEvents.size());
+                            coveredEvents.add(eventInstance);
+                        }
+                        else {
+                            ///// this means that the bridged event was already consumed by another story
+                            ///// that's a pity for this story. It cannot be used anymore.
+                        }
+                    }
+
+
+                    if (storyObjects.size()>1) {
+                        for (int i = 0; i < storyObjects.size(); i++) {
+                            JSONObject object = storyObjects.get(i);
+                            groupedObjects.add(object);
+                        }
+                    }
+                    else {
+                        for (int i = 0; i < storyObjects.size(); i++) {
+                            JSONObject object = storyObjects.get(i);
+                            //groupedObjects.add(object);
+                            singletonObjects.add(object);
+                        }
+                    }
+
+                } catch (JSONException e) {
+                     e.printStackTrace();
+                }
+            }
+            else {
+            //    System.out.println("duplicate instance = " + instance);
+            }
+            //  break;
+
+        } // end of while objects in sorted climaxObjects
+
+        //// now we handle the singleton events
+        storyObjects = new ArrayList<JSONObject>(); /// initialise the ArrayList for the story events
+        String group = "001:unrelated events";
+        String groupName = "unrelated events";
+        String groupScore = "001";
+        for (int i = 0; i < singletonObjects.size(); i++) {
+            JSONObject jsonObject = singletonObjects.get(i);
+            jsonObject.put("group", group);
+            jsonObject.put("groupName", groupName);
+            jsonObject.put("groupScore", groupScore);
+            addObjectToGroup(
+                    storyObjects,
+                    group,
+                    groupName,
+                    groupScore,
+                    jsonObject,
+                    2,
+                    climaxThreshold);
+        }
+      //  System.out.println("groupedObjects.size() = " + groupedObjects.size());
+      //  System.out.println("singleObjects.size() = " + storyObjects.size());
+        //// we add the singleton events to the other grouped events
+        for (int i = 0; i < storyObjects.size(); i++) {
+            JSONObject object = storyObjects.get(i);
+            groupedObjects.add(object);
+        }
+       // System.out.println("eventCounter = " + eventCounter);
+        return groupedObjects;
     }
 
 
@@ -2123,7 +2393,7 @@ public class JsonStoryUtil {
         while (keys.hasNext()) {
             String key = keys.next(); //// this is the subject of the triple which should point to an event mention
            // System.out.println("key = " + key);
-            JSONObject mObject = JsonFromRdf.getMentionObjectFromMentionURI(key);
+            JSONObject mObject = JsonStoryFromRdf.getMentionObjectFromMentionURI(key);
             String source = "";
             String speechactLabel = "";
             String targetLabel = "";
@@ -2210,7 +2480,7 @@ public class JsonStoryUtil {
                     }
                 }
                 else if (predicate.endsWith("generatedBy"))  {
-                    speechActMention = JsonFromRdf.getMentionObjectFromMentionURI(object);
+                    speechActMention = JsonStoryFromRdf.getMentionObjectFromMentionURI(object);
                 }
             }
             ArrayList<String> newPerspectives = new ArrayList<String>();
@@ -2317,15 +2587,15 @@ public class JsonStoryUtil {
                     String mention = getURIforMention(uriString, offsetArray);
                     System.out.println("event mention = " + mention);
                     String sparqlQuery = makeTripleQuery(mention);
-                    ArrayList<Statement> perspectiveTriples = TrigKSTripleReader.readTriplesFromKs(mention, sparqlQuery);
+                    ArrayList<Statement> perspectiveTriples = GetTriplesFromKnowledgeStore.readTriplesFromKs(mention, sparqlQuery);
                     System.out.println("perspectiveTriples.size() = " + perspectiveTriples.size());
                     for (int p = 0; p < perspectiveTriples.size(); p++) {
                         Statement statement = perspectiveTriples.get(p);
                         String relString = statement.getPredicate().toString();
                         String objUri = statement.getObject().toString();
-                        if (TrigKSTripleReader.isAttributionRelation(relString)) {
+                        if (GetTriplesFromKnowledgeStore.isAttributionRelation(relString)) {
                             sparqlQuery = makeTripleQuery(objUri);
-                            ArrayList<Statement> attrTriples = TrigKSTripleReader.readTriplesFromKs(objUri, sparqlQuery);
+                            ArrayList<Statement> attrTriples = GetTriplesFromKnowledgeStore.readTriplesFromKs(objUri, sparqlQuery);
                             System.out.println("attrTriples.size() = " + attrTriples.size());
                             boolean hasPerspective = false;
                             for (int j = 0; j < attrTriples.size(); j++) {
@@ -2343,6 +2613,9 @@ public class JsonStoryUtil {
                                     }
                                     ArrayList<String> normValues = PerspectiveJsonObject.normalizePerspectiveValue(perspective);
                                     if (!normValues.isEmpty()) {
+
+
+
                                         for (int k = 0; k < normValues.size(); k++) {
                                             String nv = normValues.get(k);
                                             hasPerspective = true;
@@ -2358,7 +2631,7 @@ public class JsonStoryUtil {
                                         //  System.out.println("statement1.getObject().toString() = " + statement1.getObject().toString());
                                         String attrObj = attrStatement.getObject().toString();
                                         sparqlQuery = makeTripleQuery(attrObj);
-                                        ArrayList<Statement> docTriples = TrigKSTripleReader.readTriplesFromKs(objUri, sparqlQuery);
+                                        ArrayList<Statement> docTriples = GetTriplesFromKnowledgeStore.readTriplesFromKs(objUri, sparqlQuery);
                                         if (docTriples.size() > 0) {
                                             for (int d = 0; d < docTriples.size(); d++) {
                                                 Statement docStatement = docTriples.get(d);
@@ -2398,7 +2671,7 @@ public class JsonStoryUtil {
                                 targetLabel = targetLabel.substring(idx + 1);
                             }
                         } else if (relString.endsWith("generatedBy")) {
-                            speechActMention = JsonFromRdf.getMentionObjectFromMentionURI(objUri);
+                            speechActMention = JsonStoryFromRdf.getMentionObjectFromMentionURI(objUri);
                         }
                         else {
                             /// WE IGNORE THIS TRIPLE

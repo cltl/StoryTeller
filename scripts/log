@@ -1,0 +1,32 @@
+[Ljava.lang.String;@5e2de80c
+sparqlQuery = PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> 
+PREFIX eso: <http://www.newsreader-project.eu/domain-ontology#> 
+PREFIX fn: <http://www.newsreader-project.eu/ontologies/framenet/> 
+PREFIX ili: <http://globalwordnet.org/ili/> 
+PREFIX prov:  <http://www.w3.org/ns/prov#>
+PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> 
+PREFIX grasp: <http://groundedannotationframework.org/grasp#>
+PREFIX gaf:   <http://groundedannotationframework.org/gaf#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dbp: <http://dbpedia.org/ontology/> 
+PREFIX dbpedia: <http://dbpedia.org/resource/> 
+PREFIX dbpedianl: <http://nl.dbpedia.org/resource/> 
+PREFIX owltime: <http://www.w3.org/TR/owl-time#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+SELECT ?event ?relation ?object ?indatetime ?begintime ?endtime  
+WHERE {
+{SELECT distinct ?event WHERE { 
+?event rdf:type sem:Event .
+?event sem:hasActor ?ent .
+{{  { ?ent rdfs:label "virus" }  }
+}
+} LIMIT 2000 }
+?event ?relation ?object . 
+OPTIONAL { ?object rdf:type owltime:Instant ; owltime:inDateTime ?indatetime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasBeginning ?begintime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime } 
+} ORDER BY ?event
+ -- KS Service = http://145.100.58.139:50053 -- token-index = token.index
+
+ -- Time elapsed to get results from KS:2.136

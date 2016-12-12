@@ -196,26 +196,6 @@ public class SimpleTaxonomy {
                     // System.out.println(inputLine);
                     inputLine = inputLine.trim();
                     if (inputLine.trim().length() > 0) {
-                             /*
-                             	Colour	9
-	Currency	189
-	Disease	8
-	EthnicGroup	2
-	Holiday	15
-	Language	106
-    Agent	Agent	9722
-Agent	Family	Family	99
-Agent	Organisation	Broadcaster	BroadcastNetwork	1
-Agent	Organisation	Broadcaster	Broadcaster	15
-
-www.w3.org/2002/07/owl#Thing	Agent	Person	Monarch
-www.w3.org/2002/07/owl#Thing	Agent	Person	MovieDirector
-www.w3.org/2002/07/owl#Thing	Agent	Person	Noble
-www.w3.org/2002/07/owl#Thing	Agent	Person	OfficeHolder
-www.w3.org/2002/07/owl#Thing	Agent	Person	OrganisationMember	SportsTeamMember
-www.w3.org/2002/07/owl#Thing	Agent	Person	Orphan
-www.w3.org/2002/07/owl#Thing	Agent	Person	Philosopher
-     */
                        // System.out.println("inputLine = " + inputLine);
                         String[] fields = inputLine.split("\t");
                         if (fields.length > 1) {
@@ -529,6 +509,7 @@ www.w3.org/2002/07/owl#Thing	Agent	Person	Philosopher
         }
         return str;
     }
+
     public String  htmlTableTreeOverview (String ns, ArrayList<String> tops,
                                   int level,
                                   HashMap<String, Integer> eventCounts,

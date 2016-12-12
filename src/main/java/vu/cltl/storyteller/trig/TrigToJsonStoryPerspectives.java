@@ -5,9 +5,10 @@ import org.json.JSONObject;
 import vu.cltl.storyteller.input.EsoReader;
 import vu.cltl.storyteller.input.EuroVoc;
 import vu.cltl.storyteller.input.FrameNetReader;
-import vu.cltl.storyteller.json.JsonSerialization;
+import vu.cltl.storyteller.input.NafTokenLayerIndex;
+import vu.cltl.storyteller.json.JsonStorySerialization;
 import vu.cltl.storyteller.json.JsonStoryUtil;
-import vu.cltl.storyteller.knowledgestore.MentionResolver;
+import vu.cltl.storyteller.knowledgestore.GetTriplesFromKnowledgeStore;
 import vu.cltl.storyteller.objects.TrigTripleData;
 import vu.cltl.storyteller.util.Util;
 
@@ -281,7 +282,7 @@ public class TrigToJsonStoryPerspectives {
             if (PERSPECTIVE && jsonObjects.size()>0) {
                 if (!entityQuery.isEmpty() || !eventQuery.isEmpty() ||!sparqlQuery.isEmpty()) {
                     System.out.println("Getting perspectives for: " + jsonObjects.size() + " events");
-                    TrigKSTripleReader.integrateAttributionFromKs(jsonObjects);
+                    GetTriplesFromKnowledgeStore.integrateAttributionFromKs(jsonObjects);
                 }
                 else {
                     JsonStoryUtil.integratePerspectivesInEventObjects(trigTripleData, jsonObjects, project);
@@ -289,18 +290,18 @@ public class TrigToJsonStoryPerspectives {
             }
 
             if (!pathToTokenIndex.isEmpty()) {
-                log += MentionResolver.createSnippetIndexFromMentions(jsonObjects, pathToTokenIndex);
+                log += NafTokenLayerIndex.createSnippetIndexFromMentions(jsonObjects, pathToTokenIndex);
             }
             else if (!pathToRawTextIndexFile.isEmpty()) {
                // rawTextArrayList = Util.ReadFileToUriTextArrayList(pathToRawTextIndexFile);
-                MentionResolver.ReadFileToUriTextArrayList(pathToRawTextIndexFile, jsonObjects);
+                NafTokenLayerIndex.ReadFileToUriTextArrayList(pathToRawTextIndexFile, 75, jsonObjects);
             }
             nEvents = jsonObjects.size();
             nActors = JsonStoryUtil.countActors(jsonObjects);
             nMentions = JsonStoryUtil.countMentions(jsonObjects);
             nStories = JsonStoryUtil.countGroups(jsonObjects);
 
-            JsonSerialization.writeJsonObjectArrayWithStructuredData(trigfolder, "", project,
+            JsonStorySerialization.writeJsonObjectArrayWithStructuredData(trigfolder, "", project,
                     jsonObjects, rawTextArrayList, nEvents, nStories, nActors, nMentions, "polls", structuredEvents);
 
 
@@ -361,7 +362,7 @@ public class TrigToJsonStoryPerspectives {
             int nActors = JsonStoryUtil.countActors(groupEvents);
             int nMentions = JsonStoryUtil.countMentions(groupEvents);
            // System.out.println("group = " + group);
-            JsonSerialization.writeJsonObjectArrayWithStructuredData(trigFolder, group, project,
+            JsonStorySerialization.writeJsonObjectArrayWithStructuredData(trigFolder, group, project,
                     groupEvents, rawTextArrayList, groupEvents.size(), 1, nActors, nMentions, "polls", structuredEvents);
 
         }
