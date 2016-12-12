@@ -29,4 +29,4 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
 } ORDER BY ?event
  -- KS Service = http://145.100.58.139:50053 -- token-index = token.index
 
- -- Time elapsed to get results from KS:2.136
+ -- Time elapsed to get results from KS:2.353

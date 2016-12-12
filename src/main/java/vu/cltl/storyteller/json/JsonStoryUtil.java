@@ -28,7 +28,7 @@ public class JsonStoryUtil {
         String timeAnchor = "";
         int idx = time.lastIndexOf("/");
         if (idx > -1 && idx<time.length()-1) {
-            timeAnchor = timeAnchor.substring(idx + 1);
+            timeAnchor = time.substring(idx + 1);
         }
         if (!timeAnchor.isEmpty()) {
             ////// we need at least have the year!!!!
@@ -52,9 +52,11 @@ public class JsonStoryUtil {
             if (timeAnchor.startsWith("19") || timeAnchor.startsWith("20")) {
                 timeAnchor = "";
             }
-            Integer dateInteger = Integer.parseInt(timeAnchor.substring(0, 4));
-            if (dateInteger < 1999 || dateInteger > 2050) {
-                timeAnchor = "";
+            if (!timeAnchor.isEmpty()) {
+                Integer dateInteger = Integer.parseInt(timeAnchor.substring(0, 4));
+                if (dateInteger < 1999 || dateInteger > 2050) {
+                    timeAnchor = "";
+                }
             }
         }
         return timeAnchor;
