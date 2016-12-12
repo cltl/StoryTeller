@@ -83,7 +83,8 @@ public class JsonStoryUtil {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("instance", key); /// needs to be the full key otherwise not unique
                     String timeAnchor = JsonStoryFromRdf.getTimeAnchor(trigTripleData.tripleMapInstances, otherTriples);
-                    if (!getValidTimeAnchor(timeAnchor).isEmpty()) {
+                    timeAnchor = getValidTimeAnchor(timeAnchor);
+                    if (!timeAnchor.isEmpty()) {
                         try {
                             jsonObject.put("time", timeAnchor);
                             JSONObject jsonClasses = JsonStoryFromRdf.getClassesJSONObjectFromInstanceStatement(instanceTriples);

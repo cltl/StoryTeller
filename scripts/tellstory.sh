@@ -7,7 +7,7 @@ RESOURCES="$( cd $ROOT && cd .. && pwd)"/vua-resources
 # assumes vua-resources is installed next to this installation
 # git clone https://github.com/cltl/vua-resources.git
 #QUERY="--entityPhrase bank --entityType dbp:Bank --entityInstance dbpedia:Rabo --eventPhrase kill --eventType eso:Killing --topic eurovoc:16789 --grasp POSITIVE"
-QUERY="--entityType dbp:Measles"
+QUERY="--entityPhrase virus"
 SERVER="http://145.100.58.139:50053"
 LIMIT="2000"
 KS="nwr/wikinews-new"
