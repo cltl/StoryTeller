@@ -19,7 +19,7 @@ WHERE {
 {SELECT distinct ?event WHERE { 
 ?event rdf:type sem:Event .
 ?event sem:hasActor ?ent .
-{{  { ?ent rdfs:label "virus" }  }
+{{  { ?ent rdf:type dbp:Measles }  }
 }
 } LIMIT 2000 }
 ?event ?relation ?object . 
@@ -29,5 +29,4 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
 } ORDER BY ?event
  -- KS Service = http://145.100.58.139:50053 -- token-index = token.index
 
- -- Time elapsed to get results from KS:2.433
- -- Time elapsed to get snippets from 17 source documents:1.535 -- story_cnt = 2, event_cnt = 73, mention_cnt = 306, actor_cnt = 207
+ -- Time elapsed to get results from KS:3.304
