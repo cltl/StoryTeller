@@ -2,6 +2,7 @@ package vu.cltl.storyteller.json;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import vu.cltl.storyteller.input.EuroVoc;
 import vu.cltl.storyteller.input.NafTokenLayerIndex;
 import vu.cltl.storyteller.knowledgestore.GetMentionsFromKnowledgeStore;
 import vu.cltl.storyteller.knowledgestore.GetTriplesFromKnowledgeStore;
@@ -25,6 +26,11 @@ public class JsonMakeStoryFromTripleData {
     static String KSpass = ""; //"nwr/wikinews-new";
     static String log = "";
     static String pathToTokenIndexFile = "";
+    static EuroVoc euroVoc = null;
+    static EuroVoc euroVocBlackList = null;
+    static String pathToEuroVocFile = "";
+    static String pathToEuroVocBlackListFile = "";
+
     static public void main (String[] args) {
         long startTime = System.currentTimeMillis();
 
@@ -39,7 +45,7 @@ public class JsonMakeStoryFromTripleData {
                 sparqlQuery = KnowledgeStoreQueryApi.createSparqlQuery(args);
 
             }
-            log += args.toString()+"\n";
+            log += KnowledgeStoreQueryApi.log+"\n";
             log += "sparqlQuery = " + sparqlQuery+"\n";
             for (int i = 0; i < args.length; i++) {
                 String arg = args[i];
@@ -59,6 +65,16 @@ public class JsonMakeStoryFromTripleData {
                     pathToTokenIndexFile = args[i + 1];
                     log += " -- token-index = " + pathToTokenIndexFile+"\n";
                 }
+                else if (arg.equalsIgnoreCase("--eurovoc") && args.length > (i + 1)) {
+                    pathToEuroVocFile = args[i + 1];
+                    euroVoc = new EuroVoc(); euroVoc.readEuroVoc(pathToEuroVocFile, "en");
+                    log += " -- eurovoc = " + pathToEuroVocFile+"\n";
+                }
+                else if (arg.equalsIgnoreCase("--eurovoc-blacklist") && args.length > (i + 1)) {
+                    pathToEuroVocBlackListFile = args[i + 1];
+                    euroVocBlackList = new EuroVoc(); euroVoc.readEuroVoc(pathToEuroVocBlackListFile, "en");
+                    log += " -- eurovoc-blacklist = " + pathToEuroVocBlackListFile+"\n";
+                }
                 else if (arg.equalsIgnoreCase("--log")) {
                     LOG = true;
                 }
@@ -77,7 +93,7 @@ public class JsonMakeStoryFromTripleData {
             GetTriplesFromKnowledgeStore.readTriplesFromKs(sparqlQuery,trigTripleData);
             long estimatedTime = System.currentTimeMillis() - startTime;
             log += " -- Time elapsed to get results from KS:" + estimatedTime / 1000.0+"\n";
-            ArrayList<JSONObject> storyObjects = makeUpStory(trigTripleData, 1, 30);
+            ArrayList<JSONObject> storyObjects = makeUpStory(trigTripleData, 1, 30, euroVoc, euroVocBlackList);
             if (storyObjects.size()>0) {
                 addPerspectiveToStory(storyObjects);
                 if (pathToTokenIndexFile.isEmpty()) {
@@ -93,7 +109,7 @@ public class JsonMakeStoryFromTripleData {
         }
         if (LOG) {
             try {
-                OutputStream logFos = new FileOutputStream("log");
+                OutputStream logFos = new FileOutputStream("log", true);
                 logFos.write(log.getBytes());
                 logFos.close();
             } catch (IOException e) {
@@ -103,12 +119,19 @@ public class JsonMakeStoryFromTripleData {
     }
 
 
-    static public ArrayList<JSONObject> makeUpStory(TrigTripleData trigTripleData, int climaxThreshold, int topicThreshold) {
+    static public ArrayList<JSONObject> makeUpStory(TrigTripleData trigTripleData,
+                                                    int climaxThreshold,
+                                                    int topicThreshold,
+                                                    EuroVoc euroVoc, EuroVoc euroVocBlackList) {
         ArrayList<JSONObject> jsonObjects = new ArrayList<JSONObject>();
         try {
             jsonObjects = JsonStoryUtil.getJSONObjectArray(trigTripleData);
             jsonObjects = JsonStoryUtil.createStoryLinesForJSONArrayList(jsonObjects, climaxThreshold, topicThreshold);
             JsonStoryUtil.minimalizeActors(jsonObjects);
+            if (euroVoc!=null) {
+                JsonStoryUtil.renameStories(jsonObjects, euroVoc, euroVocBlackList);
+            }
+
         } catch (JSONException e) {
             e.printStackTrace();
         }

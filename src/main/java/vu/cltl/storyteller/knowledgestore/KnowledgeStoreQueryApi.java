@@ -5,15 +5,14 @@ package vu.cltl.storyteller.knowledgestore;
  */
 public class KnowledgeStoreQueryApi {
 
-    static boolean STRICTSTRING = true;
     static String KSLIMIT = "2000";
-    static String log = "";
+    static public String log = "";
 
     static public void main (String[] args) {
         String query = "";
         if (args.length==0) {
             args = new String[]{"--entityPhrase", "bank;money", "--entityType", "dbp:Bank", "--entityInstance", "dbpedia:Rabo",
-                                "eventPhrase", "kill", "eventType", "eso:Killing", "--topic", "eurovoc:16789", "--grasp", "POSITIVE"};
+                                "--eventPhrase", "kill", "--eventType", "eso:Killing", "--topic", "eurovoc:16789", "--grasp", "POSITIVE"};
         }
         query = createSparqlQuery(args);
         System.out.print(query);
@@ -39,7 +38,6 @@ public class KnowledgeStoreQueryApi {
         String locationPhrase = "";
         String locationRegion = "";
 
-        String sparql = SparqlGenerator.makeSparqlQueryInit();
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.equalsIgnoreCase("--word") && args.length>(i+1)) {
@@ -47,7 +45,7 @@ public class KnowledgeStoreQueryApi {
                 log += " -- querying for word = " + word;
             }
             else if (arg.equalsIgnoreCase("--eventPhrase") && args.length>(i+1)) {
-                eventType = args[i+1];
+                eventPhrase = args[i+1];
                 log += " -- querying for eventPhrase = " + eventPhrase;
             }
             else if (arg.equalsIgnoreCase("--eventType") && args.length>(i+1)) {
@@ -90,10 +88,6 @@ public class KnowledgeStoreQueryApi {
                 topicQuery = args[i+1];
                 log += " -- querying for topic = " + topicQuery;
             }
-            else if (arg.equalsIgnoreCase("--substring")) {
-                STRICTSTRING = false;
-                log += " -- querying for substrings.";
-            }
             else if (arg.equalsIgnoreCase("--ks-limit") && args.length>(i+1)) {
                 KSLIMIT = args[i+1];
                 SparqlGenerator.limit = KSLIMIT;
@@ -102,29 +96,35 @@ public class KnowledgeStoreQueryApi {
         }
 
 
+        String sparql = SparqlGenerator.makeSparqlQueryInit();
 
+        //@TODO replace INTERSECT by UNION search
         if (!word.isEmpty()) {
+            /// we convert a word search into the INTERSECT of  an event and entity phrase search
             eventPhrase = word;
             entityPhrase = word;
         }
 
         // Events
         if (!eventPhrase.isEmpty() || !eventType.isEmpty()) {
-            sparql += "{";
+            sparql += "{\n";
 
             if (!eventPhrase.isEmpty()) {
-                String labels = SparqlGenerator.getLabelQueryforEvent(entityPhrase);
-                if (STRICTSTRING) sparql += SparqlGenerator.makeLabelConstraint("?event", labels);
-                else {sparql += SparqlGenerator.makeSubStringLabelFilter("?event", labels); }
+                String labels = SparqlGenerator.getLabelQueryforEvent(eventPhrase);
+                if (labels.indexOf("*")>-1)  {
+                    labels = labels.replace("*", "");
+                    sparql += SparqlGenerator.makeSubStringLabelFilter("?event", labels);
+                }
+                else { sparql += SparqlGenerator.makeLabelConstraint("?event", labels); }
             }
             if (!eventType.isEmpty()) {
                 String types = SparqlGenerator.getTypeQueryforEvent(eventType);
                 if (!eventPhrase.isEmpty()) {
-                    sparql += " UNION ";
+                    sparql += " UNION \n";
                 }
                 sparql += SparqlGenerator.makeTypeFilter("?event", types);
             }
-            sparql += "}";
+            sparql += "}\n";
         }
 
 
@@ -136,25 +136,21 @@ public class KnowledgeStoreQueryApi {
             String types = SparqlGenerator.getTypeQueryforEntity(entityType);
             String instances = SparqlGenerator.getInstanceQueryforEntity(entityInstance);
             sparql += "?event sem:hasActor ?ent .\n";
-            sparql += "{";
+            sparql += "{\n";
             if (!labels.isEmpty()) {
                 //makeLabelFilter("?entlabel",entityLabel) +
                 if (labels.indexOf("*")>-1)  {
                     labels = labels.replace("*", "");
-                    sparql += SparqlGenerator.makeSubStringLabelFilter("?entlabel", labels);
                     sparql += "?ent rdfs:label ?entlabel .\n" ;
-                }
-                else if (STRICTSTRING) {
-                    sparql += SparqlGenerator.makeLabelConstraint("?ent", labels);
+                    sparql += SparqlGenerator.makeSubStringLabelFilter("?entlabel", labels);
                 }
                 else {
-                    sparql += SparqlGenerator.makeSubStringLabelFilter("?entlabel", labels);
-                    sparql += "?ent rdfs:label ?entlabel .\n" ;
+                    sparql += SparqlGenerator.makeLabelConstraint("?ent", labels);
                 }
             }
             if (!instances.isEmpty()) {
                 if (!labels.isEmpty()) {
-                    sparql += " UNION ";
+                    sparql += " UNION \n";
                 }
                 sparql += SparqlGenerator.makeInstanceFilter("?event", instances);
                 // "?event sem:hasActor ?ent .";
@@ -162,11 +158,11 @@ public class KnowledgeStoreQueryApi {
             }
             if (!types.isEmpty()) {
                 if (!labels.isEmpty() || !instances.isEmpty()) {
-                    sparql += " UNION ";
+                    sparql += " UNION \n";
                 }
                 sparql += SparqlGenerator.makeTypeFilter("?ent", types) ;
             }
-            sparql += "}";
+            sparql += "}\n";
         }
 
         if (!topicQuery.isEmpty()) {
@@ -200,13 +196,15 @@ public class KnowledgeStoreQueryApi {
                                 "?mention grasp:hasAttribution ?attribution.\n" +
                                 "?attribution prov:wasAttributedTo ?doc .\n" ;
                 //"?doc prov:wasAttributedTo ?author .\n";
-/*
-                if (STRICTSTRING) sparql += TrigKSTripleReader.makeLabelConstraint("?author", sources);
-                else {sparql += TrigKSTripleReader.makeSubStringLabelFilter("?author", sources); }
-*/
-
-                //sparql += TrigKSTripleReader.makeSubStringLabelFilter("?author", sources);
-                sparql += SparqlGenerator.makeAuthorConstraint("?doc", sources);
+                sparql += SparqlGenerator.makeSubStringLabelFilter("?doc", sources);
+                //@TODO URIs with wird characters tend to fail with SPARQL
+/*                if (sources.indexOf("*")>-1)  {
+                    sources = sources.replace("*", "");
+                    sparql += SparqlGenerator.makeSubStringLabelFilter("?doc", sources);
+                }
+                else {
+                    sparql += SparqlGenerator.makeAuthorConstraint("?doc", sources);
+                }*/
             }
         }
 
@@ -221,15 +219,25 @@ public class KnowledgeStoreQueryApi {
                 if (STRICTSTRING) sparql += TrigKSTripleReader.makeLabelConstraint("?cite", sources);
                 else {sparql += TrigKSTripleReader.makeSubStringLabelFilter("?cite", sources); }
 */
-
                 sparql += SparqlGenerator.makeSubStringLabelFilter("?cite", sources);
+
+                //@TODO   URIs for cites needs to be adapted, now has project name in URI
+                ///grasp:wasAttributedTo  <http://www.newsreader-project.eu/data/wikinews/non-entities/actual+science> .
+
+/*                if (sources.indexOf("*")>-1)  {
+                    sources = sources.replace("*", "");
+                    sparql += SparqlGenerator.makeSubStringLabelFilter("?cite", sources);
+                }
+                else {
+                    sparql += SparqlGenerator.makeLabelConstraint("?cite", sources);
+                }*/
 
             }
         }
 
             /// rdf:value grasp:CERTAIN_NON_FUTURE_POS , grasp:positive ;
             ///graspQuery = NEG;UNCERTAIN;positive;
-            if (!graspQuery.isEmpty()) {
+        if (!graspQuery.isEmpty()) {
             boolean UNION = false;
             sparql += "?event gaf:denotedBy ?mention.\n" +
                     "?mention grasp:hasAttribution ?attribution.\n" +
@@ -240,7 +248,7 @@ public class KnowledgeStoreQueryApi {
                 UNION = true;
             }
             if (graspQuery.indexOf("positive") >-1) {
-                if (UNION) sparql += " UNION ";
+                if (UNION) sparql += " UNION \n";
                 sparql +=  "{ ?attribution rdf:value grasp:positive }\n";
                 UNION = true;
             }
@@ -249,7 +257,7 @@ public class KnowledgeStoreQueryApi {
                 String field = fields[i];
                 if (!field.toLowerCase().equals(field)) {
                     ///upper case field
-                    if (UNION) sparql += " UNION ";
+                    if (UNION) sparql += " UNION \n";
                     sparql +=  "{ "+ SparqlGenerator.makeSubStringLabelUnionFilter("?value", field) +" }"+ "\n";
                     UNION = true;
                 }

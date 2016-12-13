@@ -360,12 +360,13 @@ public class JsonStorySerialization {
             storyData.append("story_cnt", nStories);
             storyData.append("actor_cnt", nActors);
             storyData.append("mention_cnt", nMentions);
-            for (int j = 0; j < objects.size(); j++) {
+            storyData.put("events", objects);
+            /*for (int j = 0; j < objects.size(); j++) {
                 JSONObject jsonObject = objects.get(j);
                 jsonObject.remove("classes");
                 jsonObject.remove("topics");
                 storyData.append("events", jsonObject);
-            }
+            }*/
             JSONObject storyObject = new JSONObject();
             storyObject.put("timeline", storyData);
             return storyObject;

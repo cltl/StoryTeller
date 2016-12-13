@@ -1337,13 +1337,16 @@ public class JsonStoryUtil {
                         ArrayList<String> givenTopics = storyTopicMap.get(groupName);
                         for (int j = 0; j < topics.length(); j++) {
                             String topic = topics.get(j).toString();
-                            if (!eurovocBlackList.startsWith(topic)) {
-                                if (!eurovocBlackList.uriLabelMap.containsKey(topic)) {
+                            if (eurovocBlackList==null) {
+                                count(totalTopicCount, topic);
+                                givenTopics.add(topic);
+                            }
+                            else if (!eurovocBlackList.startsWith(topic)&&
+                                     !eurovocBlackList.uriLabelMap.containsKey(topic)) {
                                     count(totalTopicCount, topic);
                                     givenTopics.add(topic);
                                 } else {
                                  //   System.out.println("blacklist topic = " + topic);
-                                }
                             }
                         }
                         storyTopicMap.put(groupName, givenTopics);
@@ -1351,13 +1354,16 @@ public class JsonStoryUtil {
                         ArrayList<String> givenTopics = new ArrayList<String>();
                         for (int j = 0; j < topics.length(); j++) {
                             String topic = topics.get(j).toString();
-                            if (!eurovocBlackList.startsWith(topic)) {
-                                if (!eurovocBlackList.uriLabelMap.containsKey(topic)) {
-                                    count(totalTopicCount, topic);
-                                    givenTopics.add(topic);
-                                } else {
-                                 //   System.out.println("blacklist topic = " + topic);
-                                }
+                            if (eurovocBlackList==null) {
+                                count(totalTopicCount, topic);
+                                givenTopics.add(topic);
+                            }
+                            else if (!eurovocBlackList.startsWith(topic)&&
+                                    !eurovocBlackList.uriLabelMap.containsKey(topic)) {
+                                count(totalTopicCount, topic);
+                                givenTopics.add(topic);
+                            } else {
+                                //   System.out.println("blacklist topic = " + topic);
                             }
                         }
                         storyTopicMap.put(groupName, givenTopics);

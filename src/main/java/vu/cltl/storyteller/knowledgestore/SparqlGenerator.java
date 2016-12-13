@@ -1,5 +1,7 @@
 package vu.cltl.storyteller.knowledgestore;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
@@ -100,6 +102,7 @@ public class SparqlGenerator {
                 "PREFIX ili: <http://globalwordnet.org/ili/> \n" +
                 "PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
                 "PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> \n" +
+                "PREFIX nwrcite: <http://www.newsreader-project.eu/data/non-entities/> \n" +
                 "PREFIX grasp: <http://groundedannotationframework.org/grasp#>\n" +
                 "PREFIX gaf:   <http://groundedannotationframework.org/gaf#>\n" +
                 "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
@@ -148,6 +151,7 @@ public class SparqlGenerator {
         valid = valid.replace('_', '.');
         valid = valid.replace('+', '.');
         valid = valid.replace('(', '.');
+        valid = valid.replace('?', '.');
         valid = valid.replace(')', '.');
         return valid;
     }
@@ -193,7 +197,13 @@ public class SparqlGenerator {
         String filter = "{ ";
         String[] fields = query.split(";");
         for (int i = 0; i < fields.length; i++) {
-            String field = fields[i].replace('^', ' ');;
+            String field = fields[i].replace('^', ' ');
+            try {
+                field = URLEncoder.encode(field, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                //e.printStackTrace();
+            }
+
             if (i>0)  filter +=" UNION ";
             filter += " { "+variable+" prov:wasAttributedTo nwrauthor:"+field+" } ";
         }
@@ -206,7 +216,12 @@ public class SparqlGenerator {
         String filter = "{ ";
         String[] fields = query.split(";");
         for (int i = 0; i < fields.length; i++) {
-            String field = fields[i].replace('^', ' ');;
+            String field = fields[i].replace('^', ' ');
+            try {
+                field = URLEncoder.encode(field, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                //e.printStackTrace();
+            }
             if (i>0)  filter +=" UNION ";
             filter += " { "+variable+" grasp:wasAttributedTo nwrcite:"+field+" } ";
         }
