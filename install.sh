@@ -7,12 +7,11 @@ set -e
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PARENT="$( cd $DIR && cd .. && pwd)"
 
-mkdir "$DIR/lib"
-echo "#1. compiling the library from source code and dependencies"
+echo "Compiling the library from source code and dependencies"
 mvn clean
 mvn install
 
-echo "#3. installing the vua-resources"
+echo "#Installing the vua-resources"
 cd "$PARENT"
 git clone https://github.com/cltl/vua-resources.git
 
