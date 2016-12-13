@@ -4,7 +4,6 @@ ROOT="$( cd $DIR && cd .. && pwd)"
 LIB="$ROOT"/target
 
 RESOURCES="$( cd $ROOT && cd .. && pwd)"/vua-resources
-RESOURCES="/Code/vu/newsreader/vua-resources"
 # assumes vua-resources is installed next to this installation
 # git clone https://github.com/cltl/vua-resources.git
 #QUERY="--entityPhrase bank --entityType dbp:Bank --entityInstance dbpedia:Rabo --eventPhrase kill --eventType eso:Killing --topic eurovoc:16789 --grasp POSITIVE --eurovoc $RESOURCES/mapping_eurovoc_skos.label.concept.gz"
