@@ -2,10 +2,12 @@ package vu.cltl.storyteller.input;
 
 import eu.kyotoproject.kaf.KafSaxParser;
 import eu.kyotoproject.kaf.KafWordForm;
+import org.apache.tools.bzip2.CBZip2InputStream;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 import vu.cltl.storyteller.util.Util;
@@ -16,6 +18,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Created by piek on 20/07/16.
@@ -74,6 +77,19 @@ public class NafTokenLayerIndex extends DefaultHandler {
         uriFilter = new Vector<String>();
     }
 
+    public boolean parseFile(InputStream stream)
+    {
+        InputSource source = new InputSource(stream);
+        boolean result = parseFile(source);
+        try
+        {
+            stream.close();
+        }
+        catch (IOException e)
+        {}
+        return result;
+    }
+
     public boolean parseFile(String source)
     {
         return parseFile(new File (source));
@@ -83,6 +99,37 @@ public class NafTokenLayerIndex extends DefaultHandler {
     {
         try
         {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setValidating(false);
+            SAXParser parser = factory.newSAXParser();
+            parser.parse(source, this);
+            return true;
+        }
+        catch (FactoryConfigurationError factoryConfigurationError)
+        {
+            factoryConfigurationError.printStackTrace();
+        }
+        catch (ParserConfigurationException e)
+        {
+            e.printStackTrace();
+        }
+        catch (SAXException e)
+        {
+            //System.out.println("last value = " + previousvalue);
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            // e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean parseFile(InputSource source)
+    {
+        try
+        {
+            init();
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setValidating(false);
             SAXParser parser = factory.newSAXParser();
@@ -327,8 +374,30 @@ public class NafTokenLayerIndex extends DefaultHandler {
         long startTime = System.currentTimeMillis();
 
         NafTokenLayerIndex nafTokenLayerIndex = new NafTokenLayerIndex(urls);
-        //NafTokenLayerIndex nafTokenLayerIndex = new NafTokenLayerIndex();
-        nafTokenLayerIndex.parseFile(pathToTokenIndex);
+
+
+        if (pathToTokenIndex.toLowerCase().endsWith(".gz")) {
+            try {
+                InputStream fileStream = new FileInputStream(pathToTokenIndex);
+                InputStream gzipStream = new GZIPInputStream(fileStream);
+                nafTokenLayerIndex.parseFile(gzipStream);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else if (pathToTokenIndex.toLowerCase().endsWith(".bz2")) {
+            try {
+                InputStream fileStream = new FileInputStream(pathToTokenIndex);
+                InputStream gzipStream = new CBZip2InputStream(fileStream);
+                nafTokenLayerIndex.parseFile(gzipStream);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else {
+            nafTokenLayerIndex.parseFile(pathToTokenIndex);
+        }
+
         /*System.out.println("pathToTokenIndex = " + pathToTokenIndex);
         System.out.println("nafTokenLayerIndex.tokenMap.size() = " + nafTokenLayerIndex.tokenMap.size());   */
         Set keySet = sourceUriList.keySet();
