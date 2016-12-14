@@ -15,6 +15,10 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 
 /**
+ * Demonstration class that shows all the functions to query the KnowledgeStore for EventCentricKnowledgeGraphs.
+ * The result of the query is stored internally in a data structure TrigTripleData.
+ * It converts the event RDF from the TrigTripleData to JSON, creates a story structure and returns the JSON structure.
+ * Additional function are provided to enrich the JSON with perspective values and text snippets
  * Created by piek on 11/12/2016.
  */
 public class JsonMakeStoryFromTripleData {
@@ -31,6 +35,34 @@ public class JsonMakeStoryFromTripleData {
     static String pathToEuroVocFile = "";
     static String pathToEuroVocBlackListFile = "";
 
+    /**
+     * The main function needs a number of parameters to run:
+     * --ks-service     http address of the KnowledgeStore service
+     * --ks-user        (optional) if the KnowledgeStore is user protected a username is required
+     * --ks-passw       (optional) if the KnowledgeStore is user protected a psswords is required
+     * --ks-limit       (optional) limits the number of events returned by the KnowledgeStore.
+     *                  The default value is set to 500 events
+     * --token-index    (optional) path to the NafTokenIndex file (gzipped) that is needed to create text snippets for the results
+     *                  Without the token-index, the KnowledgeStore is queried, which is much slower
+     * --eurovoc        (optional) Path to the EuroVoc topic label file. This is needed to provide readable labels for topic identifiers
+     * --eurovoc-blacklist (optinal) Path to a text file that provides topics that should be ignored to make storyline groupings
+     * --log            (optional) switch to turn on logging. If ommitted there is no logging of the queries.
+     *                  If specified some logging of the querying is done
+     *
+     * A number of query types that can be combined
+     * --entityPhrase
+     * --entityInstance
+     * --entityType
+     * --eventPhrase
+     * --eventType
+     * --topic
+     * --grasp
+     *
+     * @param args
+     *
+     * The main function carries out the complete search and conversion and returs a JSON stream as a result.
+     * The usage of this class is demonstrated in the shell script tellstory.sh with a variety of queries.
+     */
     static public void main (String[] args) {
         long startTime = System.currentTimeMillis();
 
@@ -67,13 +99,13 @@ public class JsonMakeStoryFromTripleData {
                 }
                 else if (arg.equalsIgnoreCase("--eurovoc") && args.length > (i + 1)) {
                     pathToEuroVocFile = args[i + 1];
-                    euroVoc = new EuroVoc(); euroVoc.readEuroVoc(pathToEuroVocFile, "en");
                     log += " -- eurovoc = " + pathToEuroVocFile+"\n";
+                    log += euroVoc = new EuroVoc(); euroVoc.readEuroVoc(pathToEuroVocFile, "en");
                 }
                 else if (arg.equalsIgnoreCase("--eurovoc-blacklist") && args.length > (i + 1)) {
                     pathToEuroVocBlackListFile = args[i + 1];
-                    euroVocBlackList = new EuroVoc(); euroVoc.readEuroVoc(pathToEuroVocBlackListFile, "en");
                     log += " -- eurovoc-blacklist = " + pathToEuroVocBlackListFile+"\n";
+                    log += euroVocBlackList = new EuroVoc(); euroVoc.readEuroVoc(pathToEuroVocBlackListFile, "en");
                 }
                 else if (arg.equalsIgnoreCase("--log")) {
                     LOG = true;
@@ -118,7 +150,26 @@ public class JsonMakeStoryFromTripleData {
         }
     }
 
-
+    /**
+     * Given the RDF triples in trigTripleData it creates an ArrayList with JSON objects in which each object
+     * represents an EventCentricKnowledgeGraph and stories consists of events with the same group name.
+     * Groupings are based on sharing of topics and participants across events. The topicThreshold determines
+     * the proportion of overlap the coarseness of the groupings. High thresholds results in many different small
+     * groupings with high topic sharing, whereas a low threshold results in few groups with low overlap.
+     *
+     * The climaxThreshold excludes events that are not salient or prominent enough.
+     *
+     * The euroVoc data is used to label the stories with topic labels.
+     *
+     * The euroVocBlacklist is used to exclude topics from making groupings
+     *
+     * @param trigTripleData
+     * @param climaxThreshold
+     * @param topicThreshold
+     * @param euroVoc
+     * @param euroVocBlackList
+     * @return
+     */
     static public ArrayList<JSONObject> makeUpStory(TrigTripleData trigTripleData,
                                                     int climaxThreshold,
                                                     int topicThreshold,
@@ -138,21 +189,53 @@ public class JsonMakeStoryFromTripleData {
         return jsonObjects;
     }
 
+    /**
+     * Adds perspective layer to the JSON events
+     * @param jsonObjects
+     */
     static public void addPerspectiveToStory (ArrayList<JSONObject> jsonObjects) {
         GetTriplesFromKnowledgeStore.integrateAttributionFromKs(jsonObjects);
     }
 
+    /**
+     * Adds snippets to the events by querying the KnowledgeStore
+     * @param jsonObjects
+     * @param KSSERVICE
+     * @throws JSONException
+     */
     static public void addSnippetsToStoryFromKnowledgeStore (ArrayList<JSONObject> jsonObjects, String KSSERVICE) throws JSONException {
             log += GetMentionsFromKnowledgeStore.createSnippetIndexFromMentions(jsonObjects, KSSERVICE, KS, KSuser, KSpass);
     }
 
+    /**
+     * Adds snippets to the events by querying the KnowledgeStore
+     * @param jsonObjects
+     * @param KSSERVICE
+     * @param KS
+     * @param KSuser
+     * @param KSpass
+     * @throws JSONException
+     */
     static public void addSnippetsToStoryFromKnowledgeStore (ArrayList<JSONObject> jsonObjects, String KSSERVICE, String KS, String KSuser, String KSpass) throws JSONException {
             log += GetMentionsFromKnowledgeStore.createSnippetIndexFromMentions(jsonObjects, KSSERVICE, KS, KSuser, KSpass);
     }
 
+    /**
+     * Adds snippets to the events by throught the NafTokenIndex
+     * @param jsonObjects
+     * @param pathToTokenIndex
+     * @throws JSONException
+     */
     static public void addSnippetsToStoryFromIndexFile (ArrayList<JSONObject> jsonObjects, String pathToTokenIndex) throws JSONException {
             log += NafTokenLayerIndex.createSnippetIndexFromMentions(jsonObjects, pathToTokenIndex);
     }
+
+    /**
+     * Writes the story structure as a stream in JSON format
+     * @param jsonObjects
+     * @return
+     * @throws JSONException
+     */
      static public JSONObject writeStory (ArrayList<JSONObject> jsonObjects) throws JSONException {
          int nEvents = jsonObjects.size();
          int nActors = JsonStoryUtil.countActors(jsonObjects);

@@ -19,10 +19,11 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.*;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Created by piek on 20/07/16.
- * This class reads an
+ * This class creates and reads a NafTokenIndex file
  */
 public class NafTokenLayerIndex extends DefaultHandler {
 
@@ -33,12 +34,23 @@ public class NafTokenLayerIndex extends DefaultHandler {
     private String urlString;
     private Vector<String> uriFilter;
 
+    /**
+     * The main function can be used to create a NafTokenLayerIndex file from a collection of NAF files
+     * The function needs the following input parameters:
+     *
+     * --folder         to the folder that contains the NAF files (reads recursively)
+     * --extension      extension of the naf files, e.g. ".naf"
+     * --project        name of the project used for building the RDF files to match URLs for sources if not in the NAF header
+     *
+     * The output is an index in gzip format with the source URLs and the token XML from the NAF file
+     * This index can be used to construct the snippets for querying the KnowledgeStore.
+     *
+     * @param args
+     */
     static public void main (String[] args) {
         String folder = "";
         String filter = "";
         String project = "";
-       // folder = "/Users/piek/Desktop/NWR-INC/WorldBank/data/spanish/output-7-v2";
-       // filter = ".naf";
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.equals("--folder") && args.length>(i+1)) {
@@ -77,6 +89,9 @@ public class NafTokenLayerIndex extends DefaultHandler {
         uriFilter = new Vector<String>();
     }
 
+    /*
+       Parse index file as a stream
+     */
     public boolean parseFile(InputStream stream)
     {
         InputSource source = new InputSource(stream);
@@ -90,11 +105,21 @@ public class NafTokenLayerIndex extends DefaultHandler {
         return result;
     }
 
+    /**
+     * Parse filePath
+     * @param source
+     * @return
+     */
     public boolean parseFile(String source)
     {
         return parseFile(new File (source));
     }
 
+    /**
+     * Parse file
+     * @param source
+     * @return
+     */
     public boolean parseFile(File source)
     {
         try
@@ -125,6 +150,11 @@ public class NafTokenLayerIndex extends DefaultHandler {
         return false;
     }
 
+    /**
+     * Parse input stream, e.g. a gzip file
+     * @param source
+     * @return
+     */
     public boolean parseFile(InputSource source)
     {
         try
@@ -234,14 +264,24 @@ public class NafTokenLayerIndex extends DefaultHandler {
         value += new String(ch, start, length);
     }
 
+    /**
+     *
+     * @param folder
+     * @param filter
+     * @param project
+     * @throws IOException
+     */
     static void createTokenIndex (File folder, String filter, String project) throws IOException {
         final String nwrdata = "http://www.newsreader-project.eu/data/";
 
-        File indexFile = new File("token.index");
-        OutputStream stream = new FileOutputStream(indexFile);
+        File indexFile = new File("token.index.gz");
+        GZIPOutputStream gzipOutputStream =
+                new GZIPOutputStream(new FileOutputStream(indexFile));
+
+      //  OutputStream stream = new FileOutputStream(indexFile);
 
         String str = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<index>\n";
-        stream.write(str.getBytes());
+        gzipOutputStream.write(str.getBytes());
 
         ArrayList<File> nafFiles = Util.makeRecursiveFileList(folder, filter);
 
@@ -272,62 +312,21 @@ public class NafTokenLayerIndex extends DefaultHandler {
                     str += "<wf id=\""+kaf.getWid()+"\" sent=\""+kaf.getSent()+"\" length=\""+kaf.getCharLength()+"\" offset=\""+kaf.getCharOffset()+"\"><![CDATA["+kaf.getWf()+"]]></wf>\n";
                 }
                 str += "</text>\n";
-                stream.write(str.getBytes());
+                gzipOutputStream.write(str.getBytes());
             }
         }
         str = "</index>\n";
-        stream.write(str.getBytes());
+        gzipOutputStream.write(str.getBytes());
+        gzipOutputStream.close();
     }
 
-
-/*    public void writeNafToStream(OutputStream stream, String uri, ArrayList<KafWordForm> tokens)
-    {
-        try
-        {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            DOMImplementation impl = builder.getDOMImplementation();
-
-            Document xmldoc = impl.createDocument(null, "NAF", null);
-            xmldoc.setXmlStandalone(false);
-            Element root = xmldoc.getDocumentElement();
-
-            if (tokens.size()>0) {
-                Element text = xmldoc.createElement("text");
-                text.setAttribute("uri", uri);
-                for (int i = 0; i < tokens.size(); i++) {
-                    KafWordForm kaf  = tokens.get(i);
-                    text.appendChild(kaf.toNafXML(xmldoc));
-                }
-                root.appendChild(text);
-            }
-
-            // Serialisation through Tranform.
-            DOMSource domSource = new DOMSource(xmldoc);
-            TransformerFactory tf = TransformerFactory.newInstance();
-            //tf.setAttribute("indent-number", 4);
-            Transformer serializer = tf.newTransformer();
-            serializer.setOutputProperty(OutputKeys.INDENT,"yes");
-            //serializer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
-            serializer.setOutputProperty(OutputKeys.STANDALONE, "yes");
-            //serializer.setParameter("format-pretty-print", Boolean.TRUE);
-            serializer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
-
-            StreamResult streamResult = null;
-            if (encoding.isEmpty()) {
-                streamResult = new StreamResult(new OutputStreamWriter(stream));
-            }
-            else {
-                streamResult = new StreamResult(new OutputStreamWriter(stream, encoding));
-            }
-            serializer.transform(domSource, streamResult);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-    }*/
-
+    /**
+     * Given a set of JSON event objects it gets the text snippets for the mentions and creates offsets for the snippets
+     * @param objects
+     * @param pathToTokenIndex
+     * @return
+     * @throws JSONException
+     */
     public static String createSnippetIndexFromMentions(ArrayList<JSONObject> objects,
                                                         String pathToTokenIndex) throws JSONException {
         String log = "";
@@ -506,7 +505,13 @@ public class NafTokenLayerIndex extends DefaultHandler {
         return log;
     }
 
-
+    /**
+     * Given a set of JSON event objects it gets the text snippets for the mentions and creates offsets for the snippets
+     * @param fileName
+     * @param nContext
+     * @param events
+     */
+    @Deprecated
     static public void ReadFileToUriTextArrayList(String fileName, int nContext, ArrayList<JSONObject> events) {
         HashMap<String, String> rawTextMap = new HashMap<String, String>();
         if (new File(fileName).exists() ) {
@@ -638,6 +643,12 @@ public class NafTokenLayerIndex extends DefaultHandler {
         }
     }
 
+    /**
+     *
+     * @param fileName
+     * @return
+     */
+    @Deprecated
     static public ArrayList<JSONObject> ReadFileToUriTextArrayList(String fileName) {
         ArrayList<JSONObject> vector = new ArrayList<JSONObject>();
         if (new File(fileName).exists() ) {
@@ -700,6 +711,12 @@ public class NafTokenLayerIndex extends DefaultHandler {
         return vector;
     }
 
+    /**
+     *
+     * @param fileName
+     * @return
+     */
+    @Deprecated
     static public ArrayList<JSONObject> ReadFileToUriTextArrayListOrg(String fileName) {
         ArrayList<JSONObject> vector = new ArrayList<JSONObject>();
         if (new File(fileName).exists() ) {

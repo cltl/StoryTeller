@@ -17,8 +17,10 @@ import java.util.Iterator;
 import java.util.Set;
 
 /**
+ * Old class that is kep for documentation. Do not us this
  * Created by piek on 1/3/14.
  */
+@Deprecated
 public class QueryKnowledgeStoreToJsonStoryPerspectives {
 
     static boolean STRICTSTRING = true;

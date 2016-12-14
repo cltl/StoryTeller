@@ -154,6 +154,36 @@ Arguments:
 Result:
     String: Sparql query for event structures
 
+
+     * The main function needs a number of parameters to run:
+     * --ks-service     http address of the KnowledgeStore service
+     * --ks-user        (optional) if the KnowledgeStore is user protected a username is required
+     * --ks-passw       (optional) if the KnowledgeStore is user protected a psswords is required
+     * --ks-limit       (optional) limits the number of events returned by the KnowledgeStore.
+     *                  The default value is set to 500 events
+     * --token-index    (optional) path to the NafTokenIndex file (gzipped) that is needed to create text snippets for the results
+     *                  Without the token-index, the KnowledgeStore is queried, which is much slower
+     * --eurovoc        (optional) Path to the EuroVoc topic label file. This is needed to provide readable labels for topic identifiers
+     * --eurovoc-blacklist (optinal) Path to a text file that provides topics that should be ignored to make storyline groupings
+     * --log            (optional) switch to turn on logging. If ommitted there is no logging of the queries.
+     *                  If specified some logging of the querying is done
+     *
+     * A number of query types that can be combined
+     * --entityPhrase
+     * --entityInstance
+     * --entityType
+     * --eventPhrase
+     * --eventType
+     * --topic
+     * --grasp
+     *
+     * @param args
+     *
+     * The main function carries out the complete search and conversion and returs a JSON stream as a result.
+     * The usage of this class is demonstrated in the shell script tellstory.sh with a variety of queries.
+     */
+
+
 2. Querying the NewsReader KnowledgeStore to obtain the event data
 
 Function:
@@ -171,7 +201,6 @@ Result:
 
 The tellstory.sh script shows the different query options that are supported through the API.
 Additional parameters to run the tellstory.sh:
-
 
 
 References:

@@ -1344,3 +1344,231 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
  -- KS Service = http://145.100.58.139:50053 -- token-index = token.index
  -- eurovoc = /Code/vu/newsreader/vua-resources/mapping_eurovoc_skos.label.concept.gz
 
+ -- querying for word = virus;disease -- limit = 100
+sparqlQuery = PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> 
+PREFIX eso: <http://www.newsreader-project.eu/domain-ontology#> 
+PREFIX fn: <http://www.newsreader-project.eu/ontologies/framenet/> 
+PREFIX ili: <http://globalwordnet.org/ili/> 
+PREFIX prov:  <http://www.w3.org/ns/prov#>
+PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> 
+PREFIX nwrcite: <http://www.newsreader-project.eu/data/non-entities/> 
+PREFIX grasp: <http://groundedannotationframework.org/grasp#>
+PREFIX gaf:   <http://groundedannotationframework.org/gaf#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dbp: <http://dbpedia.org/ontology/> 
+PREFIX dbpedia: <http://dbpedia.org/resource/> 
+PREFIX dbpedianl: <http://nl.dbpedia.org/resource/> 
+PREFIX owltime: <http://www.w3.org/TR/owl-time#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+SELECT ?event ?relation ?object ?indatetime ?begintime ?endtime  
+WHERE {
+{SELECT distinct ?event WHERE { 
+?event rdf:type sem:Event .
+{
+{  { ?event rdfs:label "virus" }  UNION  { ?event rdfs:label "disease" }  }
+}
+?event sem:hasActor ?ent .
+{
+{  { ?ent rdfs:label "virus" }  UNION  { ?ent rdfs:label "disease" }  }
+}
+
+} LIMIT 100 }
+?event ?relation ?object . 
+OPTIONAL { ?object rdf:type owltime:Instant ; owltime:inDateTime ?indatetime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasBeginning ?begintime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime } 
+} ORDER BY ?event
+ -- KS Service = http://145.100.58.139:50053 -- token-index = token.index.gz
+ -- eurovoc = /Code/vu/StoryTeller/vua-resources/mapping_eurovoc_skos.label.concept.gz
+
+ -- Time elapsed to get results from KS:1.858
+ -- Time elapsed to get snippets from 16 source documents:0.589 -- story_cnt = 2, event_cnt = 23, mention_cnt = 106, actor_cnt = 77 -- querying for word = virus;disease -- limit = 100
+sparqlQuery = PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> 
+PREFIX eso: <http://www.newsreader-project.eu/domain-ontology#> 
+PREFIX fn: <http://www.newsreader-project.eu/ontologies/framenet/> 
+PREFIX ili: <http://globalwordnet.org/ili/> 
+PREFIX prov:  <http://www.w3.org/ns/prov#>
+PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> 
+PREFIX nwrcite: <http://www.newsreader-project.eu/data/non-entities/> 
+PREFIX grasp: <http://groundedannotationframework.org/grasp#>
+PREFIX gaf:   <http://groundedannotationframework.org/gaf#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dbp: <http://dbpedia.org/ontology/> 
+PREFIX dbpedia: <http://dbpedia.org/resource/> 
+PREFIX dbpedianl: <http://nl.dbpedia.org/resource/> 
+PREFIX owltime: <http://www.w3.org/TR/owl-time#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+SELECT ?event ?relation ?object ?indatetime ?begintime ?endtime  
+WHERE {
+{SELECT distinct ?event WHERE { 
+?event rdf:type sem:Event .
+{
+{  { ?event rdfs:label "virus" }  UNION  { ?event rdfs:label "disease" }  }
+}
+?event sem:hasActor ?ent .
+{
+{  { ?ent rdfs:label "virus" }  UNION  { ?ent rdfs:label "disease" }  }
+}
+
+} LIMIT 100 }
+?event ?relation ?object . 
+OPTIONAL { ?object rdf:type owltime:Instant ; owltime:inDateTime ?indatetime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasBeginning ?begintime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime } 
+} ORDER BY ?event
+ -- KS Service = http://145.100.58.139:50053 -- token-index = token.index.gz
+ -- eurovoc = /Code/vu/StoryTeller/vua-resources/mapping_eurovoc_skos.label.concept.gz
+
+ -- Time elapsed to get results from KS:1.874
+ -- Time elapsed to get snippets from 16 source documents:0.585 -- story_cnt = 2, event_cnt = 23, mention_cnt = 106, actor_cnt = 77 -- querying for word = *virus;disease -- limit = 100
+sparqlQuery = PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> 
+PREFIX eso: <http://www.newsreader-project.eu/domain-ontology#> 
+PREFIX fn: <http://www.newsreader-project.eu/ontologies/framenet/> 
+PREFIX ili: <http://globalwordnet.org/ili/> 
+PREFIX prov:  <http://www.w3.org/ns/prov#>
+PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> 
+PREFIX nwrcite: <http://www.newsreader-project.eu/data/non-entities/> 
+PREFIX grasp: <http://groundedannotationframework.org/grasp#>
+PREFIX gaf:   <http://groundedannotationframework.org/gaf#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dbp: <http://dbpedia.org/ontology/> 
+PREFIX dbpedia: <http://dbpedia.org/resource/> 
+PREFIX dbpedianl: <http://nl.dbpedia.org/resource/> 
+PREFIX owltime: <http://www.w3.org/TR/owl-time#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+SELECT ?event ?relation ?object ?indatetime ?begintime ?endtime  
+WHERE {
+{SELECT distinct ?event WHERE { 
+?event rdf:type sem:Event .
+{
+FILTER (regex(str(?event), "virus") || regex(str(?event), "disease")) .
+}
+?event sem:hasActor ?ent .
+{
+?ent rdfs:label ?entlabel .
+FILTER (regex(str(?entlabel), "virus") || regex(str(?entlabel), "disease")) .
+}
+
+} LIMIT 100 }
+?event ?relation ?object . 
+OPTIONAL { ?object rdf:type owltime:Instant ; owltime:inDateTime ?indatetime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasBeginning ?begintime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime } 
+} ORDER BY ?event
+ -- KS Service = http://145.100.58.139:50053 -- token-index = token.index.gz
+ -- eurovoc = /Code/vu/StoryTeller/vua-resources/mapping_eurovoc_skos.label.concept.gz
+
+ -- Time elapsed to get results from KS:2.369
+ -- Time elapsed to get snippets from 6 source documents:0.624 -- story_cnt = 2, event_cnt = 72, mention_cnt = 185, actor_cnt = 117 -- querying for entityPhrase = virus;disease -- limit = 100
+sparqlQuery = PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> 
+PREFIX eso: <http://www.newsreader-project.eu/domain-ontology#> 
+PREFIX fn: <http://www.newsreader-project.eu/ontologies/framenet/> 
+PREFIX ili: <http://globalwordnet.org/ili/> 
+PREFIX prov:  <http://www.w3.org/ns/prov#>
+PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> 
+PREFIX nwrcite: <http://www.newsreader-project.eu/data/non-entities/> 
+PREFIX grasp: <http://groundedannotationframework.org/grasp#>
+PREFIX gaf:   <http://groundedannotationframework.org/gaf#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dbp: <http://dbpedia.org/ontology/> 
+PREFIX dbpedia: <http://dbpedia.org/resource/> 
+PREFIX dbpedianl: <http://nl.dbpedia.org/resource/> 
+PREFIX owltime: <http://www.w3.org/TR/owl-time#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+SELECT ?event ?relation ?object ?indatetime ?begintime ?endtime  
+WHERE {
+{SELECT distinct ?event WHERE { 
+?event rdf:type sem:Event .
+?event sem:hasActor ?ent .
+{
+{  { ?ent rdfs:label "virus" }  UNION  { ?ent rdfs:label "disease" }  }
+}
+
+} LIMIT 100 }
+?event ?relation ?object . 
+OPTIONAL { ?object rdf:type owltime:Instant ; owltime:inDateTime ?indatetime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasBeginning ?begintime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime } 
+} ORDER BY ?event
+ -- KS Service = http://145.100.58.139:50053 -- token-index = token.index.gz
+ -- eurovoc = /Code/vu/StoryTeller/vua-resources/mapping_eurovoc_skos.label.concept.gz
+
+ -- Time elapsed to get results from KS:2.549
+ -- Time elapsed to get snippets from 21 source documents:0.593 -- story_cnt = 2, event_cnt = 88, mention_cnt = 376, actor_cnt = 244 -- querying for entityPhrase = *virus;disease -- limit = 100
+sparqlQuery = PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> 
+PREFIX eso: <http://www.newsreader-project.eu/domain-ontology#> 
+PREFIX fn: <http://www.newsreader-project.eu/ontologies/framenet/> 
+PREFIX ili: <http://globalwordnet.org/ili/> 
+PREFIX prov:  <http://www.w3.org/ns/prov#>
+PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> 
+PREFIX nwrcite: <http://www.newsreader-project.eu/data/non-entities/> 
+PREFIX grasp: <http://groundedannotationframework.org/grasp#>
+PREFIX gaf:   <http://groundedannotationframework.org/gaf#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dbp: <http://dbpedia.org/ontology/> 
+PREFIX dbpedia: <http://dbpedia.org/resource/> 
+PREFIX dbpedianl: <http://nl.dbpedia.org/resource/> 
+PREFIX owltime: <http://www.w3.org/TR/owl-time#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+SELECT ?event ?relation ?object ?indatetime ?begintime ?endtime  
+WHERE {
+{SELECT distinct ?event WHERE { 
+?event rdf:type sem:Event .
+?event sem:hasActor ?ent .
+{
+?ent rdfs:label ?entlabel .
+FILTER (regex(str(?entlabel), "virus") || regex(str(?entlabel), "disease")) .
+}
+
+} LIMIT 100 }
+?event ?relation ?object . 
+OPTIONAL { ?object rdf:type owltime:Instant ; owltime:inDateTime ?indatetime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasBeginning ?begintime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime } 
+} ORDER BY ?event
+ -- KS Service = http://145.100.58.139:50053 -- token-index = token.index.gz
+ -- eurovoc = /Code/vu/StoryTeller/vua-resources/mapping_eurovoc_skos.label.concept.gz
+
+ -- Time elapsed to get results from KS:2.384
+ -- Time elapsed to get snippets from 8 source documents:0.523 -- story_cnt = 2, event_cnt = 90, mention_cnt = 373, actor_cnt = 210 -- querying for entityInstance = dbpedia:Pakistan;dbpedia:India -- limit = 100
+sparqlQuery = PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> 
+PREFIX eso: <http://www.newsreader-project.eu/domain-ontology#> 
+PREFIX fn: <http://www.newsreader-project.eu/ontologies/framenet/> 
+PREFIX ili: <http://globalwordnet.org/ili/> 
+PREFIX prov:  <http://www.w3.org/ns/prov#>
+PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> 
+PREFIX nwrcite: <http://www.newsreader-project.eu/data/non-entities/> 
+PREFIX grasp: <http://groundedannotationframework.org/grasp#>
+PREFIX gaf:   <http://groundedannotationframework.org/gaf#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+PREFIX dbp: <http://dbpedia.org/ontology/> 
+PREFIX dbpedia: <http://dbpedia.org/resource/> 
+PREFIX dbpedianl: <http://nl.dbpedia.org/resource/> 
+PREFIX owltime: <http://www.w3.org/TR/owl-time#> 
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> 
+SELECT ?event ?relation ?object ?indatetime ?begintime ?endtime  
+WHERE {
+{SELECT distinct ?event WHERE { 
+?event rdf:type sem:Event .
+?event sem:hasActor ?ent .
+{
+{  { ?event sem:hasActor dbpedia:Pakistan }  UNION  { ?event sem:hasActor dbpedia:India }  }
+}
+
+} LIMIT 100 }
+?event ?relation ?object . 
+OPTIONAL { ?object rdf:type owltime:Instant ; owltime:inDateTime ?indatetime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasBeginning ?begintime } 
+OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime } 
+} ORDER BY ?event
+ -- KS Service = http://145.100.58.139:50053 -- token-index = token.index.gz
+ -- eurovoc = /Code/vu/StoryTeller/vua-resources/mapping_eurovoc_skos.label.concept.gz
+
+ -- Time elapsed to get results from KS:2.047
+ -- Time elapsed to get snippets from 6 source documents:0.607 -- story_cnt = 1, event_cnt = 18, mention_cnt = 70, actor_cnt = 101

@@ -36,8 +36,11 @@ public class EuroVoc {
         return false;
     }
 
-    public void readEuroVoc (String filePath, String language) {
+    public String readEuroVoc (String filePath, String language) {
       //  System.out.println("filePath = " + filePath);
+        if (!new File(filePath).exists()) {
+            return "Cannot load: "+filePath;
+        }
         try {
             InputStreamReader isr = null;
             if (filePath.toLowerCase().endsWith(".gz")) {
@@ -91,5 +94,6 @@ public class EuroVoc {
         } catch (IOException e) {
             //e.printStackTrace();
         }
+        return "";
     }
 }
