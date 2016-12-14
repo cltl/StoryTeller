@@ -154,34 +154,22 @@ Arguments:
 Result:
     String: Sparql query for event structures
 
+    In addition to the query parameters there are a number of general parameters that need or can be set:
 
-     * The main function needs a number of parameters to run:
-     * --ks-service     http address of the KnowledgeStore service
-     * --ks-user        (optional) if the KnowledgeStore is user protected a username is required
-     * --ks-passw       (optional) if the KnowledgeStore is user protected a psswords is required
-     * --ks-limit       (optional) limits the number of events returned by the KnowledgeStore.
-     *                  The default value is set to 500 events
-     * --token-index    (optional) path to the NafTokenIndex file (gzipped) that is needed to create text snippets for the results
-     *                  Without the token-index, the KnowledgeStore is queried, which is much slower
-     * --eurovoc        (optional) Path to the EuroVoc topic label file. This is needed to provide readable labels for topic identifiers
-     * --eurovoc-blacklist (optinal) Path to a text file that provides topics that should be ignored to make storyline groupings
-     * --log            (optional) switch to turn on logging. If ommitted there is no logging of the queries.
-     *                  If specified some logging of the querying is done
-     *
-     * A number of query types that can be combined
-     * --entityPhrase
-     * --entityInstance
-     * --entityType
-     * --eventPhrase
-     * --eventType
-     * --topic
-     * --grasp
-     *
-     * @param args
-     *
-     * The main function carries out the complete search and conversion and returs a JSON stream as a result.
-     * The usage of this class is demonstrated in the shell script tellstory.sh with a variety of queries.
-     */
+     --ks-service     http address of the KnowledgeStore service
+     --ks-user        (optional) if the KnowledgeStore is user protected a username is required
+     --ks-passw       (optional) if the KnowledgeStore is user protected a psswords is required
+     --ks-limit       (optional) limits the number of events returned by the KnowledgeStore.
+                      The default value is set to 500 events
+     --token-index    (optional) path to the NafTokenIndex file (gzipped) that is needed to create text snippets for the results
+                      Without the token-index, the KnowledgeStore is queried, which is much slower
+     --eurovoc        (optional) Path to the EuroVoc topic label file. This is needed to provide readable labels for topic identifiers
+     --eurovoc-blacklist (optinal) Path to a text file that provides topics that should be ignored to make storyline groupings
+     --log            (optional) switch to turn on logging. If ommitted there is no logging of the queries.
+                      If specified some logging of the querying is done
+
+     The main function carries out the complete search and conversion and returs a JSON stream as a result.
+     The usage of this class is demonstrated in the shell script tellstory.sh with a variety of queries.
 
 
 2. Querying the NewsReader KnowledgeStore to obtain the event data
@@ -195,13 +183,75 @@ Arguments:
 Result:
     trigTripleData is filled with the event data returned from the KnowledgeStore
 
+3. Creating a JSON structure with events from the trigTripleData with storyline groupings
+
+     Given the RDF triples in trigTripleData it creates an ArrayList with JSON objects in which each object
+     represents an EventCentricKnowledgeGraph and stories consists of events with the same group name.
+     Groupings are based on sharing of topics and participants across events. The topicThreshold determines
+     the proportion of overlap the coarseness of the groupings. High thresholds results in many different small
+     groupings with high topic sharing, whereas a low threshold results in few groups with low overlap.
+
+     The climaxThreshold excludes events that are not salient or prominent enough.
+     The euroVoc data is used to label the stories with topic labels.
+     The euroVocBlacklist is used to exclude topics from making groupings
+
+Function
+  makeUpStory(TrigTripleData trigTripleData, int climaxThreshold, int topicThreshold, EuroVoc euroVoc, EuroVoc euroVocBlackList
+Arguments
+     trigTripleData             triples obtained from querying the KnowledgeStore
+     climaxThreshold            climax threhold to exclude events with less prominance
+     topicThreshold             topic threshold to determine granularity of groups
+     euroVoc                    topic label map to rename groupings
+     euroVocBlackList           topics excluded from groupings
+Result
+    ArrayList<JSONObject>      List of JSONObjects representing event data
+
 4. Adding perspective values to the event data
+
+Function
+    addPerspectiveToStory
+Arguments
+   ArrayList<JSONObject> jsonObjects   list of the event data structures
+Return
+    void                JSONObjects have been enriched
+
+    GetTriplesFromKnowledgeStore.integrateAttributionFromKs(jsonObjects);
+
 5. Adding text snippets to the event data
+
+Function
+    addSnippetsToStoryFromKnowledgeStore
+Parameters:
+    ArrayList<JSONObject> jsonObjects   list of the event data structures
+    String KSSERVICE,                   address of the KnowledgeStore service
+    String KS,          <OPTIONAL>
+    String KSuser,      <OPTIONAL>
+    String KSpass       <OPTIONAL>
+Return
+    void                JSONObjects have been enriched
+
+Function
+    addSnippetsToStoryFromIndexFile
+Parameters
+    ArrayList<JSONObject>  jsonObjects
+    String pathToTokenIndex
+Return
+    void                JSONObjects have been enriched
+
 6. Outputting
 
-The tellstory.sh script shows the different query options that are supported through the API.
-Additional parameters to run the tellstory.sh:
+Writes the story structure as a stream in JSON format.
 
+Function
+    writeStory
+Parameter
+    ArrayList<JSONObject>
+Return
+    JSONObject representing the story data structure to be written as output stream
+
+
+The tellstory.sh script shows the different query options that are supported through the API.
+You may need to set the proper address, user, and password for accessing a KnowledgStore installation.
 
 References:
 
