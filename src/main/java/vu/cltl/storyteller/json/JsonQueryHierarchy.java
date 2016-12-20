@@ -21,23 +21,52 @@ public class JsonQueryHierarchy {
     static String esoPath = "/Code/vu/newsreader/vua-resources/ESO.v2/ESO_V2_Final.owl";
     static String euroVocLabelFile = "/Code/vu/newsreader/vua-resources/mapping_eurovoc_skos.label.concept.gz";
     static String euroVocHierarchyFile = "/Code/vu/newsreader/vua-resources/eurovoc_in_skos_core_concepts.rdf.gz";
+    static String KSSERVICE = ""; //https://knowledgestore2.fbk.eu";
+    static String KS = ""; //"nwr/wikinews-new";
+    static String KSuser = ""; //"nwr/wikinews-new";
+    static String KSpass = ""; //"nwr/wikinews-new";
 
     static public void main (String[] args) {
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
-            if (arg.equals("--ent") && args.length > (i + 1)) {
-                //entityPath = args[i+1];
+            if (arg.equals("--eso") && args.length > (i + 1)) {
+                esoPath = args[i+1];
+            }
+            else if (arg.equals("--eurovoc-label") && args.length > (i + 1)) {
+                euroVocLabelFile = args[i+1];
+            }
+            else if (arg.equals("--eurovoc-core") && args.length > (i + 1)) {
+                euroVocHierarchyFile = args[i+1];
+            }
+            else if (arg.equalsIgnoreCase("--ks-service") && args.length > (i + 1)) {
+                KSSERVICE = args[i + 1];
+            }
+            else if (arg.equalsIgnoreCase("--ks-user") && args.length > (i + 1)) {
+                KSuser = args[i + 1];
+            }
+            else if (arg.equalsIgnoreCase("--ks-passw") && args.length > (i + 1)) {
+                KSpass = args[i + 1];
             }
         }
-        getJsonHierarchyFromKnowledgeStore();
-        getJsonHierarchyFromEsoAndKnowledgeStore(esoPath);
-        getJsonHierarchyFromEurovocAndKnowledgeStore(euroVocLabelFile, euroVocHierarchyFile);
-        getJsonHierarchyAuthorsKnowledgeStore();
-        getJsonHierarchyCiteKnowledgeStore();
+
+
+        getJsonHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass);
+        getJsonHierarchyFromEsoAndKnowledgeStore(KSSERVICE, KSuser, KSpass, esoPath);
+        getJsonHierarchyFromEurovocAndKnowledgeStore(KSSERVICE, KSuser, KSpass, euroVocLabelFile, euroVocHierarchyFile);
+        getJsonHierarchyAuthorsKnowledgeStore(KSSERVICE, KSuser, KSpass);
+        getJsonHierarchyCiteKnowledgeStore(KSSERVICE, KSuser, KSpass);
     }
 
-    static public void getJsonHierarchyFromKnowledgeStore () {
+    static public void getJsonHierarchyFromKnowledgeStore (String KSSERVICE, String KSuser, String KSpass) {
         try {
+            if (!KSSERVICE.isEmpty()) {
+                if (KSuser.isEmpty()) {
+                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS);
+                }
+                else {
+                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS, KSuser, KSpass);
+                }
+            }
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForPhraseCountsFromKs("");
             HashMap<String, ArrayList<PhraseCount>> cntPredicates = GetTriplesFromKnowledgeStore.getCountsFromKnowledgeStore (sparqlPhrases);
             //System.out.println("cntPredicates.size() = " + cntPredicates.size());
@@ -56,8 +85,17 @@ public class JsonQueryHierarchy {
         }
     }
 
-    static public void getJsonHierarchyFromEsoAndKnowledgeStore (String esoPath) {
+    static public void getJsonHierarchyFromEsoAndKnowledgeStore (String KSSERVICE, String KSuser, String KSpass,
+                                                                 String esoPath) {
         try {
+            if (!KSSERVICE.isEmpty()) {
+                if (KSuser.isEmpty()) {
+                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS);
+                }
+                else {
+                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS, KSuser, KSpass);
+                }
+            }
             EsoReader esoReader = new EsoReader();
             esoReader.parseFile(esoPath);
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForPhraseCountsFromKs("");
@@ -77,9 +115,18 @@ public class JsonQueryHierarchy {
         }
     }
 
-    static public void getJsonHierarchyFromEurovocAndKnowledgeStore (String euroVocLabelFile,
+    static public void getJsonHierarchyFromEurovocAndKnowledgeStore (String KSSERVICE, String KSuser, String KSpass,
+                                                                     String euroVocLabelFile,
                                                                      String euroVocHierarchyFile) {
         try {
+            if (!KSSERVICE.isEmpty()) {
+                if (KSuser.isEmpty()) {
+                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS);
+                }
+                else {
+                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS, KSuser, KSpass);
+                }
+            }
             EuroVoc euroVoc = new EuroVoc();
             euroVoc.readEuroVoc(euroVocLabelFile, "en");
             SimpleTaxonomy simpleTaxonomy = new SimpleTaxonomy();
@@ -102,8 +149,16 @@ public class JsonQueryHierarchy {
         }
     }
 
-   static public void getJsonHierarchyAuthorsKnowledgeStore () {
+   static public void getJsonHierarchyAuthorsKnowledgeStore (String KSSERVICE, String KSuser, String KSpass) {
         try {
+            if (!KSSERVICE.isEmpty()) {
+                if (KSuser.isEmpty()) {
+                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS);
+                }
+                else {
+                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS, KSuser, KSpass);
+                }
+            }
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForPhraseCountsFromKs("author");
             HashMap<String, ArrayList<PhraseCount>> cntPredicates = GetTriplesFromKnowledgeStore.getCountsFromKnowledgeStore (sparqlPhrases);
             //System.out.println("cntPredicates.size() = " + cntPredicates.size());
@@ -122,8 +177,16 @@ public class JsonQueryHierarchy {
         }
     }
 
-    static public void getJsonHierarchyCiteKnowledgeStore () {
+    static public void getJsonHierarchyCiteKnowledgeStore (String KSSERVICE, String KSuser, String KSpass) {
         try {
+            if (!KSSERVICE.isEmpty()) {
+                if (KSuser.isEmpty()) {
+                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS);
+                }
+                else {
+                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS, KSuser, KSpass);
+                }
+            }
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForPhraseCountsFromKs("cite");
             HashMap<String, ArrayList<PhraseCount>> cntPredicates = GetTriplesFromKnowledgeStore.getCountsFromKnowledgeStore (sparqlPhrases);
             //System.out.println("cntPredicates.size() = " + cntPredicates.size());
