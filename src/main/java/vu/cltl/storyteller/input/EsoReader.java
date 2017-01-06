@@ -427,6 +427,7 @@ public class EsoReader extends DefaultHandler {
                     if (idx>-1) {
                         subClass = "eso:"+subClass.substring(idx+1);
                     }
+                   // System.out.println("subClass = " + subClass);
                 }
             }
         }

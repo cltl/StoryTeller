@@ -17,6 +17,7 @@ import static vu.cltl.storyteller.html.DataSetEntityHierarchy.totalPhrases;
 /**
  * Created by piek on 15/04/16.
  */
+@Deprecated
 public class DataSetEventHierarchy {
 
 
@@ -71,7 +72,7 @@ public class DataSetEventHierarchy {
             str += "<div id=\"container\">\n";
             fos.write(str.getBytes());
             //str += esoReader.htmlTableTree("eso:",tops, 1, cnt, maxDepth);
-            esoReader.simpleTaxonomy.htmlTableTree(fos, "event", "eso:",tops, 1, cnt, cntPredicates, cntIli);
+           // esoReader.simpleTaxonomy.htmlTableTree(fos, "event", "eso:",tops, 1, cnt, cntPredicates, cntIli);
             str = "</div></div>\n";
             str += TreeStaticHtml.formEnd;
             str += TreeStaticHtml.bodyEnd;

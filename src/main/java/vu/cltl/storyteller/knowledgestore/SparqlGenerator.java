@@ -1,5 +1,7 @@
 package vu.cltl.storyteller.knowledgestore;
 
+import vu.cltl.storyteller.objects.NameSpaces;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -758,20 +760,69 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
         return sparqQuery;
     }
 
-    public static String makeSparqlQueryForPhraseCountsFromKs (String type) {
-        String sparqQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
-                "PREFIX eso: <http://www.newsreader-project.eu/domain-ontology#> \n" +
-                "PREFIX fn: <http://www.newsreader-project.eu/ontologies/framenet/> \n" +
-                "PREFIX ili: <http://globalwordnet.org/ili/> \n" +
-                "PREFIX dbp: <http://dbpedia.org/ontology/> \n" +
-                "PREFIX dbpedia: <http://dbpedia.org/resource/> \n" +
-                "PREFIX owltime: <http://www.w3.org/TR/owl-time#> \n" +
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-                "SELECT ?phrase ?instance ?count\n" +
+    public static String makeSparqlQueryForPhraseDbpediaTypeCountsFromKs () {
+        String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
+                "SELECT ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
                 "WHERE {\n" +
-                "} ";
-        //System.out.println("sparqQuery = " + sparqQuery);
+                "?a gaf:denotedBy ?m .\n" +
+                "OPTIONAL {?a a ?type . }\n" +
+                "FILTER (CONTAINS(STR(?a), \"dbpedia\"))\n" +
+                "FILTER (CONTAINS(STR(?type), \"dbpedia\"))\n"+
+                "}\n" +
+                "group by ?a ?type\n" +
+                "order by DESC(?count)";
+        System.out.println("sparqQuery = " + sparqQuery);
+        return sparqQuery;
+    }
+
+    public static String makeSparqlQueryForPhraseEntityTypeCountsFromKs (String type) {
+        String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
+                 "SELECT ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
+                "WHERE {\n" +
+                "?a gaf:denotedBy ?m .\n" +
+                "OPTIONAL {?a a ?type . }\n" +
+                "FILTER (CONTAINS(STR(?a), \"/entities/\"))\n" +
+                "}\n" +
+                "group by ?a ?type\n" +
+                "order by DESC(?count)";
+        System.out.println("sparqQuery = " + sparqQuery);
+        return sparqQuery;
+    }
+
+    public static String makeSparqlQueryForPhraseSkosRelatedTypeCountsFromKs (String type) {
+        String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
+                "SELECT ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
+                "WHERE {\n" +
+                "?a gaf:denotedBy ?m .\n" +
+                "OPTIONAL {?a skos:relatedMatch ?type . }\n" +
+                "FILTER (CONTAINS(STR(?type), \"dbpedia\"))\n"+
+                "FILTER (CONTAINS(STR(?a), \"/non-entities/\"))\n" +
+                "}\n" +
+                "group by ?a ?type\n" +
+                "order by DESC(?count)";
+        System.out.println("sparqQuery = " + sparqQuery);
+        return sparqQuery;
+    }
+
+    public static String makeSparqlQueryForPhraseEsoTypeCountsFromKs (String type) {
+        String sparqQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
+                "PREFIX eso: <"+ NameSpaces.eso+"> \n" +
+                "PREFIX framenet: <"+NameSpaces.fn+"> \n" +
+                "PREFIX nwr: <"+NameSpaces.nwrclass+"> \n" +
+                "PREFIX rdf: <"+NameSpaces.rdf+"> \n" +
+                "PREFIX rdfs: <"+NameSpaces.rdfs+"> \n" +
+                "SELECT ?label (COUNT(?type) as ?count) ?type \n" +
+                "WHERE {\n" +
+                "       ?e a sem:Event .\n" +
+                "       ?e rdf:type ?type .\n" +
+                "       ?e rdfs:label ?label .\n" +
+                "      { ?type nwr:isClassDefinedBy framenet: }\n" +
+                "UNION\n" +
+                "{?type nwr:isClassDefinedBy eso:} \n" +
+                "}\n" +
+                "GROUP BY ?label ?type\n" +
+                "ORDER BY DESC(?count)";
+        System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
     }
 

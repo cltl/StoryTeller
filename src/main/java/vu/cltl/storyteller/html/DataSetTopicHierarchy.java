@@ -14,6 +14,7 @@ import java.util.zip.GZIPInputStream;
 /**
  * Created by piek on 29/05/16.
  */
+@Deprecated
 public class DataSetTopicHierarchy {
     static EuroVoc euroVoc = new EuroVoc();
     static boolean GREP = false;
@@ -93,7 +94,7 @@ public class DataSetTopicHierarchy {
             str += "<div id=\"Topics\" class=\"tabcontent\">\n";
             str += "<div id=\"container\">\n";
             fos.write(str.getBytes());
-            simpleTaxonomy.htmlTableTopicTree(fos, "topic",tops, 1, cnt, cntPredicates);
+           // simpleTaxonomy.htmlTableTopicTree(fos, "topic",tops, 1, cnt, cntPredicates);
 
 //            htmlTableList(fos, "topic", cnt);
             str = "</div></div>\n";

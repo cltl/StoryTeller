@@ -256,10 +256,10 @@ public class FrameNetReader extends DefaultHandler {
             for (int i = 0; i < attributes.getLength(); i++) {
                 String name = attributes.getQName(i);
                 if (name.equalsIgnoreCase("subFrameName")) {
-                    subFrame = attributes.getValue(i).trim();
+                    subFrame = "fn:"+attributes.getValue(i).trim();
                 }
                 else if (name.equalsIgnoreCase("superFrameName")) {
-                    superFrame = attributes.getValue(i).trim();
+                    superFrame = "fn:"+attributes.getValue(i).trim();
                 }
             }
             if (!subFrame.isEmpty() && !superFrame.isEmpty()) {
