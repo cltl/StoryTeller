@@ -10,6 +10,7 @@ import org.apache.jena.atlas.web.auth.SimpleAuthenticator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import vu.cltl.storyteller.input.EuroVoc;
 import vu.cltl.storyteller.json.JsonStoryUtil;
 import vu.cltl.storyteller.objects.*;
 
@@ -592,6 +593,52 @@ public class GetTriplesFromKnowledgeStore {
                     TypedPhraseCount typedPhraseCount = new TypedPhraseCount(label, Integer.parseInt(count));
                     typedPhraseCount.addType(type);
                     cntPredicates.put(label, typedPhraseCount);
+                }
+            }
+        }
+        return cntPredicates;
+    }
+
+    public static HashMap<String, ArrayList<PhraseCount>>  getTopicsAndLabelCountsFromKnowledgeStore(String sparqlQuery,
+                                                                                                     EuroVoc euroVoc,
+                                                                                                     SimpleTaxonomy simpleTaxonomy)throws Exception {
+        HashMap<String, ArrayList<PhraseCount>> cntPredicates = new HashMap<String, ArrayList<PhraseCount>>();
+        HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
+
+        QueryExecution x = QueryExecutionFactory.sparqlService(serviceEndpoint, sparqlQuery, authenticator);
+        ResultSet resultset = x.execSelect();
+
+        //// The problem is that the full hiearchy is given for
+        while (resultset.hasNext()) {
+            QuerySolution solution = resultset.nextSolution();
+            String topic = solution.get("topic").toString();
+            String type = "";
+            String count = solution.get("count").toString();
+            int idx = count.indexOf("^^");
+            if (idx>-1) count = count.substring(0, idx);
+            /*System.out.println("label = " + label);
+            System.out.println("type = " + type);
+            System.out.println("count = " + count);*/
+            if (!topic.isEmpty()) {
+                if (euroVoc.uriLabelMap.containsKey(topic)) {
+                    String label = euroVoc.uriLabelMap.get(topic);
+                    if (simpleTaxonomy.labelToConcept.containsKey(label)) {
+                        type = simpleTaxonomy.labelToConcept.get(label);
+                        PhraseCount phraseCount = new PhraseCount(label, Integer.parseInt(count));
+                        if (cntPredicates.containsKey(type)) {
+                            ArrayList<PhraseCount> phrases = cntPredicates.get(type);
+                            phrases.add(phraseCount);
+                            cntPredicates.put(type, phrases);
+                        } else {
+                            ArrayList<PhraseCount> phrases = new ArrayList<PhraseCount>();
+                            phrases.add(phraseCount);
+                            cntPredicates.put(type, phrases);
+                        }
+                    } else {
+                        System.out.println("Could not find label = " + label);
+                    }
+                } else {
+                    System.out.println("Could not find concept = " + topic);
                 }
             }
         }

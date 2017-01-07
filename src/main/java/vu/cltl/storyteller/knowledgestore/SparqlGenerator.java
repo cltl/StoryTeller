@@ -738,6 +738,9 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
         return sparqQuery;
     }
 
+    ///////////////////////////////
+    //////// Sparql queries to get hierarchical query interface data
+    ///////////////////////////////
 
     public static String makeSparqlQueryForTaxonomyFromKs (Set children) {
         String sparqQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
@@ -771,11 +774,11 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
                 "}\n" +
                 "group by ?a ?type\n" +
                 "order by DESC(?count)";
-        System.out.println("sparqQuery = " + sparqQuery);
+      //  System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
     }
 
-    public static String makeSparqlQueryForPhraseEntityTypeCountsFromKs (String type) {
+    public static String makeSparqlQueryForPhraseEntityTypeCountsFromKs () {
         String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
                  "SELECT ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
                 "WHERE {\n" +
@@ -785,12 +788,13 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
                 "}\n" +
                 "group by ?a ?type\n" +
                 "order by DESC(?count)";
-        System.out.println("sparqQuery = " + sparqQuery);
+      //  System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
     }
 
-    public static String makeSparqlQueryForPhraseSkosRelatedTypeCountsFromKs (String type) {
+    public static String makeSparqlQueryForPhraseSkosRelatedTypeCountsFromKs () {
         String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
+                "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
                 "SELECT ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
                 "WHERE {\n" +
                 "?a gaf:denotedBy ?m .\n" +
@@ -800,11 +804,27 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
                 "}\n" +
                 "group by ?a ?type\n" +
                 "order by DESC(?count)";
+       // System.out.println("sparqQuery = " + sparqQuery);
+        return sparqQuery;
+    }
+
+    public static String makeSparqlQueryForTopicCountsFromKs () {
+        String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
+                "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
+                "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
+                "SELECT ?topic (COUNT (DISTINCT ?m) as ?count) \n" +
+                "WHERE {\n" +
+                "?a a sem:Event .\n" +
+                "?a gaf:denotedBy ?m .\n" +
+                "?a skos:relatedMatch ?topic . }\n" +
+                "group by ?topic\n" +
+                "order by DESC(?count)";
+        //// topic + count
         System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
     }
 
-    public static String makeSparqlQueryForPhraseEsoTypeCountsFromKs (String type) {
+    public static String makeSparqlQueryForEventEsoFramenetTypeCountsFromKs () {
         String sparqQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
                 "PREFIX eso: <"+ NameSpaces.eso+"> \n" +
                 "PREFIX framenet: <"+NameSpaces.fn+"> \n" +
@@ -822,7 +842,26 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
                 "}\n" +
                 "GROUP BY ?label ?type\n" +
                 "ORDER BY DESC(?count)";
-        System.out.println("sparqQuery = " + sparqQuery);
+      //  System.out.println("sparqQuery = " + sparqQuery);
+        return sparqQuery;
+    }
+
+    public static String makeSparqlQueryForEventAnyTypeCountsFromKs () {
+        String sparqQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
+                "PREFIX eso: <"+ NameSpaces.eso+"> \n" +
+                "PREFIX framenet: <"+NameSpaces.fn+"> \n" +
+                "PREFIX nwr: <"+NameSpaces.nwrclass+"> \n" +
+                "PREFIX rdf: <"+NameSpaces.rdf+"> \n" +
+                "PREFIX rdfs: <"+NameSpaces.rdfs+"> \n" +
+                "SELECT ?label (COUNT(?type) as ?count) ?type \n" +
+                "WHERE {\n" +
+                "       ?e a sem:Event .\n" +
+                "       ?e rdf:type ?type .\n" +
+                "       ?e rdfs:label ?label .\n" +
+                "}\n" +
+                "GROUP BY ?label ?type\n" +
+                "ORDER BY DESC(?count)";
+       // System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
     }
 
