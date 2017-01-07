@@ -620,6 +620,27 @@ public class GetTriplesFromKnowledgeStore {
             System.out.println("type = " + type);
             System.out.println("count = " + count);*/
             if (!topic.isEmpty()) {
+/*                if (euroVoc.uriLabelMap.containsKey(topic)) {
+                    String label = euroVoc.uriLabelMap.get(topic);
+                    if (simpleTaxonomy.labelToConcept.containsKey(label)) {
+                        type = simpleTaxonomy.labelToConcept.get(label);
+                        PhraseCount phraseCount = new PhraseCount(label, Integer.parseInt(count));
+                        if (cntPredicates.containsKey(type)) {
+                            ArrayList<PhraseCount> phrases = cntPredicates.get(type);
+                            phrases.add(phraseCount);
+                            cntPredicates.put(type, phrases);
+                        } else {
+                            ArrayList<PhraseCount> phrases = new ArrayList<PhraseCount>();
+                            phrases.add(phraseCount);
+                            cntPredicates.put(type, phrases);
+                        }
+                    } else {
+                        System.out.println("Could not find label = " + label);
+                    }
+                } else {
+                    System.out.println("Could not find concept = " + topic);
+                }*/
+
                 if (euroVoc.uriLabelMap.containsKey(topic)) {
                     String label = euroVoc.uriLabelMap.get(topic);
                     if (simpleTaxonomy.labelToConcept.containsKey(label)) {
@@ -640,6 +661,27 @@ public class GetTriplesFromKnowledgeStore {
                 } else {
                     System.out.println("Could not find concept = " + topic);
                 }
+                /*
+                if (simpleTaxonomy.conceptToLabels.containsKey(topic)) {
+                    ArrayList<String> labels = simpleTaxonomy.conceptToLabels.get(topic);
+                    if (labels.size()>0) {
+                        String label = simpleTaxonomy.labelToConcept.get(labels.get(0));
+                        PhraseCount phraseCount = new PhraseCount(label, Integer.parseInt(count));
+                        if (cntPredicates.containsKey(topic)) {
+                            ArrayList<PhraseCount> phrases = cntPredicates.get(type);
+                            phrases.add(phraseCount);
+                            cntPredicates.put(topic, phrases);
+                        } else {
+                            ArrayList<PhraseCount> phrases = new ArrayList<PhraseCount>();
+                            phrases.add(phraseCount);
+                            cntPredicates.put(topic, phrases);
+                        }
+                    } else {
+                        System.out.println("Could not find labels = " + topic);
+                    }
+                } else {
+                    System.out.println("Could not find concept = " + topic);
+                }*/
             }
         }
         return cntPredicates;

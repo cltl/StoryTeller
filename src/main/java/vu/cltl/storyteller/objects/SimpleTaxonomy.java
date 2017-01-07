@@ -614,6 +614,12 @@ public class SimpleTaxonomy {
                     else if (topCount.getPhrase().indexOf("fn:")>-1) {
                         type = gType+"Type";
                     }
+                    else if (topCount.getPhrase().indexOf("sem:")>-1) {
+                        type = gType+"Type";
+                    }
+                    else if (topCount.getPhrase().indexOf("Event")>-1) {
+                        type = gType+"Type";
+                    }
                     else if (topCount.getPhrase().indexOf("eso:")>-1) {
                         type = gType+"Type";
                     }

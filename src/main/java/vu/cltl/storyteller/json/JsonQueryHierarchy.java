@@ -31,7 +31,8 @@ public class JsonQueryHierarchy {
     static boolean DEBUG = false;
     static String fnPath = "/Code/vu/newsreader/vua-resources/frAllRelation.xml";
     static String esoPath = "/Code/vu/newsreader/vua-resources/ESO_Version2.owl";
-    static String euroVocLabelFile = "/Code/vu/newsreader/vua-resources/mapping_eurovoc_skos.label.concept.gz";
+    //static String euroVocLabelFile = "/Code/vu/newsreader/vua-resources/mapping_eurovoc_skos.label.concept.gz";
+    static String euroVocLabelFile = "/Code/vu/newsreader/vua-resources/mapping_eurovoc_skos.csv.gz";
     static String euroVocHierarchyFile = "/Code/vu/newsreader/vua-resources/eurovoc_in_skos_core_concepts.rdf.gz";
     static String entityTypeFile = "/Code/vu/newsreader/vua-resources/instance_types_en.ttl.gz";
     static String entityHierarchyFile = "/Code/vu/newsreader/vua-resources/DBpediaHierarchy_parent_child.tsv";
@@ -84,10 +85,10 @@ public class JsonQueryHierarchy {
 
 
 
-        //getJsonLightEntityHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, entityHierarchyFile);
-        //getJsonDarkEntityHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass);
-        //getJsonConceptHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, entityHierarchyFile, entityTypeFile);
-        //getJsonEventHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, esoPath, fnPath);
+        getJsonLightEntityHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, entityHierarchyFile);
+        getJsonDarkEntityHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass);
+        getJsonConceptHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, entityHierarchyFile, entityTypeFile);
+        getJsonEventHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, esoPath, fnPath);
         getJsonHierarchyFromEurovocAndKnowledgeStore(KSSERVICE, KSuser, KSpass, euroVocLabelFile, euroVocHierarchyFile);
         //getJsonHierarchyAuthorsKnowledgeStore(KSSERVICE, KSuser, KSpass);
         //getJsonHierarchyCiteKnowledgeStore(KSSERVICE, KSuser, KSpass);
@@ -326,6 +327,7 @@ public class JsonQueryHierarchy {
             simpleTaxonomy.cumulateScores("", tops, cnt);
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
+            //@TODO add names to hierarchy types
             simpleTaxonomy.jsonTree(tree, "topic", "", tops, 1, cnt, cntPredicates, null);
             if (DEBUG) {
                 OutputStream fos = new FileOutputStream("topics.debug.json");
