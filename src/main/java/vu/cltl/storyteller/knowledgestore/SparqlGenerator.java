@@ -763,30 +763,34 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
         return sparqQuery;
     }
 
-    public static String makeSparqlQueryForPhraseDbpediaTypeCountsFromKs () {
+    public static String makeSparqlQueryForLightEntityFromKs() {
         String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
-                "SELECT ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+                "SELECT ?label ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
                 "WHERE {\n" +
                 "?a gaf:denotedBy ?m .\n" +
+                "?a rdfs:label ?label .\n" +
                 "OPTIONAL {?a a ?type . }\n" +
                 "FILTER (CONTAINS(STR(?a), \"dbpedia\"))\n" +
                 "FILTER (CONTAINS(STR(?type), \"dbpedia\"))\n"+
                 "}\n" +
-                "group by ?a ?type\n" +
+                "group by ?label ?a ?type\n" +
                 "order by DESC(?count)";
-      //  System.out.println("sparqQuery = " + sparqQuery);
+        //System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
     }
 
-    public static String makeSparqlQueryForPhraseEntityTypeCountsFromKs () {
+    public static String makeSparqlQueryForDarkEntitiesFromKs() {
         String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
-                 "SELECT ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+                "SELECT  ?label ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
                 "WHERE {\n" +
                 "?a gaf:denotedBy ?m .\n" +
+                "?a rdfs:label ?label .\n" +
                 "OPTIONAL {?a a ?type . }\n" +
                 "FILTER (CONTAINS(STR(?a), \"/entities/\"))\n" +
                 "}\n" +
-                "group by ?a ?type\n" +
+                "group by  ?label ?a ?type\n" +
                 "order by DESC(?count)";
       //  System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
@@ -861,6 +865,47 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
                 "}\n" +
                 "GROUP BY ?label ?type\n" +
                 "ORDER BY DESC(?count)";
+       // System.out.println("sparqQuery = " + sparqQuery);
+        return sparqQuery;
+    }
+
+    public static String makeSparqlQueryForCitedSourcesFromKs () {
+        String sparqQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/>\n" +
+                "    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "    PREFIX grasp: <http://groundedannotationframework.org/grasp#>\n" +
+                "    PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
+                "    PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> \n" +
+                "    PREFIX nwrcite: <http://www.newsreader-project.eu/provenance/cited/> \n" +
+                "    PREFIX gaf:   <http://groundedannotationframework.org/gaf#>\n" +
+                "    SELECT ?a (COUNT (DISTINCT ?attribution) as ?count)\n" +
+                "WHERE {\n" +
+                "   ?attribution grasp:wasAttributedTo ?a\n" +
+                "    }\n" +
+                "group by ?a \n" +
+                "order by DESC(?count)";
+       // System.out.println("sparqQuery = " + sparqQuery);
+        return sparqQuery;
+    }
+
+    public static String makeSparqlQueryForAuthorsFromKs () {
+        String sparqQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/>\n" +
+                "    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "    PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
+                "    PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> \n" +
+                "    PREFIX nwrcite: <http://www.newsreader-project.eu/provenance/cited/> \n" +
+                "    PREFIX grasp: <http://groundedannotationframework.org/grasp#>\n" +
+                "    PREFIX gaf:   <http://groundedannotationframework.org/gaf#>\n" +
+                "    SELECT ?a (COUNT (DISTINCT ?attribution) as ?count)\n" +
+                "WHERE {\n" +
+                "\n" +
+                "   ?attribution prov:wasAttributedTo ?doc .\n" +
+                "   ?doc prov:wasAttributedTo ?a\n" +
+                "\n" +
+                "    }\n" +
+                "group by ?a \n" +
+                "order by DESC(?count)";
        // System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
     }

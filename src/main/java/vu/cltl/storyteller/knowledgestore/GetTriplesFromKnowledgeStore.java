@@ -565,6 +565,44 @@ public class GetTriplesFromKnowledgeStore {
         return cntPredicates;
     }
 
+    public static HashMap<String, TypedPhraseCount>  getLabelsTypesAndInstanceCountsFromKnowledgeStore(String sparqlQuery)throws Exception {
+        HashMap<String, TypedPhraseCount> cntPredicates = new HashMap<String, TypedPhraseCount>();
+        HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
+
+        QueryExecution x = QueryExecutionFactory.sparqlService(serviceEndpoint, sparqlQuery, authenticator);
+        ResultSet resultset = x.execSelect();
+
+        //// The problem is that the full hiearchy is given for
+        while (resultset.hasNext()) {
+            QuerySolution solution = resultset.nextSolution();
+            String label = solution.get("label").toString();
+            String instance = solution.get("a").toString();
+            String type = solution.get("type").toString();
+            String count = solution.get("count").toString();
+            int idx = count.indexOf("^^");
+            if (idx>-1) count = count.substring(0, idx);
+            /*System.out.println("instance = " + instance);
+            System.out.println("type = " + type);
+            System.out.println("count = " + count);
+            System.out.println("label = " + label);
+*/
+            if (!instance.isEmpty()) {
+                if (cntPredicates.containsKey(instance)) {
+                    TypedPhraseCount typedPhraseCount = cntPredicates.get(instance);
+                    typedPhraseCount.addType(type);
+                    typedPhraseCount.addLabel(label);
+                    cntPredicates.put(instance, typedPhraseCount);
+                } else {
+                    TypedPhraseCount typedPhraseCount = new TypedPhraseCount(instance, Integer.parseInt(count));
+                    typedPhraseCount.addType(type);
+                    typedPhraseCount.addLabel(label);
+                    cntPredicates.put(instance, typedPhraseCount);
+                }
+            }
+        }
+        return cntPredicates;
+    }
+
     public static HashMap<String, TypedPhraseCount>  getTypesAndLabelCountsFromKnowledgeStore(String sparqlQuery)throws Exception {
         HashMap<String, TypedPhraseCount> cntPredicates = new HashMap<String, TypedPhraseCount>();
         HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
@@ -687,24 +725,20 @@ public class GetTriplesFromKnowledgeStore {
         return cntPredicates;
     }
 
-     /*public static HashMap<String, ArrayList<PhraseCount>>  getCountsFromKnowledgeStore(String sparqlQuery)throws Exception {
+     public static HashMap<String, ArrayList<PhraseCount>>  getCountsFromKnowledgeStore(String sparqlQuery, String type)throws Exception {
             HashMap<String, ArrayList<PhraseCount>> cntPredicates = new HashMap<String, ArrayList<PhraseCount>>();
             HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
 
             QueryExecution x = QueryExecutionFactory.sparqlService(serviceEndpoint, sparqlQuery, authenticator);
             ResultSet resultset = x.execSelect();
-
-            //// The problem is that the full hiearchy is given for
             while (resultset.hasNext()) {
                 QuerySolution solution = resultset.nextSolution();
                 String phrase = solution.get("a").toString();
-                String type = solution.get("type").toString();
                 String count = solution.get("count").toString();
                 int idx = count.indexOf("^^");
                 if (idx>-1) count = count.substring(0, idx);
-                System.out.println("phrase = " + phrase);
-                System.out.println("type = " + type);
-                System.out.println("count = " + count);
+                /*System.out.println("phrase = " + phrase);
+                System.out.println("count = " + count);*/
                 PhraseCount phraseCount = new PhraseCount(phrase, Integer.parseInt(count));
                 if (cntPredicates.containsKey(type)) {
                     ArrayList<PhraseCount> phrases = cntPredicates.get(type);
@@ -717,7 +751,7 @@ public class GetTriplesFromKnowledgeStore {
                 }
             }
             return cntPredicates;
-    }*/
+    }
 
 
     private static boolean isEventUri (String subject) {

@@ -336,17 +336,22 @@ public class SimpleTaxonomy {
 <http://dbpedia.org/resource/Abraham_Lincoln__3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/TimePeriod> .
 <http://dbpedia.org/resource/Austroasiatic_languages> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Thing> .
 <http://dbpedia.org/resource/Afroasiatic_languages> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Thing> .
+
+inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Building> .
      */
-                       //  System.out.println("inputLine = " + inputLine);
+                       // if (inputLine.indexOf("/resource/")>-1)  System.out.println("inputLine = " + inputLine);
                         String[] fields = inputLine.split(" ");
                         if (fields.length >= 2) {
-                            String className = fields[0];
+                            String subClass = fields[0];
+                            if (subClass.startsWith("<")) subClass = subClass.substring(1);
+                            if (subClass.endsWith(">")) subClass = subClass.substring(0, subClass.length()-1);
                            // System.out.println("className = " + className);
-                            if (keySet.contains(className)) {
-                                String subClass = className;
-                                className = fields[2];
-                                className = className.substring(className.lastIndexOf("/"));
-                                String superClass = className;
+                            if (keySet.contains(subClass)) {
+                                //System.out.println("subClass = " + subClass);
+                                String superClass = fields[2];
+                                if (superClass.startsWith("<")) superClass = superClass.substring(1);
+                                if (superClass.endsWith(">")) superClass = superClass.substring(0, superClass.length()-1);
+                               // superClass = superClass.substring(superClass.lastIndexOf("/"));
                                 if (!subClass.equals(superClass)) {
                                     subToSuper.put(subClass, superClass);
                                     if (superToSub.containsKey(superClass)) {
@@ -532,13 +537,13 @@ public class SimpleTaxonomy {
                                  int level,
                                  HashMap<String, Integer> typeCounts,
                                  HashMap<String, ArrayList<PhraseCount>> phrases,
-                                 HashMap<String, ArrayList<String>> iliMap) throws IOException, JSONException {
+                                 HashMap<String, TypedPhraseCount> typedPredicates) throws IOException, JSONException {
         ArrayList<String> covered = new ArrayList<String>();
         jsonTree ( tree,  gType,  ns,  tops, covered,
          level,
          typeCounts,
          phrases,
-         iliMap);
+         typedPredicates);
     }
 
 
@@ -548,7 +553,7 @@ public class SimpleTaxonomy {
                            int level,
                            HashMap<String, Integer> typeCounts,
                            HashMap<String, ArrayList<PhraseCount>> phrases,
-                           HashMap<String, ArrayList<String>> iliMap) throws IOException, JSONException {
+                           HashMap<String, TypedPhraseCount> typedPredicates) throws IOException, JSONException {
 
 
 
@@ -623,7 +628,7 @@ public class SimpleTaxonomy {
                     else if (topCount.getPhrase().indexOf("eso:")>-1) {
                         type = gType+"Type";
                     }
-                    else if (topCount.getPhrase().indexOf("eurovoc:")>-1) {
+                    else if (topCount.getPhrase().indexOf("eurovoc")>-1) {
                         type = gType+"Type";
                     }
 
@@ -637,7 +642,6 @@ public class SimpleTaxonomy {
                     node.put("child_count", children.size());
                     node.put("instance_count", instances);
                     node.put("mention_count", topCount.getCount());
-
                     if (phrases.containsKey(topCount.getPhrase())) {
 
                         ArrayList<PhraseCount> phraseCounts = phrases.get(topCount.getPhrase());
@@ -680,12 +684,21 @@ public class SimpleTaxonomy {
                                     }
                                 }*/
                                 if (!ref.isEmpty()) phraseCountJsonObject.put("parent", ref);
+
+                                if (typedPredicates!=null && typedPredicates.containsKey(phraseCount.getPhrase())) {
+                                    TypedPhraseCount typedPhraseCount = typedPredicates.get(phraseCount.getPhrase());
+                                    for (int k = 0; k < typedPhraseCount.getLabels().size(); k++) {
+                                        String label = typedPhraseCount.getLabels().get(k);
+                                        phraseCountJsonObject.append("labels", label);
+                                    }
+
+                                }
                                 node.append("instances", phraseCountJsonObject);
                             }
                         }
                     };
                     if (children.size()>0) {
-                        jsonTree(node, gType, ns, children, covered, level, typeCounts, phrases, iliMap);
+                        jsonTree(node, gType, ns, children, covered, level, typeCounts, phrases, typedPredicates);
                     }
                     else {
                         //  System.out.println("has no children top = " + top);
@@ -694,7 +707,9 @@ public class SimpleTaxonomy {
                 }
                 else {
                     //// no use for this class
-                  //  System.out.println("ignoring topCount = " + topCount.getPhraseCount());
+                   /* System.out.println("ignoring topCount = " + topCount.getPhraseCount());
+                    System.out.println("instances. = " + instances);
+                    System.out.println("children = "+children.size());*/
                 }
             }
             else {
@@ -794,6 +809,7 @@ public class SimpleTaxonomy {
                             String child = children.get(j);
                             if (eventCounts.containsKey(child)) {
                                 cCount += eventCounts.get(child);
+                               // System.out.println("child = " + child+" :"+cCount);
                             } else {
                                 // System.out.println("no counts for child = " + child);
                             }
