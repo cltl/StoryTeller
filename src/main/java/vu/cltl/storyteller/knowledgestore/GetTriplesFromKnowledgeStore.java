@@ -531,6 +531,33 @@ public class GetTriplesFromKnowledgeStore {
         return simpleTaxonomy;
     }
 
+    public static ArrayList<PhraseCount>  getCountsFromKnowledgeStore(String sparqlQuery)throws Exception {
+        ArrayList<PhraseCount> cntPredicates = new ArrayList<PhraseCount>();
+        HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
+
+        QueryExecution x = QueryExecutionFactory.sparqlService(serviceEndpoint, sparqlQuery, authenticator);
+        ResultSet resultset = x.execSelect();
+
+        //// The problem is that the full hiearchy is given for
+        while (resultset.hasNext()) {
+            QuerySolution solution = resultset.nextSolution();
+            String value = solution.get("value").toString();
+            String count = solution.get("count").toString();
+            int idx = count.indexOf("^^");
+            if (idx>-1) count = count.substring(0, idx);
+            /*System.out.println("instance = " + instance);
+            System.out.println("type = " + type);
+            System.out.println("count = " + count);*/
+
+            if (!value.isEmpty()) {
+                PhraseCount phraseCount = new PhraseCount(value,  Integer.parseInt(count));
+                cntPredicates.add(phraseCount);
+            }
+        }
+        return cntPredicates;
+    }
+
+
     public static HashMap<String, TypedPhraseCount>  getTypesAndInstanceCountsFromKnowledgeStore(String sparqlQuery)throws Exception {
         HashMap<String, TypedPhraseCount> cntPredicates = new HashMap<String, TypedPhraseCount>();
         HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());

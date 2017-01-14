@@ -86,15 +86,51 @@ public class JsonQueryHierarchy {
 
 
 
-        getJsonLightEntityHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, entityHierarchyFile);
-        getJsonDarkEntityHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass);
-        getJsonConceptHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, entityHierarchyFile, entityTypeFile);
-        getJsonEventHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, esoPath, fnPath);
-        getJsonHierarchyFromEurovocAndKnowledgeStore(KSSERVICE, KSuser, KSpass, euroVocLabelFile, euroVocHierarchyFile);
-        getJsonHierarchyAuthorsKnowledgeStore(KSSERVICE, KSuser, KSpass);
-        getJsonHierarchyCiteKnowledgeStore(KSSERVICE, KSuser, KSpass);
-     //   getPerspectiveCountsFromKnowledgeStore(KSSERVICE, KSuser, KSpass);
+      //  getJsonLightEntityHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, entityHierarchyFile);
+      //  getJsonDarkEntityHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass);
+      //  getJsonConceptHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, entityHierarchyFile, entityTypeFile);
+      //  getJsonEventHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, esoPath, fnPath);
+      //  getJsonHierarchyFromEurovocAndKnowledgeStore(KSSERVICE, KSuser, KSpass, euroVocLabelFile, euroVocHierarchyFile);
+      //  getJsonHierarchyAuthorsKnowledgeStore(KSSERVICE, KSuser, KSpass);
+      //  getJsonHierarchyCiteKnowledgeStore(KSSERVICE, KSuser, KSpass);
+        getPerspectiveCountsFromKnowledgeStore(KSSERVICE, KSuser, KSpass);
 
+    }
+
+    static public void getPerspectiveCountsFromKnowledgeStore(String KSSERVICE,
+                                                              String KSuser,
+                                                              String KSpass) {
+        try {
+            if (!KSSERVICE.isEmpty()) {
+                if (KSuser.isEmpty()) {
+                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS);
+                }
+                else {
+                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS, KSuser, KSpass);
+                }
+            }
+
+            String sparqlPhrases = SparqlGenerator.makeSparqlQueryForAttributionValuesFromKs();
+            ArrayList<PhraseCount> cntPredicates = GetTriplesFromKnowledgeStore.getCountsFromKnowledgeStore(sparqlPhrases);
+            JSONObject jsonPerspectives = new JSONObject();
+            for (int i = 0; i < cntPredicates.size(); i++) {
+                PhraseCount phraseCount = cntPredicates.get(i);
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("value", phraseCount.getPhrase());
+                jsonObject.put("count", phraseCount.getCount());
+                jsonPerspectives.append("perspectives",jsonObject);
+            }
+            if (DEBUG) {
+                OutputStream fos = new FileOutputStream("perspectives.debug.json");
+                fos.write(jsonPerspectives.toString(0).getBytes());
+                fos.close();
+            }
+            if (!DEBUG) System.out.write(jsonPerspectives.toString(0).getBytes());
+
+        }
+        catch (Exception e) {
+        e.printStackTrace();
+        }
     }
 
     static public void getJsonLightEntityHierarchyFromKnowledgeStore (String KSSERVICE,
@@ -129,7 +165,8 @@ public class JsonQueryHierarchy {
                 fos.write(tree.toString(0).getBytes());
                 fos.close();
             }
-            if (!DEBUG) System.out.write(tree.toString(0).getBytes());        } catch (Exception e) {
+            if (!DEBUG) System.out.write(tree.toString(0).getBytes());
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -337,7 +374,7 @@ public class JsonQueryHierarchy {
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
             //@TODO add names to hierarchy types
-            simpleTaxonomy.jsonTree(tree, "topic", "", tops, 1, cnt, cntPredicates, null);
+            simpleTaxonomy.jsonTopicTree(tree, "topic", "", tops, 1, euroVoc.uriLabelMap, cnt, cntPredicates, null);
             if (DEBUG) {
                 OutputStream fos = new FileOutputStream("topics.debug.json");
                 fos.write(tree.toString(0).getBytes());
