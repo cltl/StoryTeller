@@ -295,43 +295,25 @@ In addition to the KnowledgeStore query option, there are a few scripts to creat
 contained in the KnowledgeStore.
 
 
-JsonQueryHierarchy
 
 
-stream with the entity and concept hierarchy in JSON format
+Stream with the entity and concept hierarchy in JSON format
     
---ks-service
---eso
---eurovoc-label
---eurovoc-core
 
 
 Function
-    vu.cltl.storyteller.json.JsonQueryHierarchy.getJsonHierarchyFromKnowledgeStore.getJsonHierarchyFromEsoAndKnowledgeStore
-Parameter
+    vu.cltl.storyteller.json.JsonQueryHierarchy
 
-Return
-
-Function
-    vu.cltl.storyteller.json.JsonQueryHierarchy.getJsonHierarchyFromKnowledgeStore.getJsonHierarchyFromEurovocAndKnowledgeStore
-Parameter
-
-Return
-
-
-Function
-    vu.cltl.storyteller.json.JsonQueryHierarchy.getJsonHierarchyFromKnowledgeStore.getJsonHierarchyAuthorsKnowledgeStore
-Parameter
-
-Return
-
-Function
-    vu.cltl.storyteller.json.JsonQueryHierarchy.getJsonHierarchyFromKnowledgeStore.getJsonHierarchyCiteKnowledgeStore
-Parameter
-
-Return
-
-        
+# get KS stats in json for query generator for a specified type of data.
+# Supported types are:
+# light-entities
+# dark-entities
+# concepts
+# events
+# topics
+# authors
+# cited
+# perspectives
         
 
 References:

@@ -20,7 +20,7 @@ entityTypeFile = "$RESOURCES/instance_types_en.ttl.gz"
 entityHierarchyFile = "$RESOURCES/DBpediaHierarchy_parent_child.tsv"
 
 # get KS stats in json for query generator for a specified type of data.
-# types are:
+# Supported types are:
 # light-entities
 # dark-entities
 # concepts
