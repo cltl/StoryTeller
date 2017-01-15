@@ -43,14 +43,21 @@ public class JsonQueryHierarchy {
     static String KSuser = ""; //"nwr/wikinews-new";
     static String KSpass = ""; //"nwr/wikinews-new";
     static boolean ALLEVENTYPES = false;
+    static String DATA = "events";
 
     static public void main (String[] args) {
         DEBUG = true;
         ALLEVENTYPES = true;
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
-            if (arg.equals("--eso") && args.length > (i + 1)) {
+            if (arg.equals("--data") && args.length > (i + 1)) {
+                DATA = args[i+1];
+            }
+            else if (arg.equals("--eso") && args.length > (i + 1)) {
                 esoPath = args[i+1];
+            }
+            else if (arg.equals("--framenet") && args.length > (i + 1)) {
+                fnPath = args[i+1];
             }
             else if (arg.equals("--eurovoc-label") && args.length > (i + 1)) {
                 euroVocLabelFile = args[i+1];
@@ -83,18 +90,15 @@ public class JsonQueryHierarchy {
                 ALLEVENTYPES = true;
             }
         }
-
-
-
-      //  getJsonLightEntityHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, entityHierarchyFile);
-      //  getJsonDarkEntityHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass);
-      //  getJsonConceptHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, entityHierarchyFile, entityTypeFile);
-      //  getJsonEventHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, esoPath, fnPath);
-      //  getJsonHierarchyFromEurovocAndKnowledgeStore(KSSERVICE, KSuser, KSpass, euroVocLabelFile, euroVocHierarchyFile);
-      //  getJsonHierarchyAuthorsKnowledgeStore(KSSERVICE, KSuser, KSpass);
-      //  getJsonHierarchyCiteKnowledgeStore(KSSERVICE, KSuser, KSpass);
-        getPerspectiveCountsFromKnowledgeStore(KSSERVICE, KSuser, KSpass);
-
+        if (DATA.equalsIgnoreCase("light-entities")) getJsonLightEntityHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, entityHierarchyFile);
+        else if (DATA.equalsIgnoreCase("dark-entities")) getJsonDarkEntityHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass);
+        else if (DATA.equalsIgnoreCase("concepts")) getJsonConceptHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, entityHierarchyFile, entityTypeFile);
+        else if (DATA.equalsIgnoreCase("events")) getJsonEventHierarchyFromKnowledgeStore(KSSERVICE, KSuser, KSpass, esoPath, fnPath);
+        else if (DATA.equalsIgnoreCase("topics")) getJsonHierarchyFromEurovocAndKnowledgeStore(KSSERVICE, KSuser, KSpass, euroVocLabelFile, euroVocHierarchyFile);
+        else if (DATA.equalsIgnoreCase("authors")) getJsonHierarchyAuthorsKnowledgeStore(KSSERVICE, KSuser, KSpass);
+        else if (DATA.equalsIgnoreCase("cited")) getJsonHierarchyCiteKnowledgeStore(KSSERVICE, KSuser, KSpass);
+        else if (DATA.equalsIgnoreCase("perspectives")) getPerspectiveCountsFromKnowledgeStore(KSSERVICE, KSuser, KSpass);
+        else System.out.println("unsupported data type:"+DATA);
     }
 
     static public void getPerspectiveCountsFromKnowledgeStore(String KSSERVICE,
@@ -374,7 +378,7 @@ public class JsonQueryHierarchy {
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
             //@TODO add names to hierarchy types
-            simpleTaxonomy.jsonTopicTree(tree, "topic", "", tops, 1, euroVoc.uriLabelMap, cnt, cntPredicates, null);
+            simpleTaxonomy.jsonTopicTree(tree, "topic", "", tops, 1, euroVoc.uriLabelMap, cnt, cntPredicates);
             if (DEBUG) {
                 OutputStream fos = new FileOutputStream("topics.debug.json");
                 fos.write(tree.toString(0).getBytes());

@@ -697,26 +697,23 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                                  int level,
                                  HashMap<String, String> uriLabelMap,
                                  HashMap<String, Integer> typeCounts,
-                                 HashMap<String, ArrayList<PhraseCount>> phrases,
-                                 HashMap<String, TypedPhraseCount> typedPredicates) throws IOException, JSONException {
+                                 HashMap<String, ArrayList<PhraseCount>> phrases) throws IOException, JSONException {
         ArrayList<String> covered = new ArrayList<String>();
         jsonTopicTree ( tree,  gType,  ns,  tops, covered,
                 level,
                 uriLabelMap,
                 typeCounts,
-                phrases,
-                typedPredicates);
+                phrases);
     }
 
 
 
     public void  jsonTopicTree (JSONObject tree, String gType, String ns, ArrayList<String> tops,
-                           ArrayList<String> covered,
-                           int level,
+                                ArrayList<String> covered,
+                                int level,
                                 HashMap<String, String> uriLabelMap,
-                           HashMap<String, Integer> typeCounts,
-                           HashMap<String, ArrayList<PhraseCount>> phrases,
-                           HashMap<String, TypedPhraseCount> typedPredicates) throws IOException, JSONException {
+                                HashMap<String, Integer> typeCounts,
+                                HashMap<String, ArrayList<PhraseCount>> phrases) throws IOException, JSONException {
 
 
 
@@ -772,7 +769,6 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                     if (uriLabelMap.containsKey(topCount.getPhrase())) {
                         name = uriLabelMap.get(topCount.getPhrase());
                     }
-
                     JSONObject node = new JSONObject();
                    // node.put("level", new Integer(level).toString());
                     if (!name.isEmpty()) node.put("name", name);
@@ -811,34 +807,16 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                                     phraseCountJsonObject.put("type", gType+"Phrase");
                                 }
                                 phraseCountJsonObject.put("mention_count", phraseCount.getCount());
-                                //@TODO provide an additional structure for ILI mappings to support cross-lingual search
-                                /*if (iliMap!=null) {
-                                    if (iliMap.containsKey(name)) {
-                                        ArrayList<String> ilis = iliMap.get(name);
-                                        for (int k = 0; k < ilis.size(); k++) {
-                                            String ili = ilis.get(k);
-                                            phraseCountJsonObject.append("ili", ili);
-                                        }
-                                    } else {
-                                        //System.out.println("could not find iliString = " + iliString);
-                                    }
-                                }*/
+
                                 if (!ref.isEmpty()) phraseCountJsonObject.put("parent", ref);
 
-                                if (typedPredicates!=null && typedPredicates.containsKey(phraseCount.getPhrase())) {
-                                    TypedPhraseCount typedPhraseCount = typedPredicates.get(phraseCount.getPhrase());
-                                    for (int k = 0; k < typedPhraseCount.getLabels().size(); k++) {
-                                        String label = typedPhraseCount.getLabels().get(k);
-                                        phraseCountJsonObject.append("labels", label);
-                                    }
-
-                                }
                                 node.append("instances", phraseCountJsonObject);
                             }
                         }
                     };
                     if (children.size()>0) {
-                        jsonTree(node, gType, ns, children, covered, level, typeCounts, phrases, typedPredicates);
+                        jsonTopicTree(node, gType, ns, children, covered, level,
+                                uriLabelMap,typeCounts, phrases);
                     }
                     else {
                         //  System.out.println("has no children top = " + top);
