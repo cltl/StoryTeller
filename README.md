@@ -290,31 +290,28 @@ The tellstory.sh script shows the different query options that are supported thr
 from a query to a JSON result structure. You may need to set the proper address, user, and password for accessing a KnowledgStore installation.
 
 
-7. Creating a JSON tree structure for generating queries
-In addition to the KnowledgeStore query option, there are a few scripts to create overview data and statistics on the data
-contained in the KnowledgeStore.
+7. Creating JSON tree data from the KnowledgeStore for generating queries to the KnowledgeStore.
+The tree data show the statistics for different data types and the child-parent relations if relevant.
+Supported types are:
+ light-entities
+ dark-entities
+ concepts
+ events
+ topics
+ authors
+ cited
+ perspectives
 
+The function requires different resources for building up the hiearchies and labeling the nodes. These resources need to be installed separately from:
 
-
-
-Stream with the entity and concept hierarchy in JSON format
-    
-
+git clone https://github.com/cltl/vua-resources.git
 
 Function
     vu.cltl.storyteller.json.JsonQueryHierarchy
 
-# get KS stats in json for query generator for a specified type of data.
-# Supported types are:
-# light-entities
-# dark-entities
-# concepts
-# events
-# topics
-# authors
-# cited
-# perspectives
-        
+The API is illustrated in the script getoverview.sh
+
+Any update of the KnowledgeStore requires running the script again to update the statistics.
 
 References:
 

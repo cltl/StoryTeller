@@ -31,21 +31,28 @@ entityHierarchyFile = "$RESOURCES/DBpediaHierarchy_parent_child.tsv"
 # perspectives
 
 
-#OPTIONAL parameters --debug (writes JSON to file for debugging) --all-events (all events are collected, also the ones without FrameNet and ESO type)
+#OPTIONAL parameter --debug (writes JSON to file for debugging to a file and prints debug information toi standard out)
 
-java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --eso $esoPath --framenet $fnPath --eurovoc-label euroVocLabelFile --eurovoc-core euroVocHierarchyFile --entity-hiearchy $entityHierarchyFile --entity-type $entityTypeFile --data light-entities
+# generate a JSON output stream for ligh-entities using the DBPedia ontology, --entity-hiearchy parameter expects a text file with parent<TAB>child on separate lines.
+java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --entity-hiearchy $entityHierarchyFile --data "light-entities"
 
+# generate a JSON output stream for dark-entities using the ENTITY classes assigned to entities in the NAF file.
+java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy $entityTypeFile --data "dark-entities"
 
-java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --eso $esoPath --framenet $fnPath --eurovoc-label euroVocLabelFile --eurovoc-core euroVocHierarchyFile --entity-hiearchy $entityHierarchyFile --entity-type $entityTypeFile --data dark-entities
+# generate a JSON output stream for concepts. Concepts are anything that is not an entity but plays an important role in an event. It uses the DBPedia ontology, --entity-hiearchy parameter expects a text file with parent<TAB>child on separate lines, --entity-type expects a gz file with  <dbpedia resource uri><TAB><dbpedia ontology uri>
+java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --entity-hiearchy $entityHierarchyFile --entity-type $entityTypeFile --data "concepts"
 
-java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --eso $esoPath --framenet $fnPath --eurovoc-label euroVocLabelFile --eurovoc-core euroVocHierarchyFile --entity-hiearchy $entityHierarchyFile --entity-type $entityTypeFile --data concepts
+# generate a JSON output stream for events. It uses two ontologies for building up the hiearchy --eso $esoPath --framenet $fnPath. Standard mode only outputs events mapped to ESO or FrameNet. Use the optional parameter --all-events to also get other events not mapped to ESO or FrameNet
+java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --eso $esoPath --framenet $fnPath --data "events"
 
-java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --eso $esoPath --framenet $fnPath --eurovoc-label euroVocLabelFile --eurovoc-core euroVocHierarchyFile --entity-hiearchy $entityHierarchyFile --entity-type $entityTypeFile --data events
+# generate a JSON output stream for topics.
+java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --eurovoc-label $euroVocLabelFile --eurovoc-core $euroVocHierarchyFile --data "topics"
 
-java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --eso $esoPath --framenet $fnPath --eurovoc-label euroVocLabelFile --eurovoc-core euroVocHierarchyFile --entity-hiearchy $entityHierarchyFile --entity-type $entityTypeFile --data topics
+# generate a JSON output stream for authors of the sources (documents). Flat list with countings.
+java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --data "authors"
 
-java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --eso $esoPath --framenet $fnPath --eurovoc-label euroVocLabelFile --eurovoc-core euroVocHierarchyFile --entity-hiearchy $entityHierarchyFile --entity-type $entityTypeFile --data authors
+# generate a JSON output stream for cited sources within the documents. Flat list with countings.
+java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --data "cited"
 
-java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --eso $esoPath --framenet $fnPath --eurovoc-label euroVocLabelFile --eurovoc-core euroVocHierarchyFile --entity-hiearchy $entityHierarchyFile --entity-type $entityTypeFile --data cited
-
-java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --eso $esoPath --framenet $fnPath --eurovoc-label euroVocLabelFile --eurovoc-core euroVocHierarchyFile --entity-hiearchy $entityHierarchyFile --entity-type $entityTypeFile --data perspectives
+# generate a JSON output stream for perspective values. Flat list with countings.
+java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --data "perspectives"
