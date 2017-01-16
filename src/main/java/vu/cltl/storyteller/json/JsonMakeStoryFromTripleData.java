@@ -56,6 +56,8 @@ public class JsonMakeStoryFromTripleData {
      * --eventPhrase
      * --eventType
      * --topic
+     * --author
+     * --cited
      * --grasp
      *
      * @param args
