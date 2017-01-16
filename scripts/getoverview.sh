@@ -13,11 +13,11 @@ KSUSER="wikinews"
 KSPASS="wikinews"
 
 fnPath="$RESOURCES/frAllRelation.xml"
-esoPath = "$RESOURCES/ESO_Version2.owl"
-euroVocLabelFile = "$RESOURCES/mapping_eurovoc_skos.csv.gz"
-euroVocHierarchyFile = ""$RESOURCES/eurovoc_in_skos_core_concepts.rdf.gz"
-entityTypeFile = "$RESOURCES/instance_types_en.ttl.gz"
-entityHierarchyFile = "$RESOURCES/DBpediaHierarchy_parent_child.tsv"
+esoPath="$RESOURCES/ESO_Version2.owl"
+euroVocLabelFile="$RESOURCES/mapping_eurovoc_skos.csv.gz"
+euroVocHierarchyFile="$RESOURCES/eurovoc_in_skos_core_concepts.rdf.gz"
+entityTypeFile="$RESOURCES/instance_types_en.ttl.gz"
+entityHierarchyFile="$RESOURCES/DBpediaHierarchy_parent_child.tsv"
 
 # get KS stats in json for query generator for a specified type of data.
 # Supported types are:
