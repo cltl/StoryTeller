@@ -696,14 +696,12 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
     public void  jsonTopicTree (JSONObject tree, String gType, String ns, ArrayList<String> tops,
                                  int level,
                                  HashMap<String, String> uriLabelMap,
-                                 HashMap<String, Integer> typeCounts,
-                                 HashMap<String, ArrayList<PhraseCount>> phrases) throws IOException, JSONException {
+                                 HashMap<String, Integer> typeCounts) throws IOException, JSONException {
         ArrayList<String> covered = new ArrayList<String>();
         jsonTopicTree ( tree,  gType,  ns,  tops, covered,
                 level,
                 uriLabelMap,
-                typeCounts,
-                phrases);
+                typeCounts);
     }
 
 
@@ -712,8 +710,7 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                                 ArrayList<String> covered,
                                 int level,
                                 HashMap<String, String> uriLabelMap,
-                                HashMap<String, Integer> typeCounts,
-                                HashMap<String, ArrayList<PhraseCount>> phrases) throws IOException, JSONException {
+                                HashMap<String, Integer> typeCounts ) throws IOException, JSONException {
 
 
 
@@ -751,12 +748,7 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                         }
                     }
                 }
-                int instances = 0;
-                if (phrases.containsKey(topCount.getPhrase())) {
-                    ArrayList<PhraseCount> phraseCounts = phrases.get(topCount.getPhrase());
-                    instances = phraseCounts.size();
-                }
-                if (topCount.getCount()>0 && (instances>0 || children.size()>0)) {
+                if (topCount.getCount()>0 || children.size()>0) {
                     String ref = topCount.getPhrase();
                     String type = getType(gType, topCount.getPhrase());
 
@@ -769,6 +761,9 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                     if (uriLabelMap.containsKey(topCount.getPhrase())) {
                         name = uriLabelMap.get(topCount.getPhrase());
                     }
+                    else {
+                       // System.out.println("no name for topCount = " + topCount.getPhrase());
+                    }
                     JSONObject node = new JSONObject();
                    // node.put("level", new Integer(level).toString());
                     if (!name.isEmpty()) node.put("name", name);
@@ -776,47 +771,11 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                     if (!type.isEmpty()) node.put("type", type);
                     if (!ref.isEmpty()) node.put("url", ref);
                     node.put("child_count", children.size());
-                    node.put("instance_count", instances);
                     node.put("mention_count", topCount.getCount());
-                    if (phrases.containsKey(topCount.getPhrase())) {
 
-                        ArrayList<PhraseCount> phraseCounts = phrases.get(topCount.getPhrase());
-                        Collections.sort(phraseCounts, new Comparator<PhraseCount>() {
-                            @Override
-                            public int compare(PhraseCount p1, PhraseCount p2) {
-                                return p2.getCount().compareTo(p1.getCount());
-                            }
-                        });
-                        for (int j = 0; j < phraseCounts.size(); j++) {
-                            PhraseCount phraseCount = phraseCounts.get(j);
-                            if (phraseCount.getCount()>0) {
-                                JSONObject phraseCountJsonObject = new JSONObject();
-                                name = phraseCount.getPhrase().trim();
-                                idx = phraseCount.getPhrase().lastIndexOf("/");
-                                if (idx > -1) {
-                                    name = phraseCount.getPhrase().substring(idx + 1);
-                                }
-                                phraseCountJsonObject.put("name", name.replace("+","_"));
-                                phraseCountJsonObject.put("query", phraseCount.getPhrase());
-                                if (phraseCount.getPhrase().indexOf("http")> -1) {
-                                    ///what about eso and eurovoc
-                                    phraseCountJsonObject.put("url", phraseCount.getPhrase());
-                                    phraseCountJsonObject.put("type", gType+"Instance");
-                                }
-                                else {
-                                    phraseCountJsonObject.put("type", gType+"Phrase");
-                                }
-                                phraseCountJsonObject.put("mention_count", phraseCount.getCount());
-
-                                if (!ref.isEmpty()) phraseCountJsonObject.put("parent", ref);
-
-                                node.append("instances", phraseCountJsonObject);
-                            }
-                        }
-                    };
                     if (children.size()>0) {
                         jsonTopicTree(node, gType, ns, children, covered, level,
-                                uriLabelMap,typeCounts, phrases);
+                                uriLabelMap,typeCounts);
                     }
                     else {
                         //  System.out.println("has no children top = " + top);

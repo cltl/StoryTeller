@@ -10,7 +10,6 @@ import org.apache.jena.atlas.web.auth.SimpleAuthenticator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import vu.cltl.storyteller.input.EuroVoc;
 import vu.cltl.storyteller.json.JsonStoryUtil;
 import vu.cltl.storyteller.objects.*;
 
@@ -664,10 +663,8 @@ public class GetTriplesFromKnowledgeStore {
         return cntPredicates;
     }
 
-    public static HashMap<String, ArrayList<PhraseCount>>  getTopicsAndLabelCountsFromKnowledgeStore(String sparqlQuery,
-                                                                                                     EuroVoc euroVoc,
-                                                                                                     SimpleTaxonomy simpleTaxonomy)throws Exception {
-        HashMap<String, ArrayList<PhraseCount>> cntPredicates = new HashMap<String, ArrayList<PhraseCount>>();
+    public static HashMap<String, Integer>  getTopicsAndLabelCountsFromKnowledgeStore(String sparqlQuery)throws Exception {
+        HashMap<String, Integer> cntPredicates = new HashMap<String, Integer>();
         HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
 
         QueryExecution x = QueryExecutionFactory.sparqlService(serviceEndpoint, sparqlQuery, authenticator);
@@ -685,6 +682,36 @@ public class GetTriplesFromKnowledgeStore {
             System.out.println("type = " + type);
             System.out.println("count = " + count);*/
             if (!topic.isEmpty()) {
+                cntPredicates.put(topic,  Integer.parseInt(count));
+            }
+        }
+        return cntPredicates;
+    }
+/*
+ public static HashMap<String, ArrayList<PhraseCount>>  getTopicsAndLabelCountsFromKnowledgeStore(String sparqlQuery,
+                                                                                                     EuroVoc euroVoc,
+                                                                                                     SimpleTaxonomy simpleTaxonomy)throws Exception {
+        HashMap<String, ArrayList<PhraseCount>> cntPredicates = new HashMap<String, ArrayList<PhraseCount>>();
+        HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
+
+        QueryExecution x = QueryExecutionFactory.sparqlService(serviceEndpoint, sparqlQuery, authenticator);
+        ResultSet resultset = x.execSelect();
+
+        //// The problem is that the full hiearchy is given for
+        while (resultset.hasNext()) {
+            QuerySolution solution = resultset.nextSolution();
+            String topic = solution.get("topic").toString();
+            String type = "";
+            String count = solution.get("count").toString();
+            int idx = count.indexOf("^^");
+            if (idx>-1) count = count.substring(0, idx);
+            */
+/*System.out.println("label = " + label);
+            System.out.println("type = " + type);
+            System.out.println("count = " + count);*//*
+
+            if (!topic.isEmpty()) {
+*/
 /*                if (euroVoc.uriLabelMap.containsKey(topic)) {
                     String label = euroVoc.uriLabelMap.get(topic);
                     if (simpleTaxonomy.labelToConcept.containsKey(label)) {
@@ -704,7 +731,8 @@ public class GetTriplesFromKnowledgeStore {
                     }
                 } else {
                     System.out.println("Could not find concept = " + topic);
-                }*/
+                }*//*
+
 
                 if (euroVoc.uriLabelMap.containsKey(topic)) {
                     String label = euroVoc.uriLabelMap.get(topic);
@@ -726,7 +754,8 @@ public class GetTriplesFromKnowledgeStore {
                 } else {
                     System.out.println("Could not find concept = " + topic);
                 }
-                /*
+                */
+/*
                 if (simpleTaxonomy.conceptToLabels.containsKey(topic)) {
                     ArrayList<String> labels = simpleTaxonomy.conceptToLabels.get(topic);
                     if (labels.size()>0) {
@@ -746,11 +775,13 @@ public class GetTriplesFromKnowledgeStore {
                     }
                 } else {
                     System.out.println("Could not find concept = " + topic);
-                }*/
+                }*//*
+
             }
         }
         return cntPredicates;
     }
+*/
 
      public static HashMap<String, ArrayList<PhraseCount>>  getCountsFromKnowledgeStore(String sparqlQuery, String type)throws Exception {
             HashMap<String, ArrayList<PhraseCount>> cntPredicates = new HashMap<String, ArrayList<PhraseCount>>();

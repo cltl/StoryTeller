@@ -824,7 +824,7 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
                 "group by ?topic\n" +
                 "order by DESC(?count)";
         //// topic + count
-        System.out.println("sparqQuery = " + sparqQuery);
+        //System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
     }
 

@@ -32,8 +32,8 @@ public class JsonQueryHierarchy {
     static boolean DEBUG = false;
     static String fnPath = "/Code/vu/newsreader/vua-resources/frAllRelation.xml";
     static String esoPath = "/Code/vu/newsreader/vua-resources/ESO_Version2.owl";
-    //static String euroVocLabelFile = "/Code/vu/newsreader/vua-resources/mapping_eurovoc_skos.label.concept.gz";
-    static String euroVocLabelFile = "/Code/vu/newsreader/vua-resources/mapping_eurovoc_skos.csv.gz";
+    static String euroVocLabelFile = "/Code/vu/newsreader/vua-resources/mapping_eurovoc_skos.label.concept.gz";
+    //static String euroVocLabelFile = "/Code/vu/newsreader/vua-resources/mapping_eurovoc_skos.csv.gz";
     static String euroVocHierarchyFile = "/Code/vu/newsreader/vua-resources/eurovoc_in_skos_core_concepts.rdf.gz";
     static String entityTypeFile = "/Code/vu/newsreader/vua-resources/instance_types_en.ttl.gz";
     static String entityHierarchyFile = "/Code/vu/newsreader/vua-resources/DBpediaHierarchy_parent_child.tsv";
@@ -48,6 +48,7 @@ public class JsonQueryHierarchy {
     static public void main (String[] args) {
         DEBUG = true;
         ALLEVENTYPES = true;
+        DATA = "topics";
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.equals("--data") && args.length > (i + 1)) {
@@ -237,12 +238,7 @@ public class JsonQueryHierarchy {
             simpleTaxonomy.readSimpleTaxonomyFromDbpFile(pathToTypeFile, cntPredicates.keySet());
 
             ArrayList<String> tops = simpleTaxonomy.getTops();
-           // simpleTaxonomy.addTypesToTops(cntPredicates.keySet().iterator(), tops);
-/*            if (DEBUG) {
-                OutputStream tree = new FileOutputStream("tree.txt");
-                simpleTaxonomy.printTree(tree);
-                tree.close();
-            }*/
+
             if (DEBUG) System.out.println("tops.toString() = " + tops.toString());
             HashMap<String, Integer> cnt = cntPhrases(cntPredicates);
             simpleTaxonomy.cumulateScores("", tops, cnt);
@@ -250,7 +246,7 @@ public class JsonQueryHierarchy {
             JSONObject tree = new JSONObject();
             simpleTaxonomy.jsonTree(tree, "concept", "", tops, 1, cnt, cntPredicates, null);
             if (DEBUG) {
-                OutputStream fos = new FileOutputStream("non-entities.debug.json");
+                OutputStream fos = new FileOutputStream("concepts.debug.json");
                 fos.write(tree.toString(0).getBytes());
                 fos.close();
             }
@@ -301,12 +297,6 @@ public class JsonQueryHierarchy {
             }
             else {
                 sparqlPhrases = SparqlGenerator.makeSparqlQueryForEventEsoFramenetTypeCountsFromKs();
-            }
-
-            if (DEBUG) {
-                OutputStream tree = new FileOutputStream("tree.txt");
-                simpleTaxonomy.printTree(tree);
-                tree.close();
             }
 
             HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getTypesAndLabelCountsFromKnowledgeStore (sparqlPhrases);
@@ -367,18 +357,15 @@ public class JsonQueryHierarchy {
 
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForTopicCountsFromKs();
 
-            HashMap<String, ArrayList<PhraseCount>> cntPredicates = GetTriplesFromKnowledgeStore.getTopicsAndLabelCountsFromKnowledgeStore(sparqlPhrases, euroVoc,simpleTaxonomy);
-
-            if (DEBUG) System.out.println("cntPredicates.size() = " + cntPredicates.size());
 
             ArrayList<String> tops = simpleTaxonomy.getTops();
             if (DEBUG) System.out.println("tops.toString() = " + tops.toString());
-            HashMap<String, Integer> cnt = cntPhrases(cntPredicates);
+            HashMap<String, Integer> cnt = GetTriplesFromKnowledgeStore.getTopicsAndLabelCountsFromKnowledgeStore(sparqlPhrases);
             simpleTaxonomy.cumulateScores("", tops, cnt);
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
             //@TODO add names to hierarchy types
-            simpleTaxonomy.jsonTopicTree(tree, "topic", "", tops, 1, euroVoc.uriLabelMap, cnt, cntPredicates);
+            simpleTaxonomy.jsonTopicTree(tree, "topic", "", tops, 1, euroVoc.uriLabelMap, cnt);
             if (DEBUG) {
                 OutputStream fos = new FileOutputStream("topics.debug.json");
                 fos.write(tree.toString(0).getBytes());

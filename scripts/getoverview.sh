@@ -14,7 +14,7 @@ KSPASS="wikinews"
 
 fnPath="$RESOURCES/frAllRelation.xml"
 esoPath="$RESOURCES/ESO_Version2.owl"
-euroVocLabelFile="$RESOURCES/mapping_eurovoc_skos.csv.gz"
+euroVocLabelFile="$RESOURCES/mapping_eurovoc_skos.label.concept.gz"
 euroVocHierarchyFile="$RESOURCES/eurovoc_in_skos_core_concepts.rdf.gz"
 entityTypeFile="$RESOURCES/instance_types_en.ttl.gz"
 entityHierarchyFile="$RESOURCES/DBpediaHierarchy_parent_child.tsv"
