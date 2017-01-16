@@ -48,7 +48,7 @@ public class JsonQueryHierarchy {
     static public void main (String[] args) {
         DEBUG = true;
         ALLEVENTYPES = true;
-        DATA = "topics";
+        DATA = "perspectives";
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.equals("--data") && args.length > (i + 1)) {

@@ -895,9 +895,9 @@ order by DESC(?count)
                 "    PREFIX gaf:   <http://groundedannotationframework.org/gaf#>\n" +
                 "    SELECT ?cite (COUNT (DISTINCT ?mention) as ?count)\n" +
                 "WHERE {\n" +
-                "    ?attribution grasp:attributedTo ?mention .\n" +
-                "    ?cite grasp:hasAttribution ?attribution .\n" +
-                "    FILTER NOT EXISTS {?cite prov:wasAttributedTo ?author}\n" +
+                "\n" +
+                "    ?attribution grasp:isAttributionFor ?mention .\n" +
+                "    ?attribution grasp:wasAttributedTo ?cited \n" +
                 "    }\n" +
                 "group by ?cite \n" +
                 "order by DESC(?count)";
@@ -924,7 +924,7 @@ order by DESC(?count)
      *
      * @return
      */
-    public static String makeSparqlQueryForAuthorsFromKs () {
+    public static String makeSparqlQueryForAuthorsFromKs_old () {
         String sparqQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/>\n" +
                 "    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
@@ -938,7 +938,7 @@ order by DESC(?count)
                 "\n" +
                 "     ?attribution grasp:attributedTo ?mention .\n" +
                 "     ?doc grasp:hasAttribution ?attribution .\n" +
-                "     ?doc prov:wasAttributedTo ?author\n" +
+                "     ?doc prov:wasAttributedTo ?a\n" +
                 "\n" +
                 "    }\n" +
                 "group by ?a \n" +
@@ -946,6 +946,45 @@ order by DESC(?count)
        // System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
     }
+
+
+   /* PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX grasp: <http://groundedannotationframework.org/grasp#>
+    PREFIX gaf:   <http://groundedannotationframework.org/gaf#>
+    SELECT ?author (COUNT (DISTINCT ?mention) as ?count)
+    WHERE {
+    ?attribution grasp:isAttributionFor ?mention .
+                ?attribution prov:wasAttributedTo ?doc .
+                ?doc prov:wasAttributedTo ?author
+
+    }
+    group by ?author
+    order by DESC(?count)*/
+   public static String makeSparqlQueryForAuthorsFromKs () {
+       String sparqQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/>\n" +
+               "    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+               "    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+               "    PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
+               "    PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> \n" +
+               "    PREFIX nwrcite: <http://www.newsreader-project.eu/provenance/cited/> \n" +
+               "    PREFIX grasp: <http://groundedannotationframework.org/grasp#>\n" +
+               "    PREFIX gaf:   <http://groundedannotationframework.org/gaf#>\n" +
+               "    SELECT ?a (COUNT (DISTINCT ?mention) as ?count)\n" +
+               "WHERE {\n" +
+               "\n" +
+              "                 ?attribution grasp:isAttributionFor ?mention .\n" +
+               "                ?attribution prov:wasAttributedTo ?doc .\n" +
+               "                ?doc prov:wasAttributedTo ?a\n" +
+               "\n" +
+               "    }\n" +
+               "group by ?a \n" +
+               "order by DESC(?count)";
+      // System.out.println("sparqQuery = " + sparqQuery);
+       return sparqQuery;
+   }
+
 
 
     /*
@@ -956,7 +995,7 @@ order by DESC(?count)
      PREFIX gaf:   <http://groundedannotationframework.org/gaf#>
      SELECT ?value (COUNT (DISTINCT ?mention) as ?count)
      WHERE {
-     ?attribution grasp:attributedTo ?mention .
+     ?attribution grasp:isAttributionFor ?mention .
      ?attribution rdf:value ?value
 
      }
@@ -975,12 +1014,12 @@ order by DESC(?count)
                 "    PREFIX gaf:   <http://groundedannotationframework.org/gaf#>\n" +
                 "    SELECT ?value (COUNT (DISTINCT ?mention) as ?count)\n" +
                 "     WHERE {\n" +
-                "     ?attribution grasp:attributedTo ?mention .\n" +
+                "     ?attribution grasp:isAttributionFor ?mention .\n" +
                 "     ?attribution rdf:value ?value\n" +
                 "     }\n" +
                 "     group by ?value\n"+
                 "order by DESC(?count)";
-         System.out.println("sparqQuery = " + sparqQuery);
+       //  System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
     }
 
