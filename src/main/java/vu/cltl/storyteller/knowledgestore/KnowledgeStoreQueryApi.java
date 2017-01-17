@@ -15,7 +15,7 @@ public class KnowledgeStoreQueryApi {
                                 "--eventPhrase", "kill", "--eventType", "eso:Killing", "--topic", "eurovoc:16789", "--grasp", "POSITIVE"};
         }
         query = createSparqlQuery(args);
-        System.out.print(query);
+        //System.out.print(query);
         //System.out.println("query = " + query);
         //System.out.println("log = " + log);
     }
@@ -37,7 +37,7 @@ public class KnowledgeStoreQueryApi {
         String yearEnd = "";
         String locationPhrase = "";
         String locationRegion = "";
-
+        log +="\n\n";
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.equalsIgnoreCase("--word") && args.length>(i+1)) {
@@ -94,7 +94,7 @@ public class KnowledgeStoreQueryApi {
                 log += " -- limit = " +KSLIMIT;
             }
         }
-
+        log += "\n";
 
         String sparql = SparqlGenerator.makeSparqlQueryInit();
 
@@ -271,7 +271,7 @@ public class KnowledgeStoreQueryApi {
                     ///upper case field
                     if (UNION) sparql += " UNION \n";
                     //sparql +=  "{ "+ SparqlGenerator.makeSubStringLabelUnionFilter("?value", field) +" }"+ "\n";
-                    sparql +=  "{ "+"?attribution rdf:value" + "grasp:"+field +" }"+ "\n";
+                    sparql +=  "{ "+"?attribution rdf:value" + " grasp:"+field +" }"+ "\n";
                     UNION = true;
                 }
             }

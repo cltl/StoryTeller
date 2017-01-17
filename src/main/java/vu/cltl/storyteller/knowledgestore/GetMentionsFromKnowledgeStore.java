@@ -391,7 +391,7 @@ public class GetMentionsFromKnowledgeStore {
                 e.printStackTrace();
             }
         }
-        log = " * Getting sourcedocuments for unique sources = " + sourceUriList.size()+"\n";
+        log = " * Getting source information for " + sourceUriList.size()+" unique documents\n";
         long startTime = System.currentTimeMillis();
         Authenticator.setDefault(new Authenticator() {
             @Override
@@ -509,7 +509,7 @@ public class GetMentionsFromKnowledgeStore {
             //break;
         }
         long estimatedTime = System.currentTimeMillis() - startTime;
-        log = " * Time elapsed to get text snippets from KS:"+estimatedTime/1000.0+"\n";
+        log = " * Time elapsed to get text snippets from KS:"+estimatedTime/1000.0+" seconds\n";
         return log;
     }
 

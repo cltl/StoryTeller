@@ -85,15 +85,15 @@ public class JsonMakeStoryFromTripleData {
                 String arg = args[i];
                 if (arg.equalsIgnoreCase("--ks-service") && args.length > (i + 1)) {
                     KSSERVICE = args[i + 1];
-                    log += " -- KS Service = " + KSSERVICE;
+                    log += " -- KS Service = " + KSSERVICE+"\n";
                 }
                 else if (arg.equalsIgnoreCase("--ks-user") && args.length > (i + 1)) {
                     KSuser = args[i + 1];
-                    log += " -- KS User = " + KSuser;
+                    log += " -- KS User = " + KSuser+"\n";
                 }
                 else if (arg.equalsIgnoreCase("--ks-passw") && args.length > (i + 1)) {
                     KSpass = args[i + 1];
-                    log += " -- KS Passw = " + KSpass;
+                    log += " -- KS Passw = " + KSpass+"\n";
                 }
                 else if (arg.equalsIgnoreCase("--token-index") && args.length > (i + 1)) {
                     pathToTokenIndexFile = args[i + 1];
@@ -102,18 +102,20 @@ public class JsonMakeStoryFromTripleData {
                 else if (arg.equalsIgnoreCase("--eurovoc") && args.length > (i + 1)) {
                     pathToEuroVocFile = args[i + 1];
                     log += " -- eurovoc = " + pathToEuroVocFile+"\n";
-                    log += euroVoc = new EuroVoc(); euroVoc.readEuroVoc(pathToEuroVocFile, "en");
+                    euroVoc = new EuroVoc();
+                    euroVoc.readEuroVoc(pathToEuroVocFile, "en");
                 }
                 else if (arg.equalsIgnoreCase("--eurovoc-blacklist") && args.length > (i + 1)) {
                     pathToEuroVocBlackListFile = args[i + 1];
                     log += " -- eurovoc-blacklist = " + pathToEuroVocBlackListFile+"\n";
-                    log += euroVocBlackList = new EuroVoc(); euroVoc.readEuroVoc(pathToEuroVocBlackListFile, "en");
+                    euroVocBlackList = new EuroVoc();
+                    euroVoc.readEuroVoc(pathToEuroVocBlackListFile, "en");
                 }
                 else if (arg.equalsIgnoreCase("--log")) {
                     LOG = true;
                 }
             }
-            log+='\n';
+            log+="\n";
             TrigTripleData trigTripleData = new TrigTripleData();
             if (!KSSERVICE.isEmpty()) {
                 if (KSuser.isEmpty()) {
@@ -128,6 +130,7 @@ public class JsonMakeStoryFromTripleData {
             long estimatedTime = System.currentTimeMillis() - startTime;
             log += " -- Time elapsed to get results from KS:" + estimatedTime / 1000.0+"\n";
             ArrayList<JSONObject> storyObjects = makeUpStory(trigTripleData, 1, 30, euroVoc, euroVocBlackList);
+            log += " -- Result: "+storyObjects.size()+" events.\n";
             if (storyObjects.size()>0) {
                 addPerspectiveToStory(storyObjects);
                 if (pathToTokenIndexFile.isEmpty()) {
@@ -138,12 +141,16 @@ public class JsonMakeStoryFromTripleData {
                 JSONObject story = writeStory(storyObjects);
                 System.out.print(story.toString(4));
             }
+            JSONObject story = writeStory(storyObjects);
+            System.out.print(story.toString(4));
+
         } catch (Exception e) {
             e.printStackTrace();
         }
         if (LOG) {
             try {
-                OutputStream logFos = new FileOutputStream("log", true);
+               // OutputStream logFos = new FileOutputStream("log", true);  /// append version
+                OutputStream logFos = new FileOutputStream("log");
                 logFos.write(log.getBytes());
                 logFos.close();
             } catch (IOException e) {
@@ -186,7 +193,7 @@ public class JsonMakeStoryFromTripleData {
             }
 
         } catch (JSONException e) {
-            e.printStackTrace();
+           // e.printStackTrace();
         }
         return jsonObjects;
     }
@@ -206,7 +213,7 @@ public class JsonMakeStoryFromTripleData {
      * @throws JSONException
      */
     static public void addSnippetsToStoryFromKnowledgeStore (ArrayList<JSONObject> jsonObjects, String KSSERVICE) throws JSONException {
-            log += GetMentionsFromKnowledgeStore.createSnippetIndexFromMentions(jsonObjects, KSSERVICE, KS, KSuser, KSpass);
+            log += GetMentionsFromKnowledgeStore.createSnippetIndexFromMentions(jsonObjects, KSSERVICE, KS, KSuser, KSpass)+"\n";
     }
 
     /**
@@ -219,7 +226,7 @@ public class JsonMakeStoryFromTripleData {
      * @throws JSONException
      */
     static public void addSnippetsToStoryFromKnowledgeStore (ArrayList<JSONObject> jsonObjects, String KSSERVICE, String KS, String KSuser, String KSpass) throws JSONException {
-            log += GetMentionsFromKnowledgeStore.createSnippetIndexFromMentions(jsonObjects, KSSERVICE, KS, KSuser, KSpass);
+            log += GetMentionsFromKnowledgeStore.createSnippetIndexFromMentions(jsonObjects, KSSERVICE, KS, KSuser, KSpass)+"\n";
     }
 
     /**
@@ -229,7 +236,7 @@ public class JsonMakeStoryFromTripleData {
      * @throws JSONException
      */
     static public void addSnippetsToStoryFromIndexFile (ArrayList<JSONObject> jsonObjects, String pathToTokenIndex) throws JSONException {
-            log += NafTokenLayerIndex.createSnippetIndexFromMentions(jsonObjects, pathToTokenIndex);
+            log += NafTokenLayerIndex.createSnippetIndexFromMentions(jsonObjects, pathToTokenIndex)+"\n";
     }
 
     /**

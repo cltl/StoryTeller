@@ -1216,7 +1216,7 @@ public class JsonStoryUtil {
                     }
                 }
             } catch (JSONException e) {
-                 e.printStackTrace();
+               //  e.printStackTrace();
             }
         }
         return actorNames.size();
@@ -1244,11 +1244,11 @@ public class JsonStoryUtil {
                             }
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                      //  e.printStackTrace();
                     }
                 }
             } catch (JSONException e) {
-                 e.printStackTrace();
+               //  e.printStackTrace();
             }
             if (nActorObject.length()>0) {
                 oEvent.remove("actors");
@@ -1257,7 +1257,7 @@ public class JsonStoryUtil {
                     // System.out.println("nActorObject.toString() = " + nActorObject.toString());
                     oEvent.put("actors", nActorObject);
                 } catch (JSONException e) {
-                    e.printStackTrace();
+                 //   e.printStackTrace();
                 }
             }
         }
@@ -1288,7 +1288,7 @@ public class JsonStoryUtil {
                             }
                         }
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                      //  e.printStackTrace();
                     }
                 }
             } catch (JSONException e) {
@@ -1674,20 +1674,24 @@ public class JsonStoryUtil {
 
     static String getfirstActorByRoleFromEvent (JSONObject event, String role) throws JSONException {
         String actor = "";
-        JSONObject actorObject = event.getJSONObject("actors");
-        Iterator keys = actorObject.sortedKeys();
-        while (keys.hasNext()) {
-            String key = keys.next().toString(); //role
-            //  System.out.println("key = " + key);
-            if (key.equalsIgnoreCase(role)) {
-                JSONArray actors = actorObject.getJSONArray(key);
-                for (int j = 0; j < actors.length(); j++) {
-                    String nextActor = actors.getString(j);
-                    nextActor = nextActor.substring(nextActor.lastIndexOf("/")+1);
-                    actor += ":" + nextActor;
-                    break;
+        try {
+            JSONObject actorObject = event.getJSONObject("actors");
+            Iterator keys = actorObject.sortedKeys();
+            while (keys.hasNext()) {
+                String key = keys.next().toString(); //role
+                //  System.out.println("key = " + key);
+                if (key.equalsIgnoreCase(role)) {
+                    JSONArray actors = actorObject.getJSONArray(key);
+                    for (int j = 0; j < actors.length(); j++) {
+                        String nextActor = actors.getString(j);
+                        nextActor = nextActor.substring(nextActor.lastIndexOf("/")+1);
+                        actor += ":" + nextActor;
+                        break;
+                    }
                 }
             }
+        } catch (JSONException e) {
+           // e.printStackTrace();
         }
         return actor;
     }
@@ -3110,43 +3114,53 @@ public class JsonStoryUtil {
                                                                         JSONObject event, int intersection)
             throws JSONException {
         ArrayList<JSONObject> coPartipantEvents = new ArrayList<JSONObject>();
-        JSONObject actorObject = event.getJSONObject("actors");
-        Iterator keys = actorObject.sortedKeys();
-        while (keys.hasNext()) {
-            String key = keys.next().toString(); //role
-            if (key.toLowerCase().startsWith("pb/")
-                    || key.toLowerCase().startsWith("fn/")
-                    || key.toLowerCase().startsWith("eso/")
-                    ) {
-                JSONArray actors = actorObject.getJSONArray(key);
-                for (int i = 0; i < events.size(); i++) {
-                    JSONObject oEvent = events.get(i);
-                    if (!oEvent.get("instance").toString().equals(event.get("instance").toString())) {
-                        ///skip event itself
-                        JSONObject oActorObject = oEvent.getJSONObject("actors");
-                        Iterator oKeys = oActorObject.sortedKeys();
-                        int cnt = 0;
-                        while (oKeys.hasNext()) {
-                            String oKey = oKeys.next().toString();
-                            if (oKey.toLowerCase().startsWith("pb/")
-                                    || oKey.toLowerCase().startsWith("fn/")
-                                    || oKey.toLowerCase().startsWith("eso/")
-                                    ) {
-                                JSONArray oActors = oActorObject.getJSONArray(oKey);
-                                //  System.out.println("oActors.length() = " + oActors.length());
-                                // System.out.println("oActors.toString() = " + oActors.toString());
-                                if (countIntersectingDBpActor(actors,oActors)>=intersection) {
-                                    cnt++;
-                                    if (!coPartipantEvents.contains(oEvent)) {
-                                        coPartipantEvents.add(oEvent);
+        JSONObject actorObject = null;
+        try {
+            actorObject = event.getJSONObject("actors");
+            Iterator keys = actorObject.sortedKeys();
+            while (keys.hasNext()) {
+                String key = keys.next().toString(); //role
+                if (key.toLowerCase().startsWith("pb/")
+                        || key.toLowerCase().startsWith("fn/")
+                        || key.toLowerCase().startsWith("eso/")
+                        ) {
+                    JSONArray actors = actorObject.getJSONArray(key);
+                    for (int i = 0; i < events.size(); i++) {
+                        JSONObject oEvent = events.get(i);
+                        if (!oEvent.get("instance").toString().equals(event.get("instance").toString())) {
+                            ///skip event itself
+                            JSONObject oActorObject = null;
+                            try {
+                                oActorObject = oEvent.getJSONObject("actors");
+                                Iterator oKeys = oActorObject.sortedKeys();
+                                int cnt = 0;
+                                while (oKeys.hasNext()) {
+                                    String oKey = oKeys.next().toString();
+                                    if (oKey.toLowerCase().startsWith("pb/")
+                                            || oKey.toLowerCase().startsWith("fn/")
+                                            || oKey.toLowerCase().startsWith("eso/")
+                                            ) {
+                                        JSONArray oActors = oActorObject.getJSONArray(oKey);
+                                        //  System.out.println("oActors.length() = " + oActors.length());
+                                        // System.out.println("oActors.toString() = " + oActors.toString());
+                                        if (countIntersectingDBpActor(actors,oActors)>=intersection) {
+                                            cnt++;
+                                            if (!coPartipantEvents.contains(oEvent)) {
+                                                coPartipantEvents.add(oEvent);
+                                            }
+                                            break;
+                                        }
                                     }
-                                    break;
                                 }
+                            } catch (JSONException e) {
+                               // e.printStackTrace();
                             }
                         }
                     }
                 }
             }
+        } catch (JSONException e) {
+           // e.printStackTrace();
         }
         return coPartipantEvents;
     }
