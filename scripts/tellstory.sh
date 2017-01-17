@@ -65,7 +65,7 @@ QUERY="--entityType dbp:Person;dbp:Company --entityInstance dbpedia:Pakistan;dbp
 java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonMakeStoryFromTripleData  $QUERY --ks-limit $LIMIT --ks-service $SERVER --log --token-index token.index.gz --eurovoc $RESOURCES/mapping_eurovoc_skos.label.concept.gz > eventType.mixedEntitiesEvents.json
 
 # Events from documents with UNION of topics
-QUERY="--topic http://eurovoc.europa.eu/219382;http://eurovoc.europa.eu/215505"
+QUERY="--topic http://eurovoc.europa.eu/1854;http://eurovoc.europa.eu/2560"
 java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonMakeStoryFromTripleData  $QUERY --ks-limit $LIMIT --ks-service $SERVER --log --token-index token.index.gz --eurovoc $RESOURCES/mapping_eurovoc_skos.label.concept.gz > topic.json
 
 # Events attributed to UNION of authors
@@ -80,22 +80,26 @@ java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.sto
 QUERY="--grasp negative;positive"
 java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonMakeStoryFromTripleData  $QUERY --ks-limit $LIMIT --ks-service $SERVER --log --token-index token.index.gz --eurovoc $RESOURCES/mapping_eurovoc_skos.label.concept.gz > grasp.negativeORpositive.json
 
-# Events with a time perspective of the source
-QUERY="--grasp FUTURE;RECENT;PAST"
-java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonMakeStoryFromTripleData  $QUERY --ks-limit $LIMIT --ks-service $SERVER --log --token-index token.index.gz --eurovoc $RESOURCES/mapping_eurovoc_skos.label.concept.gz > grasp.time.json
+# Events with a FUTURE time perspective of the source
+QUERY="--grasp FUTURE"
+java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonMakeStoryFromTripleData  $QUERY --ks-limit $LIMIT --ks-service $SERVER --log --token-index token.index.gz --eurovoc $RESOURCES/mapping_eurovoc_skos.label.concept.gz > grasp.time.future.json
+
+# Events with a PAST time perspective of the source
+QUERY="--grasp PAST"
+java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonMakeStoryFromTripleData  $QUERY --ks-limit $LIMIT --ks-service $SERVER --log --token-index token.index.gz --eurovoc $RESOURCES/mapping_eurovoc_skos.label.concept.gz > grasp.time.past.json
 
 # Events with an uncertain perspective from the source
 QUERY="--grasp UNCERTAIN"
 java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonMakeStoryFromTripleData  $QUERY --ks-limit $LIMIT --ks-service $SERVER --log --token-index token.index.gz --eurovoc $RESOURCES/mapping_eurovoc_skos.label.concept.gz > grasp.uncertain.json
 
 # Events with an denied perspective from the source
-QUERY="--grasp DENIAL"
+QUERY="--grasp NEG"
 java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonMakeStoryFromTripleData  $QUERY --ks-limit $LIMIT --ks-service $SERVER --log --token-index token.index.gz --eurovoc $RESOURCES/mapping_eurovoc_skos.label.concept.gz > grasp.denial.json
 
 # Events with any non-default perspective: UNION of values
-QUERY="--grasp negative;positive;UNCERTAIN;FUTURE;RECENT;PAST;DENIAL"
-java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonMakeStoryFromTripleData  $QUERY --ks-limit $LIMIT --ks-service $SERVER --log --token-index token.index.gz --eurovoc $RESOURCES/mapping_eurovoc_skos.label.concept.gz > grasp.json
+QUERY="--grasp negative;positive;UNCERTAIN;FUTURE;RECENT;PAST;NEG"
+java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonMakeStoryFromTripleData  $QUERY --ks-limit $LIMIT --ks-service $SERVER --log --token-index token.index.gz --eurovoc $RESOURCES/mapping_eurovoc_skos.label.concept.gz > grasp.non-default.json
 
 # Events with non-default perspective with certain participants and of certain event types
-QUERY="--grasp negative;positive;UNCERTAIN;FUTURE;RECENT;PAST;DENIAL --entityPhrase disease --eventType eso:Decreasing;eso:Increasing"
-java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonMakeStoryFromTripleData  $QUERY --ks-limit $LIMIT --ks-service $SERVER --log --token-index token.index.gz --eurovoc $RESOURCES/mapping_eurovoc_skos.label.concept.gz > grasp.entity.event.json
+QUERY="--grasp negative;positive;UNCERTAIN;FUTURE;PAST;NEG --entityPhrase health --eventType eso:Decreasing;eso:Increasing"
+java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonMakeStoryFromTripleData  $QUERY --ks-limit $LIMIT --ks-service $SERVER --log --token-index token.index.gz --eurovoc $RESOURCES/mapping_eurovoc_skos.label.concept.gz > grasp.entity.event.perspective.json

@@ -46,6 +46,56 @@ public class SparqlGenerator {
      PREFIX owltime: <http://www.w3.org/TR/owl-time#>
      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+     SELECT distinct ?event ?mention ?attribution ?author ?cite ?label ?comment WHERE { VALUES ?event {
+     <http://www.cidrap.umn.edu/news-perspective/2016/10/news-scan-oct-10-2016#ev121>
+     <https://web.archive.org/web/20161107200904/http://www.reuters.com/article/us-measles-disneyland-idUSKBN0MC1OJ20150316#ev51>
+     <https://web.archive.org/web/20150818195231/http://www.nydailynews.com/life-style/health/disneyland-measles-outbreak-linked-vaccine-rate-article-1.2151859#ev58>
+     <https://web.archive.org/web/20160729045546/http://www.pbs.org/newshour/updates/whos-risk-measles-maybe-think/#ev70>
+     <https://web.archive.org/web/20150905085927/http://www.naturalnews.com/048383_measles_outbreak_Disneyland_vaccine_inserts.html#ev170>
+     <https://web.archive.org/web/20150723165753/http://nymag.com/daily/intelligencer/2015/01/anti-vaccinators-react-to-measles-outbreak.html#ev159>
+     <https://web.archive.org/web/20150810135938/http://www.wired.com/2015/01/vaccinated-people-get-measles-disneyland-blame-unvaccinated/#ev93>
+     <https://web.archive.org/web/20161107195115/http://insideupmc.upmc.com/disney-measles-outbreak-a-consequence-of-low-vaccination-rates-easy-travel/#ev66>
+     <https://web.archive.org/web/20161018172826/http://www.usnews.com/news/blogs/data-mine/2015/01/26/whats-really-behind-the-measles-outbreak#ev132>
+     }
+     ?event <http://groundedannotationframework.org/gaf#denotedBy> ?mention .
+     ?attr <http://groundedannotationframework.org/grasp#isAttributionFor> ?mention .
+     ?attr rdf:value  ?attribution .
+     OPTIONAL { ?attr <http://groundedannotationframework.org/grasp#wasAttributedTo> ?cite }
+     OPTIONAL { ?attr <http://www.w3.org/ns/prov#wasAttributedTo> ?doc . ?doc <http://www.w3.org/ns/prov#wasAttributedTo> ?author}
+     }
+     * @param uris
+     * @return
+     */
+    static public String makeAttributionQuery(ArrayList<String> uris) {
+        String sparqlQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
+                "PREFIX owltime: <http://www.w3.org/TR/owl-time#> \n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+                "SELECT distinct ?event ?mention ?attribution ?author ?cite ?label ?comment WHERE { VALUES ?event {\n";
+        for (int i = 0; i < uris.size(); i++) {
+            String u = uris.get(i);
+            if (!u.startsWith("<")) u = "<"+u+">";
+            sparqlQuery += u+"\n";
+        }
+            sparqlQuery+= "}\n"+
+                "    ?event <http://groundedannotationframework.org/gaf#denotedBy> ?mention .\n" +
+                "     ?attr <http://groundedannotationframework.org/grasp#isAttributionFor> ?mention .\n" +
+                "     ?attr rdf:value  ?attribution .\n" +
+                "     OPTIONAL { ?attr <http://groundedannotationframework.org/grasp#wasAttributedTo> ?cite }\n" +
+                "     OPTIONAL { ?attr <http://www.w3.org/ns/prov#wasAttributedTo> ?doc . ?doc <http://www.w3.org/ns/prov#wasAttributedTo> ?author}\n" +
+                "}";
+        //System.out.println("sparqlQuery = " + sparqlQuery);
+        return sparqlQuery;
+    }
+
+    /**
+     * Creates a SPARQL query for a list of event URIs to get a table with:
+     * ?event ?mention ?attribution ?author ?cite ?label ?comment"
+     *
+     PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/>
+     PREFIX owltime: <http://www.w3.org/TR/owl-time#>
+     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
      SELECT distinct ?event ?mention ?attribution ?author ?cite ?label ?comment WHERE { VALUES ?event {<http://www.ft.com/thing/b0d8195c-eb8d-11e5-888e-2eadd5fbc4a4#ev101> <http://www.ft.com/thing/bb5a999a-c67b-11e5-808f-8231cd71622e#ev129> <http://www.ft.com/thing/e5c73d14-92cd-11e5-94e6-c5413829caa5#ev57>}
      ?event <http://groundedannotationframework.org/gaf#denotedBy> ?mention
      OPTIONAL { ?mention rdfs:label ?label}
@@ -75,7 +125,7 @@ public class SparqlGenerator {
      * @param uris
      * @return
      */
-    static public String makeAttributionQuery(ArrayList<String> uris) {
+    static public String makeAttributionQueryOrg(ArrayList<String> uris) {
         String sparqlQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
                 "PREFIX owltime: <http://www.w3.org/TR/owl-time#> \n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
@@ -93,7 +143,7 @@ public class SparqlGenerator {
                 "     OPTIONAL { ?mention <http://groundedannotationframework.org/grasp#hasAttribution> [<http://groundedannotationframework.org/grasp#wasAttributedTo> ?cite]}\n" +
                 "     OPTIONAL { ?mention <http://groundedannotationframework.org/grasp#hasAttribution> [<http://www.w3.org/ns/prov#wasAttributedTo>  [<http://www.w3.org/ns/prov#wasAttributedTo> ?author]]}\n" +
                 "}";
-        //System.out.println("sparqlQuery = " + sparqlQuery);
+        System.out.println("sparqlQuery = " + sparqlQuery);
         return sparqlQuery;
     }
 

@@ -136,7 +136,7 @@ public class GetTriplesFromKnowledgeStore {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+           // e.printStackTrace();
         }
         Set keySet = perspectiveMap.keySet();
         Iterator<String> keys = keySet.iterator();
@@ -147,7 +147,7 @@ public class GetTriplesFromKnowledgeStore {
                 JSONObject perspectiveEvent = JsonStoryUtil.createSourcePerspectiveEvent(perspectiveJsonObject);
                 pEvents.add(perspectiveEvent);
             } catch (JSONException e) {
-                e.printStackTrace();
+               // e.printStackTrace();
             }
         }
         long estimatedTime = System.currentTimeMillis() - startTime;
@@ -156,6 +156,25 @@ public class GetTriplesFromKnowledgeStore {
         return pEvents;
     }
 
+    static void addPerspective(ArrayList<PerspectiveJsonObject> objects, PerspectiveJsonObject object) {
+        boolean MERGE = false;
+        for (int i = 0; i < objects.size(); i++) {
+            PerspectiveJsonObject perspectiveJsonObject = objects.get(i);
+            if (object.getCite().isEmpty()) {
+                if (object.getAuthor().equals(perspectiveJsonObject.getAuthor())) {
+                    perspectiveJsonObject.addAttribution(object.getAttribution());
+                    MERGE = true;
+                    break;
+                }
+            }
+            else if (object.getCite().equals(perspectiveJsonObject.getCite())) {
+                perspectiveJsonObject.addAttribution(object.getAttribution());
+                MERGE = true;
+                break;
+            }
+        }
+        if (!MERGE) objects.add(object);
+    }
 
     public static void integrateAttributionFromKs(ArrayList<JSONObject> targetEvents){
         long startTime = System.currentTimeMillis();
@@ -167,16 +186,16 @@ public class GetTriplesFromKnowledgeStore {
             JSONObject targetEvent = targetEvents.get(i);
             try {
                 String eventUri = targetEvent.getString("instance");
+                //if (!eventUri.startsWith("<")) eventUri = "<"+eventUri+">";
                 eventMap.put(eventUri, targetEvent);
-                if (!eventUri.startsWith("<")) eventUri = "<"+eventUri+">";
                 uris.add(eventUri);
             }
             catch (Exception e) {
-                e.printStackTrace();
+              //  e.printStackTrace();
             }
         }
         String sparqlQuery = SparqlGenerator.makeAttributionQuery(uris);
-       // System.out.println("sparqlQuery = " + sparqlQuery);
+        //System.out.println("sparqlQuery = " + sparqlQuery);
         HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
         try {
             QueryExecution x = QueryExecutionFactory.sparqlService(serviceEndpoint, sparqlQuery, authenticator);
@@ -191,6 +210,156 @@ public class GetTriplesFromKnowledgeStore {
                 String label = "";
                 String comment = "";
                 try { event = solution.get("event").toString(); } catch (Exception e) { }
+                //try { event = "<"+solution.get("event").toString()+">"; } catch (Exception e) { }
+                try { mention = "<"+solution.get("mention").toString()+">"; } catch (Exception e) { }
+                try { attribution = solution.get("attribution").toString(); } catch (Exception e) { }
+                try { cite = solution.get("cite").toString(); } catch (Exception e) { }
+                try { author = solution.get("author").toString(); } catch (Exception e) { }
+                try { label = solution.get("label").toString(); } catch (Exception e) { }
+                try { comment = solution.get("comment").toString(); } catch (Exception e) { }
+
+                if (author.isEmpty() && cite.isEmpty()) {
+                    author = "unknown";
+                }
+                //ArrayList<String> perspectives = PerspectiveJsonObject.normalizePerspectiveValue(attribution);
+                ArrayList<String> perspectives = new ArrayList<String>();
+                if (!attribution.isEmpty()) {
+                    int idx = attribution.lastIndexOf("#"); //http://groundedannotationframework.org/grasp#pos
+                    if (idx>-1) attribution = attribution.substring(idx+1);
+                    perspectives.add(attribution.toLowerCase());
+                    //System.out.println("attribution = " + attribution);
+                    JSONObject targetEvent = eventMap.get(event);
+                    if (targetEvent != null) {
+                        PerspectiveJsonObject perspectiveJsonObject = new PerspectiveJsonObject(perspectives, author, cite, comment, event, label, mention, targetEvent);
+                        if (perspectiveMap.containsKey(mention)) {
+                            ArrayList<PerspectiveJsonObject> perspectiveJsonObjects = perspectiveMap.get(mention);
+                            addPerspective(perspectiveJsonObjects, perspectiveJsonObject);
+                            perspectiveMap.put(mention, perspectiveJsonObjects);
+                        }
+                        else {
+                            ArrayList<PerspectiveJsonObject> perspectiveJsonObjects = new ArrayList<PerspectiveJsonObject>();
+                            perspectiveJsonObjects.add(perspectiveJsonObject);
+                            perspectiveMap.put(mention, perspectiveJsonObjects);
+                        }
+                    } else {
+                       // System.out.println("Error: mention without target event = " + event);
+                    }
+                }
+                else {
+                  //  System.out.println("No perspectives for this event.");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        for (int i = 0; i < targetEvents.size(); i++) {
+            JSONObject mEvent = targetEvents.get(i);
+            JSONArray mMentions = null;
+            try {
+                mMentions = (JSONArray) mEvent.get("mentions");
+            } catch (JSONException e) {
+               // e.printStackTrace();
+            }
+            if (mMentions!=null) {
+                for (int m = 0; m < mMentions.length(); m++) {
+                    try {
+                        JSONObject mentionObject = (JSONObject) mMentions.get(m);
+                        String uriString = mentionObject.getString("uri");
+                        JSONArray offsetArray = mentionObject.getJSONArray("char");
+                        String mention = JsonStoryUtil.getURIforMention(uriString, offsetArray);
+                        //System.out.println("mention = " + mention);
+                        if (perspectiveMap.containsKey(mention)) {
+                            ArrayList<PerspectiveJsonObject> perspectiveJsonObjects = perspectiveMap.get(mention);
+                            for (int j = 0; j < perspectiveJsonObjects.size(); j++) {
+                                PerspectiveJsonObject perspectiveJsonObject = perspectiveJsonObjects.get(j);
+                                if (!perspectiveJsonObject.getAttribution().isEmpty()) {
+                                    JsonStoryUtil.addPerspectiveToMention(mentionObject, perspectiveJsonObject);
+                                }
+                            }
+                            /*ArrayList<PerspectiveJsonObject> nonDefaultPerspectives = PerspectiveJsonObject.keepNonDefaultPerspectives(perspectiveJsonObjects);
+                            if (nonDefaultPerspectives.size()>0) {
+                                for (int j = 0; j < nonDefaultPerspectives.size(); j++) {
+                                    PerspectiveJsonObject perspectiveJsonObject = nonDefaultPerspectives.get(j);
+                                    JsonStoryUtil.addPerspectiveToMention(mentionObject, perspectiveJsonObject);
+                                }
+                            }
+                            else {
+                                for (int j = 0; j < perspectiveJsonObjects.size(); j++) {
+                                    PerspectiveJsonObject perspectiveJsonObject = perspectiveJsonObjects.get(j);
+                                    JsonStoryUtil.addPerspectiveToMention(mentionObject, perspectiveJsonObject);
+                                }
+                            }*/
+                        }
+                        else {
+/*
+                            PerspectiveJsonObject dymmyPerspective = new PerspectiveJsonObject();
+                            JsonStoryUtil.addPerspectiveToMention(mentionObject, dymmyPerspective);
+*/
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            else {
+                /*try {
+                    System.out.println("No mentions for target = "+mEvent.getString("instance"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }*/
+            }
+        }
+        long estimatedTime = System.currentTimeMillis() - startTime;
+       // System.out.println(" -- Time elapsed adding perspective :"+estimatedTime/1000.0);
+    }
+
+
+    public static void integrateAttributionFromKsOrg(ArrayList<JSONObject> targetEvents){
+        long startTime = System.currentTimeMillis();
+        HashMap<String, ArrayList<PerspectiveJsonObject>> perspectiveMap = new HashMap<String, ArrayList<PerspectiveJsonObject>>();
+
+        ArrayList<String> uris = new ArrayList<String>();
+        HashMap<String, JSONObject> eventMap = new HashMap<String, JSONObject>();
+        for (int i = 0; i < targetEvents.size(); i++) {
+            JSONObject targetEvent = targetEvents.get(i);
+            try {
+                String eventUri = targetEvent.getString("instance");
+                eventMap.put(eventUri, targetEvent);
+                if (!eventUri.startsWith("<")) eventUri = "<"+eventUri+">";
+                uris.add(eventUri);
+            }
+            catch (Exception e) {
+                //  e.printStackTrace();
+            }
+        }
+        String sparqlQuery = SparqlGenerator.makeAttributionQuery(uris);
+        //System.out.println("sparqlQuery = " + sparqlQuery);
+        HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
+        try {
+            QueryExecution x = QueryExecutionFactory.sparqlService(serviceEndpoint, sparqlQuery, authenticator);
+            ResultSet resultset = x.execSelect();
+            while (resultset.hasNext()) {
+
+                /*
+                ?event	?mention	?attribution	?author	?cite	?label	?comment
+<https://web.archive.org/web/20150818195231/http://www.nydailynews.com/life-style/health/disneyland-measles-outbreak-linked-vaccine-rate-article-1.2151859#ev58>	<https://web.archive.org/web/20150818195231/http://www.nydailynews.com/life-style/health/disneyland-measles-outbreak-linked-vaccine-rate-article-1.2151859#char=1392,1397>	<http://groundedannotationframework.org/grasp#CERTAIN>	<http://www.newsreader-project.eu/provenance/author/NY+Daily+News___unknown>
+<https://web.archive.org/web/20150818195231/http://www.nydailynews.com/life-style/health/disneyland-measles-outbreak-linked-vaccine-rate-article-1.2151859#ev58>	<https://web.archive.org/web/20150818195231/http://www.nydailynews.com/life-style/health/disneyland-measles-outbreak-linked-vaccine-rate-article-1.2151859#char=1392,1397>	<http://groundedannotationframework.org/grasp#NONFUTURE>	<http://www.newsreader-project.eu/provenance/author/NY+Daily+News___unknown>
+<https://web.archive.org/web/20150818195231/http://www.nydailynews.com/life-style/health/disneyland-measles-outbreak-linked-vaccine-rate-article-1.2151859#ev58>	<https://web.archive.org/web/20150818195231/http://www.nydailynews.com/life-style/health/disneyland-measles-outbreak-linked-vaccine-rate-article-1.2151859#char=1392,1397>	<http://groundedannotationframework.org/grasp#POS>	<http://www.newsreader-project.eu/provenance/author/NY+Daily+News___unknown>
+<https://web.archive.org/web/20161018172826/http://www.usnews.com/news/blogs/data-mine/2015/01/26/whats-really-behind-the-measles-outbreak#ev132>	<https://web.archive.org/web/20161018172826/http://www.usnews.com/news/blogs/data-mine/2015/01/26/whats-really-behind-the-measles-outbreak#char=1100,1105>	<http://groundedannotationframework.org/grasp#CERTAIN>	<http://www.newsreader-project.eu/provenance/author/U.S.+News___Kimberley+Leonard>
+<https://web.archive.org/web/20161018172826/http://www.usnews.com/news/blogs/data-mine/2015/01/26/whats-really-behind-the-measles-outbreak#ev132>	<https://web.archive.org/web/20161018172826/http://www.usnews.com/news/blogs/data-mine/2015/01/26/whats-really-behind-the-measles-outbreak#char=1100,1105>	<http://groundedannotationframework.org/grasp#NONFUTURE>	<http://www.newsreader-project.eu/provenance/author/U.S.+News___Kimberley+Leonard>
+<https://web.archive.org/web/20161018172826/http://www.usnews.com/news/blogs/data-mine/2015/01/26/whats-really-behind-the-measles-outbreak#ev132>	<https://web.archive.org/web/20161018172826/http://www.usnews.com/news/blogs/data-mine/2015/01/26/whats-really-behind-the-measles-outbreak#char=1100,1105>	<http://groundedannotationframework.org/grasp#POS>	<http://www.newsreader-project.eu/provenance/author/U.S.+News___Kimberley+Leonard>
+<https://web.archive.org/web/20161107195115/http://insideupmc.upmc.com/disney-measles-outbreak-a-consequence-of-low-vaccination-rates-easy-travel/#ev66>	<https://web.archive.org/web/20161107195115/http://insideupmc.upmc.com/disney-measles-outbreak-a-consequence-of-low-vaccination-rates-easy-travel/#char=1309,1314>	<http://groundedannotationframework.org/grasp#CERTAIN>	<http://www.newsreader-project.eu/provenance/author/UPMC+and+the+University+of+Pittsburgh+Schools+of+the+Health+Sciences___Allison+Hydzik>
+<https://web.archive.org/web/20161107195115/http://insideupmc.upmc.com/disney-measles-outbreak-a-consequence-of-low-vaccination-rates-easy-travel/#ev66>	<https://web.archive.org/web/20161107195115/http://insideupmc.upmc.com/disney-measles-outbreak-a-consequence-of-low-vaccination-rates-easy-travel/#char=1309,1314>	<http://groundedannotationframework.org/grasp#NONFUTURE>	<http://www.newsreader-project.eu/provenance/author/UPMC+and+the+University+of+Pittsburgh+Schools+of+the+Health+Sciences___Allison+Hydzik>
+                 */
+                QuerySolution solution = resultset.nextSolution();
+                String event = "";
+                String mention = "";
+                String attribution = "";
+                String cite = "";
+                String author = "";
+                String label = "";
+                String comment = "";
+                try { event = "<"+solution.get("event").toString()+">"; } catch (Exception e) { }
                 try { mention = "<"+solution.get("mention").toString()+">"; } catch (Exception e) { }
                 try { attribution = solution.get("attribution").toString(); } catch (Exception e) { }
                 try { cite = solution.get("cite").toString(); } catch (Exception e) { }
@@ -218,11 +387,11 @@ public class GetTriplesFromKnowledgeStore {
                         }
 
                     } else {
-                      //  System.out.println("Error: mention without target event = " + mention);
+                          System.out.println("Error: mention without target event = " + mention);
                     }
                 }
                 else {
-                  //  System.out.println("No perspectives for this event.");
+                    //  System.out.println("No perspectives for this event.");
                 }
             }
         } catch (Exception e) {
@@ -234,7 +403,7 @@ public class GetTriplesFromKnowledgeStore {
             try {
                 mMentions = (JSONArray) mEvent.get("mentions");
             } catch (JSONException e) {
-               // e.printStackTrace();
+                // e.printStackTrace();
             }
             if (mMentions!=null) {
                 for (int m = 0; m < mMentions.length(); m++) {
@@ -277,7 +446,7 @@ public class GetTriplesFromKnowledgeStore {
             }
         }
         long estimatedTime = System.currentTimeMillis() - startTime;
-       // System.out.println(" -- Time elapsed adding perspective :"+estimatedTime/1000.0);
+        // System.out.println(" -- Time elapsed adding perspective :"+estimatedTime/1000.0);
     }
 
     public static ArrayList<String> readEventIdsFromKs(String sparqlQuery)throws Exception {

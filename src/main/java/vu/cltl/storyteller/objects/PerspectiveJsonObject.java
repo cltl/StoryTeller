@@ -65,9 +65,8 @@ public class PerspectiveJsonObject {
 
     public void addAttribution(ArrayList<String> attributions) {
         for (int i = 0; i < attributions.size(); i++) {
-            String a =  attributions.get(i).toLowerCase();
+            String a =  attributions.get(i);
             this.addAttribution(a);
-
         }
     }
 
@@ -152,43 +151,56 @@ public class PerspectiveJsonObject {
 
     public JSONObject getJSONObject () throws JSONException {
         JSONObject object = new JSONObject();
+       // System.out.println("attribution = " + attribution.toString());
         if (attribution.contains("certain")) {
             object.put("certainty", "certain");
         }
         else if (attribution.contains("uncertain")) {
             object.put("certainty", "uncertain");
-        }
+        }/*
         else {
             object.put("certainty", "certain");
-        }
+        }*/
 
         if (attribution.contains("unlikely")) {
             object.put("possibility", "unlikely");
         }
         else if (attribution.contains("likely")) {
             object.put("possibility", "likely");
-        }
+        }/*
         else {
             object.put("possibility", "likely");
-        }
+        }*/
 
-        if (attribution.contains("denial")) {
-            object.put("belief", "deny");
+        if (attribution.contains("deny")) {
+            object.put("belief", "neg");
         }
-        else if (attribution.contains("deny")) {
-            object.put("belief", "deny");
+        else if (attribution.contains("denial")) {
+            object.put("belief", "neg");
+        }
+        else if (attribution.contains("neg")) {
+            object.put("belief", "neg");
+        }
+        else if (attribution.contains("pos")) {
+            object.put("belief", "pos");
         }
         else if (attribution.contains("confirm")) {
-            object.put("belief", "confirm");
+            object.put("belief", "pos");
         }
 
         if (attribution.contains("positive")) {
             object.put("sentiment", "positive");
         }
+        else if (attribution.contains("+")) {
+            object.put("sentiment", "positive");
+        }
         else if (attribution.contains("negative")) {
             object.put("sentiment", "negative");
         }
-        else {
+        else if (attribution.contains("-")) {
+            object.put("sentiment", "negative");
+        }
+        else if (attribution.contains("neutral")) {
             object.put("sentiment", "neutral");
         }
 
@@ -201,18 +213,24 @@ public class PerspectiveJsonObject {
         else if (attribution.contains("past")) {
             object.put("when", "past");
         }
+        else if (attribution.contains("nonfuture")) {
+            object.put("when", "nonfuture");
+        }/*
         else {
             object.put("when", "recent");
-        }
+        }*/
         return object;
     }
 
     public void setDefaultPerspectiveValue () {
         attribution.add("certain");
-        attribution.add("confirm");
+        attribution.add("pos");
         attribution.add("recent");
     }
 
+    /*
+     @Deprecated
+     */
     static public ArrayList<String> normalizePerspectiveValue (String value) {
         ArrayList<String> normValues = new ArrayList<String>();
         String normValue = "";
@@ -224,12 +242,12 @@ public class PerspectiveJsonObject {
 */
 
         //System.out.println("value = " + value);
-        if (value.toLowerCase().equals("u_u_u") || (value.equals("u_u_u_u"))) {
+        if (value.equalsIgnoreCase("u_u_u") || (value.equalsIgnoreCase("u_u_u_u"))) {
             normValues.add("certain");
             normValues.add("confirm");
             normValues.add("recent");
         }
-        else if (value.toLowerCase().indexOf("negative")>-1) {
+        else if (value.equalsIgnoreCase("negative")) {
             // normValue="-";
             // normValue=":(";
             normValue="negative";

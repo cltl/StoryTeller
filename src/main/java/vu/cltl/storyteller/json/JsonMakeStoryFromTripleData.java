@@ -138,8 +138,8 @@ public class JsonMakeStoryFromTripleData {
                 } else {
                     addSnippetsToStoryFromIndexFile(storyObjects, pathToTokenIndexFile);
                 }
-                JSONObject story = writeStory(storyObjects);
-                System.out.print(story.toString(4));
+               /* JSONObject story = writeStory(storyObjects);
+                System.out.print(story.toString(4));*/
             }
             JSONObject story = writeStory(storyObjects);
             System.out.print(story.toString(4));
@@ -149,8 +149,8 @@ public class JsonMakeStoryFromTripleData {
         }
         if (LOG) {
             try {
-               // OutputStream logFos = new FileOutputStream("log", true);  /// append version
-                OutputStream logFos = new FileOutputStream("log");
+                OutputStream logFos = new FileOutputStream("log", true);  /// append version
+               // OutputStream logFos = new FileOutputStream("log");
                 logFos.write(log.getBytes());
                 logFos.close();
             } catch (IOException e) {
@@ -187,7 +187,7 @@ public class JsonMakeStoryFromTripleData {
         try {
             jsonObjects = JsonStoryUtil.getJSONObjectArray(trigTripleData);
             jsonObjects = JsonStoryUtil.createStoryLinesForJSONArrayList(jsonObjects, climaxThreshold, topicThreshold);
-            JsonStoryUtil.minimalizeActors(jsonObjects);
+            //JsonStoryUtil.minimalizeActors(jsonObjects);
             if (euroVoc!=null) {
                 JsonStoryUtil.renameStories(jsonObjects, euroVoc, euroVocBlackList);
             }
