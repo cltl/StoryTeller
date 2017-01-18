@@ -226,7 +226,7 @@ public class GetTriplesFromKnowledgeStore {
                 if (!attribution.isEmpty()) {
                     int idx = attribution.lastIndexOf("#"); //http://groundedannotationframework.org/grasp#pos
                     if (idx>-1) attribution = attribution.substring(idx+1);
-                    perspectives.add(attribution.toLowerCase());
+                    perspectives.add(attribution);
                     //System.out.println("attribution = " + attribution);
                     JSONObject targetEvent = eventMap.get(event);
                     if (targetEvent != null) {
@@ -270,6 +270,7 @@ public class GetTriplesFromKnowledgeStore {
                         //System.out.println("mention = " + mention);
                         if (perspectiveMap.containsKey(mention)) {
                             ArrayList<PerspectiveJsonObject> perspectiveJsonObjects = perspectiveMap.get(mention);
+                            boolean HASPERSPECTIVE = false;
                             for (int j = 0; j < perspectiveJsonObjects.size(); j++) {
                                 PerspectiveJsonObject perspectiveJsonObject = perspectiveJsonObjects.get(j);
                                 if (!perspectiveJsonObject.getAttribution().isEmpty()) {
@@ -289,12 +290,14 @@ public class GetTriplesFromKnowledgeStore {
                                     JsonStoryUtil.addPerspectiveToMention(mentionObject, perspectiveJsonObject);
                                 }
                             }*/
+                            /*if (!HASPERSPECTIVE) {
+                                PerspectiveJsonObject dymmyPerspective = new PerspectiveJsonObject();
+                                JsonStoryUtil.addPerspectiveToMention(mentionObject, dymmyPerspective);
+                            }*/
                         }
-                        else {
-/*
+                        else {/*
                             PerspectiveJsonObject dymmyPerspective = new PerspectiveJsonObject();
-                            JsonStoryUtil.addPerspectiveToMention(mentionObject, dymmyPerspective);
-*/
+                            JsonStoryUtil.addPerspectiveToMention(mentionObject, dymmyPerspective);*/
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

@@ -151,74 +151,37 @@ public class PerspectiveJsonObject {
 
     public JSONObject getJSONObject () throws JSONException {
         JSONObject object = new JSONObject();
-       // System.out.println("attribution = " + attribution.toString());
-        if (attribution.contains("certain")) {
-            object.put("certainty", "certain");
-        }
-        else if (attribution.contains("uncertain")) {
-            object.put("certainty", "uncertain");
-        }/*
-        else {
-            object.put("certainty", "certain");
-        }*/
+        for (int i = 0; i < attribution.size(); i++) {
+            String attr = attribution.get(i);
+            if (attr.equalsIgnoreCase("certain")  || attr.equalsIgnoreCase("uncertain")) {
+                object.put("certainty", attr);
+            }
+            else if (attr.equalsIgnoreCase("likely")  || attr.equalsIgnoreCase("unlikely")
+                  || attr.equalsIgnoreCase("probable")  || attr.equalsIgnoreCase("possible")) {
+                object.put("possibility", attr);
+            }
+            else if (attr.equalsIgnoreCase("pos")  || attr.equalsIgnoreCase("neg")) {
+                object.put("belief", attr);
+            }
+            else if (attr.equalsIgnoreCase("positive")  ||
+                    attr.equalsIgnoreCase("negative")  ||
+                    attr.equalsIgnoreCase("neutral")  ||
+                    attr.equalsIgnoreCase("+")  ||
+                    attr.equalsIgnoreCase("-")
+                    ) {
+                object.put("sentiment", attr);
+            }
 
-        if (attribution.contains("unlikely")) {
-            object.put("possibility", "unlikely");
-        }
-        else if (attribution.contains("likely")) {
-            object.put("possibility", "likely");
-        }/*
-        else {
-            object.put("possibility", "likely");
-        }*/
-
-        if (attribution.contains("deny")) {
-            object.put("belief", "neg");
-        }
-        else if (attribution.contains("denial")) {
-            object.put("belief", "neg");
-        }
-        else if (attribution.contains("neg")) {
-            object.put("belief", "neg");
-        }
-        else if (attribution.contains("pos")) {
-            object.put("belief", "pos");
-        }
-        else if (attribution.contains("confirm")) {
-            object.put("belief", "pos");
+            else if (attr.equalsIgnoreCase("future")  ||
+                    attr.equalsIgnoreCase("nonfuture") ||
+                    attr.equalsIgnoreCase("non_future") ||
+                    attr.equalsIgnoreCase("recent")  ||
+                    attr.equalsIgnoreCase("past")
+                    ) {
+                object.put("when", attr);
+            }
         }
 
-        if (attribution.contains("positive")) {
-            object.put("sentiment", "positive");
-        }
-        else if (attribution.contains("+")) {
-            object.put("sentiment", "positive");
-        }
-        else if (attribution.contains("negative")) {
-            object.put("sentiment", "negative");
-        }
-        else if (attribution.contains("-")) {
-            object.put("sentiment", "negative");
-        }
-        else if (attribution.contains("neutral")) {
-            object.put("sentiment", "neutral");
-        }
-
-        if (attribution.contains("future")) {
-            object.put("when", "future");
-        }
-        else if (attribution.contains("recent")) {
-            object.put("when", "recent");
-        }
-        else if (attribution.contains("past")) {
-            object.put("when", "past");
-        }
-        else if (attribution.contains("nonfuture")) {
-            object.put("when", "nonfuture");
-        }/*
-        else {
-            object.put("when", "recent");
-        }*/
         return object;
     }
 
