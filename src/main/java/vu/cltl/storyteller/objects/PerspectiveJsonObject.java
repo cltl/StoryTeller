@@ -58,8 +58,8 @@ public class PerspectiveJsonObject {
     }
 
     public void addAttribution(String attribution) {
-        if (!this.attribution.contains(attribution.toLowerCase())) {
-            this.attribution.add(attribution.toLowerCase());
+        if (!this.attribution.contains(attribution)) {
+            this.attribution.add(attribution);
         }
     }
 
