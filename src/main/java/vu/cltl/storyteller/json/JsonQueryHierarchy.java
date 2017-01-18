@@ -44,6 +44,7 @@ public class JsonQueryHierarchy {
     static String KSpass = ""; //"nwr/wikinews-new";
     static boolean ALLEVENTYPES = false;
     static String DATA = "events";
+    static Integer mCount = -1;
 
     static public void main (String[] args) {
         DEBUG = true;
@@ -53,6 +54,13 @@ public class JsonQueryHierarchy {
             String arg = args[i];
             if (arg.equals("--data") && args.length > (i + 1)) {
                 DATA = args[i+1];
+            }
+            if (arg.equals("--mention") && args.length > (i + 1)) {
+                try {
+                    mCount = Integer.parseInt(args[i+1]);
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
             }
             else if (arg.equals("--eso") && args.length > (i + 1)) {
                 esoPath = args[i+1];
@@ -164,7 +172,7 @@ public class JsonQueryHierarchy {
             simpleTaxonomy.cumulateScores("", tops, cnt);
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
-            simpleTaxonomy.jsonTree(tree, "entity", "", tops, 1, cnt, cntPredicates, cntTypedPredicates);
+            simpleTaxonomy.jsonTree(tree, "entity", "", tops, mCount, 1, cnt, cntPredicates, cntTypedPredicates);
             if (DEBUG) {
                 OutputStream fos = new FileOutputStream("light-entities.debug.json");
                 fos.write(tree.toString(0).getBytes());
@@ -201,7 +209,7 @@ public class JsonQueryHierarchy {
             simpleTaxonomy.cumulateScores("", tops, cnt);
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
-            simpleTaxonomy.jsonTree(tree, "entity", "", tops, 1, cnt, cntPredicates, cntTypedPredicates);
+            simpleTaxonomy.jsonTree(tree, "entity", "", tops, mCount, 1, cnt, cntPredicates, cntTypedPredicates);
             if (DEBUG) {
                 OutputStream fos = new FileOutputStream("dark-entities.debug.json");
                 fos.write(tree.toString(0).getBytes());
@@ -244,7 +252,7 @@ public class JsonQueryHierarchy {
             simpleTaxonomy.cumulateScores("", tops, cnt);
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
-            simpleTaxonomy.jsonTree(tree, "concept", "", tops, 1, cnt, cntPredicates, null);
+            simpleTaxonomy.jsonTree(tree, "concept", "", tops, mCount, 1, cnt, cntPredicates, null);
             if (DEBUG) {
                 OutputStream fos = new FileOutputStream("concepts.debug.json");
                 fos.write(tree.toString(0).getBytes());
@@ -325,7 +333,7 @@ public class JsonQueryHierarchy {
             simpleTaxonomy.cumulateScores("", tops, cnt);
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
-            simpleTaxonomy.jsonTree(tree, "event", "", tops, 1, cnt, cntPredicates, cntTypedPredicates);
+            simpleTaxonomy.jsonTree(tree, "event", "", tops, 1, mCount, cnt, cntPredicates, cntTypedPredicates);
             if (DEBUG) {
                 OutputStream fos = new FileOutputStream("events.debug.json");
                 fos.write(tree.toString(0).getBytes());
@@ -401,7 +409,7 @@ public class JsonQueryHierarchy {
             simpleTaxonomy.cumulateScores("", tops, cnt);
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
-            simpleTaxonomy.jsonTree(tree, "author", "", tops, 1, cnt, cntPredicates, null);
+            simpleTaxonomy.jsonTree(tree, "author", "", tops, mCount, 1, cnt, cntPredicates, null);
             if (DEBUG) {
                 OutputStream fos = new FileOutputStream("authors.debug.json");
                 fos.write(tree.toString(0).getBytes());
@@ -436,7 +444,7 @@ public class JsonQueryHierarchy {
             simpleTaxonomy.cumulateScores("", tops, cnt);
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
-            simpleTaxonomy.jsonTree(tree, "cite", "", tops, 1, cnt, cntPredicates, null);
+            simpleTaxonomy.jsonTree(tree, "cite", "", tops, mCount, 1, cnt, cntPredicates, null);
             if (DEBUG) {
                 OutputStream fos = new FileOutputStream("cited.debug.json");
                 fos.write(tree.toString(0).getBytes());
