@@ -662,7 +662,7 @@ public class SparqlGenerator {
                 "?event gaf:denotedBy ?mention.\n" +
                 "?mention grasp:hasAttribution ?attribution.\n" +
                 //"?attribution prov:wasAttributedTo ?doc .\n" +
-                "?attribution prov:isDerivedFrom ?doc .\n" +
+                "?attribution prov:wasDerivedFrom ?doc .\n" +
                 "?doc prov:wasAttributedTo ?author .\n"  +
                 makeSubStringLabelFilter("?author", authorLabel);
         if (eventIds.size()>0) {
@@ -1032,7 +1032,7 @@ order by DESC(?count)
                "\n" +
               "                 ?attribution grasp:isAttributionFor ?mention .\n" +
               // "                ?attribution prov:wasAttributedTo ?doc .\n" +
-               "                ?attribution prov:isDerivedFrom ?doc .\n" +
+               "                ?attribution prov:wasDerivedFrom ?doc .\n" +
                "                ?doc prov:wasAttributedTo ?a\n" +
                "\n" +
                "    }\n" +

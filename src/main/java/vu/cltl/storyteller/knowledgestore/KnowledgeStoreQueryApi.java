@@ -207,7 +207,7 @@ public class KnowledgeStoreQueryApi {
                         "?event gaf:denotedBy ?mention.\n" +
                         "?attribution grasp:isAttributionFor ?mention .\n" +
                         //"?attribution prov:wasAttributedTo ?doc .\n" +
-                        "?attribution prov:isDerivedFrom ?doc .\n" +
+                        "?attribution prov:wasDerivedFrom ?doc .\n" +
                         "?doc prov:wasAttributedTo ?author .\n";
                 sparql += SparqlGenerator.makeSubStringLabelFilter("?author", sources);
                 //@TODO URIs with wird characters tend to fail with SPARQL
