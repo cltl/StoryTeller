@@ -10,12 +10,9 @@ import vu.cltl.storyteller.input.FrameNetReader;
 import vu.cltl.storyteller.objects.PerspectiveJsonObject;
 import vu.cltl.storyteller.objects.PhraseCount;
 import vu.cltl.storyteller.objects.TrigTripleData;
-import vu.cltl.storyteller.knowledgestore.GetTriplesFromKnowledgeStore;
 import vu.cltl.storyteller.util.Util;
 
 import java.util.*;
-
-import static vu.cltl.storyteller.knowledgestore.SparqlGenerator.makeTripleQuery;
 
 /**
  * Created by piek on 17/02/16.
@@ -2158,7 +2155,7 @@ public class JsonStoryUtil {
         }
     }
 
-
+    @Deprecated
     public static PerspectiveJsonObject getPerspectiveObjectForEvent(TrigTripleData trigTripleData, String mentionUri, String meta) {
         PerspectiveJsonObject perspectiveJsonObject = new PerspectiveJsonObject();
         String author = "";
@@ -2365,6 +2362,8 @@ public class JsonStoryUtil {
         }
     }
 
+    @Deprecated
+
     public static void integratePerspectivesInEventObjects(TrigTripleData trigTripleData, ArrayList<JSONObject> targetEvents, String meta) {
         for (int i = 0; i < targetEvents.size(); i++) {
             JSONObject mEvent = targetEvents.get(i);
@@ -2388,6 +2387,7 @@ public class JsonStoryUtil {
 
                         }
 
+
 /*                        if (perspectiveJsonObject.getAttribution().size()>0) {
                             //System.out.println("mention event = " + mention);
                             if (perspectiveJsonObject != null) {
@@ -2396,6 +2396,7 @@ public class JsonStoryUtil {
 
                             }
                         }*/
+
                     } catch (JSONException e) {
                         // e.printStackTrace();
                     }
@@ -2404,6 +2405,9 @@ public class JsonStoryUtil {
         }
     }
 
+
+
+/*
     static ArrayList<JSONObject> getPerspectiveEvents (TrigTripleData trigTripleData, ArrayList<JSONObject> jsonObjects) throws JSONException {
         ArrayList<JSONObject> pEvents = new ArrayList<JSONObject>();
         Set keySet = trigTripleData.tripleMapGrasp.keySet();
@@ -2554,6 +2558,7 @@ public class JsonStoryUtil {
         System.out.println("pEvents = " + pEvents.size());
         return pEvents;
     }
+*/
 
     static public String getURIforMention (String uriValue, JSONArray charOffset) throws JSONException {
         String uri = "<"+uriValue+"#char="+charOffset.getString(0)+","+charOffset.getString(1)+">";
@@ -2583,7 +2588,8 @@ public class JsonStoryUtil {
         return uri;
     }*/
 
-    static ArrayList<JSONObject> getPerspectiveEventsFromKS (ArrayList<JSONObject> jsonObjects) throws JSONException {
+    @Deprecated
+    /*static ArrayList<JSONObject> getPerspectiveEventsFromKS (ArrayList<JSONObject> jsonObjects) throws JSONException {
         ArrayList<JSONObject> pEvents = new ArrayList<JSONObject>();
         int totalMentions = 0;
         for (int i = 0; i < jsonObjects.size(); i++) {
@@ -2712,7 +2718,7 @@ public class JsonStoryUtil {
         System.out.println("pEvents = " + pEvents.size());
         return pEvents;
     }
-
+*/
 
     ///"source": "author:Matt_Steinglass_in_Amsterdam"
     ///"source": "author:George_Parker?_Political_Editor"

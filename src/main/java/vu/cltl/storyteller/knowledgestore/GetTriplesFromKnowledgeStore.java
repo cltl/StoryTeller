@@ -1009,7 +1009,7 @@ public class GetTriplesFromKnowledgeStore {
     }
 
     public static boolean isProvRelation(String relation) {
-        return relation.equals("http://www.w3.org/ns/prov#wasAttributedTo");
+        return relation.startsWith("http://www.w3.org/ns/prov");
     }
 
     private static boolean isFNRelation(String relation) {

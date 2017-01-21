@@ -82,13 +82,15 @@ public class SparqlGenerator {
                 "     ?attr <http://groundedannotationframework.org/grasp#isAttributionFor> ?mention .\n" +
                 "     ?attr rdf:value  ?attribution .\n" +
                 "     OPTIONAL { ?attr <http://groundedannotationframework.org/grasp#wasAttributedTo> ?cite }\n" +
-                "     OPTIONAL { ?attr <http://www.w3.org/ns/prov#wasAttributedTo> ?doc . ?doc <http://www.w3.org/ns/prov#wasAttributedTo> ?author}\n" +
+                //"     OPTIONAL { ?attr <http://www.w3.org/ns/prov#wasAttributedTo> ?doc . ?doc <http://www.w3.org/ns/prov#wasAttributedTo> ?author}\n" +
+                "     OPTIONAL { ?attr <http://www.w3.org/ns/prov#isDerivedFrom> ?doc . ?doc <http://www.w3.org/ns/prov#wasAttributedTo> ?author}\n" +
                 "}";
         //System.out.println("sparqlQuery = " + sparqlQuery);
         return sparqlQuery;
     }
 
     /**
+     * @Deprecated
      * Creates a SPARQL query for a list of event URIs to get a table with:
      * ?event ?mention ?attribution ?author ?cite ?label ?comment"
      *
@@ -616,6 +618,7 @@ public class SparqlGenerator {
         return sparqlQuery;
     }
 
+    @Deprecated
     static public String makeQueryforCitedSurfaceForm(String citedLabel, ArrayList<String> eventIds)throws Exception {
 
         String sparqlQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
@@ -643,6 +646,7 @@ public class SparqlGenerator {
         return sparqlQuery;
     }
 
+    @Deprecated
     static public String makeQueryforAuthorSurfaceForm(String authorLabel, ArrayList<String> eventIds)throws Exception {
         //http://www.newsreader-project.eu/provenance/author/Algemeen+Dagblad
         String sparqlQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
@@ -657,7 +661,8 @@ public class SparqlGenerator {
                 "{SELECT distinct ?event WHERE { \n" +
                 "?event gaf:denotedBy ?mention.\n" +
                 "?mention grasp:hasAttribution ?attribution.\n" +
-                "?attribution prov:wasAttributedTo ?doc .\n" +
+                //"?attribution prov:wasAttributedTo ?doc .\n" +
+                "?attribution prov:isDerivedFrom ?doc .\n" +
                 "?doc prov:wasAttributedTo ?author .\n"  +
                 makeSubStringLabelFilter("?author", authorLabel);
         if (eventIds.size()>0) {
@@ -956,6 +961,7 @@ order by DESC(?count)
     }
 
     /**
+     * @Deprecated
      * PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/>
      PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
      PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -1025,7 +1031,8 @@ order by DESC(?count)
                "WHERE {\n" +
                "\n" +
               "                 ?attribution grasp:isAttributionFor ?mention .\n" +
-               "                ?attribution prov:wasAttributedTo ?doc .\n" +
+              // "                ?attribution prov:wasAttributedTo ?doc .\n" +
+               "                ?attribution prov:isDerivedFrom ?doc .\n" +
                "                ?doc prov:wasAttributedTo ?a\n" +
                "\n" +
                "    }\n" +

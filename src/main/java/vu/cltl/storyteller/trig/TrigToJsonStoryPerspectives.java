@@ -8,7 +8,6 @@ import vu.cltl.storyteller.input.FrameNetReader;
 import vu.cltl.storyteller.input.NafTokenLayerIndex;
 import vu.cltl.storyteller.json.JsonStorySerialization;
 import vu.cltl.storyteller.json.JsonStoryUtil;
-import vu.cltl.storyteller.knowledgestore.GetTriplesFromKnowledgeStore;
 import vu.cltl.storyteller.objects.TrigTripleData;
 import vu.cltl.storyteller.util.Util;
 
@@ -280,13 +279,7 @@ public class TrigToJsonStoryPerspectives {
             ArrayList<JSONObject> perspectiveEvents = new ArrayList<JSONObject>();
             ArrayList<JSONObject> structuredEvents = new ArrayList<JSONObject>();
             if (PERSPECTIVE && jsonObjects.size()>0) {
-                if (!entityQuery.isEmpty() || !eventQuery.isEmpty() ||!sparqlQuery.isEmpty()) {
-                    System.out.println("Getting perspectives for: " + jsonObjects.size() + " events");
-                    GetTriplesFromKnowledgeStore.integrateAttributionFromKs(jsonObjects);
-                }
-                else {
                     JsonStoryUtil.integratePerspectivesInEventObjects(trigTripleData, jsonObjects, project);
-                }
             }
 
             if (!pathToTokenIndex.isEmpty()) {

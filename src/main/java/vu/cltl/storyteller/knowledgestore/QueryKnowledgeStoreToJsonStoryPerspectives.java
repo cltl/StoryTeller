@@ -407,6 +407,7 @@ public class QueryKnowledgeStoreToJsonStoryPerspectives {
                     sparql +=
                             "?event gaf:denotedBy ?mention.\n" +
                                     "?mention grasp:hasAttribution ?attribution.\n" +
+                                    "?mention prov:isDerivedFrom ?attribution.\n" +
                                     "?attribution prov:wasAttributedTo ?doc .\n" ;
                                     //"?doc prov:wasAttributedTo ?author .\n";
 /*
