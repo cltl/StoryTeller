@@ -18,6 +18,17 @@ The install.sh will build the binary through apache-maven-2.2.1 and the pom.xml 
 
 REQUIREMENTS
 StoryTeller is developed in Java 1.6 and can run on any platform that supports Java 1.6
+The code includes a JENA library for excecuting SPARQL and reading the results. Running JENA requires
+the jena-log4j.properties file to be present from the location that the code is excecuted.
+This file is included in the scripts folder of this distribution.
+
+Some of the functions require resources that need to be cloned from
+
+    git clone https://github.com/cltl/vua-resources.git
+
+The download of these resources is included in the install.sh script. The scripts assume these resources to be present
+next to the installation of the StoryTeller. If not, you need to adapt the paths in the scripts.
+
 
 LICENSE
     StoryTeller is free software: you can redistribute it and/or modify

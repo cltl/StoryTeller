@@ -47,9 +47,9 @@ public class JsonQueryHierarchy {
     static Integer mCount = -1;
 
     static public void main (String[] args) {
-        DEBUG = true;
-        ALLEVENTYPES = true;
-        DATA = "perspectives";
+        //DEBUG = true;
+        //ALLEVENTYPES = true;
+        //DATA = "perspectives";
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.equals("--data") && args.length > (i + 1)) {
@@ -74,7 +74,7 @@ public class JsonQueryHierarchy {
             else if (arg.equals("--eurovoc-core") && args.length > (i + 1)) {
                 euroVocHierarchyFile = args[i+1];
             }
-            else if (arg.equals("--entity-hiearchy") && args.length > (i + 1)) {
+            else if (arg.equals("--entity-hierarchy") && args.length > (i + 1)) {
                 entityHierarchyFile = args[i+1];
             }
             else if (arg.equals("--entity-type") && args.length > (i + 1)) {
