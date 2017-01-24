@@ -835,6 +835,29 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
         return sparqQuery;
     }
 
+    public static String makeSparqlQueryForLightEntityDiffFromKs() {
+        String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
+                "PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
+                "PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> \n" +
+                "PREFIX grasp: <http://groundedannotationframework.org/grasp#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+                "SELECT ?label ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
+                "WHERE {\n" +
+                "?a gaf:denotedBy ?m .\n" +
+                "?attribution grasp:isAttributionFor ?m .\n" +
+                "?attribution prov:wasDerivedFrom ?doc .\n" +
+                "?doc prov:wasAttributedTo ?a .\n" +
+                "?a rdfs:label ?label .\n" +
+                "OPTIONAL {?a a ?type . }\n" +
+                "FILTER (CONTAINS(STR(?a), \"dbpedia\"))\n" +
+                "FILTER (CONTAINS(STR(?type), \"dbpedia\"))\n"+
+                "}\n" +
+                "group by ?label ?a ?type\n" +
+                "order by DESC(?count)";
+        //System.out.println("sparqQuery = " + sparqQuery);
+        return sparqQuery;
+    }
+
     public static String makeSparqlQueryForDarkEntitiesFromKs() {
         String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
@@ -1012,7 +1035,7 @@ order by DESC(?count)
     SELECT ?author (COUNT (DISTINCT ?mention) as ?count)
     WHERE {
     ?attribution grasp:isAttributionFor ?mention .
-                ?attribution prov:wasAttributedTo ?doc .
+                ?attribution prov:wasDerivedFrom ?doc .
                 ?doc prov:wasAttributedTo ?author
 
     }
@@ -1038,7 +1061,7 @@ order by DESC(?count)
                "    }\n" +
                "group by ?a \n" +
                "order by DESC(?count)";
-      // System.out.println("sparqQuery = " + sparqQuery);
+       System.out.println("sparqQuery = " + sparqQuery);
        return sparqQuery;
    }
 
