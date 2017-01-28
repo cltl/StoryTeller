@@ -763,7 +763,7 @@ public class GetTriplesFromKnowledgeStore {
         return cntPredicates;
     }
 
-    public static HashMap<String, TypedPhraseCount>  getLabelsTypesAndInstanceCountsFromKnowledgeStore(String sparqlQuery)throws Exception {
+    public static HashMap<String, TypedPhraseCount>  getLabelsTypesAndInstanceCountsFromKnowledgeStore(String sparqlQuery, HashMap<String, String> mapping)throws Exception {
         HashMap<String, TypedPhraseCount> cntPredicates = new HashMap<String, TypedPhraseCount>();
         HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
 
@@ -776,6 +776,9 @@ public class GetTriplesFromKnowledgeStore {
             String label = solution.get("label").toString();
             String instance = solution.get("a").toString();
             String type = solution.get("type").toString();
+            if (mapping!=null && mapping.containsKey(type)) {
+                type = mapping.get(type);
+            }
             String count = solution.get("count").toString();
             int idx = count.indexOf("^^");
             if (idx>-1) count = count.substring(0, idx);
@@ -794,6 +797,87 @@ public class GetTriplesFromKnowledgeStore {
                     TypedPhraseCount typedPhraseCount = new TypedPhraseCount(instance, Integer.parseInt(count));
                     typedPhraseCount.addType(type);
                     typedPhraseCount.addLabel(label);
+                    cntPredicates.put(instance, typedPhraseCount);
+                }
+            }
+        }
+        return cntPredicates;
+    }
+
+
+    public static HashMap<String, TypedPhraseCount>  getTypesAndInstanceCountsFromKnowledgeStore(String sparqlQuery, HashMap<String, String> mapping)throws Exception {
+        HashMap<String, TypedPhraseCount> cntPredicates = new HashMap<String, TypedPhraseCount>();
+        HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
+
+        QueryExecution x = QueryExecutionFactory.sparqlService(serviceEndpoint, sparqlQuery, authenticator);
+        ResultSet resultset = x.execSelect();
+
+        //// The problem is that the full hiearchy is given for
+        while (resultset.hasNext()) {
+            QuerySolution solution = resultset.nextSolution();
+            String instance = solution.get("a").toString();
+            String type = solution.get("type").toString();
+            if (type==null || type.isEmpty() || type.equals("http://www.newsreader-project.eu/ontologies/NONENTITY")) {
+                type = "http://dbpedia.org/ontology/Agent";
+            }
+            else {
+            }
+
+            if (mapping != null && mapping.containsKey(type)) {
+                type = mapping.get(type);
+            }
+            String count = solution.get("count").toString();
+            int idx = count.indexOf("^^");
+            if (idx>-1) count = count.substring(0, idx);
+            /*System.out.println("instance = " + instance);
+            System.out.println("type = " + type);
+            System.out.println("count = " + count);
+            System.out.println("label = " + label);
+*/
+            if (!instance.isEmpty()) {
+                if (cntPredicates.containsKey(instance)) {
+                    TypedPhraseCount typedPhraseCount = cntPredicates.get(instance);
+                    typedPhraseCount.addType(type);
+                    cntPredicates.put(instance, typedPhraseCount);
+                } else {
+                    TypedPhraseCount typedPhraseCount = new TypedPhraseCount(instance, Integer.parseInt(count));
+                    typedPhraseCount.addType(type);
+                    cntPredicates.put(instance, typedPhraseCount);
+                }
+            }
+        }
+        return cntPredicates;
+    }
+
+    public static HashMap<String, TypedPhraseCount>  getInstanceCountsFromKnowledgeStore(String sparqlQuery)throws Exception {
+        HashMap<String, TypedPhraseCount> cntPredicates = new HashMap<String, TypedPhraseCount>();
+        HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
+
+        QueryExecution x = QueryExecutionFactory.sparqlService(serviceEndpoint, sparqlQuery, authenticator);
+        ResultSet resultset = x.execSelect();
+
+        //// The problem is that the full hiearchy is given for
+        while (resultset.hasNext()) {
+            QuerySolution solution = resultset.nextSolution();
+            String instance = solution.get("a").toString();
+            String type = "http://dbpedia.org/ontology/Agent";
+
+            String count = solution.get("count").toString();
+            int idx = count.indexOf("^^");
+            if (idx>-1) count = count.substring(0, idx);
+            /*System.out.println("instance = " + instance);
+            System.out.println("type = " + type);
+            System.out.println("count = " + count);
+            System.out.println("label = " + label);
+*/
+            if (!instance.isEmpty()) {
+                if (cntPredicates.containsKey(instance)) {
+                    TypedPhraseCount typedPhraseCount = cntPredicates.get(instance);
+                    typedPhraseCount.addType(type);
+                    cntPredicates.put(instance, typedPhraseCount);
+                } else {
+                    TypedPhraseCount typedPhraseCount = new TypedPhraseCount(instance, Integer.parseInt(count));
+                    typedPhraseCount.addType(type);
                     cntPredicates.put(instance, typedPhraseCount);
                 }
             }
@@ -984,6 +1068,87 @@ public class GetTriplesFromKnowledgeStore {
     }
 
 
+    public static void  getJSONCountlistFromKnowledgeStore(String sparqlQuery, String instanceType, String project, HashMap<String, NewsReaderInstance> map)throws Exception {
+        HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
+        QueryExecution x = QueryExecutionFactory.sparqlService(serviceEndpoint, sparqlQuery, authenticator);
+        ResultSet resultset = x.execSelect();
+        //// The problem is that the full hiearchy is given for
+        while (resultset.hasNext()) {
+            QuerySolution solution = resultset.nextSolution();
+            String label = solution.get("label").toString();
+            String instance = solution.get("a").toString();
+            String type = solution.get("type").toString();
+            String dCount = solution.get("dcount").toString();
+            String mCount = solution.get("mcount").toString();
+
+            if (dCount!=null) {
+                int idx = dCount.indexOf("^^");
+                if (idx > -1) dCount = dCount.substring(0, idx);
+                System.out.println("dCount = " + dCount);
+            }
+            if (mCount!=null) {
+                int idx = mCount.indexOf("^^");
+                if (idx > -1) mCount = mCount.substring(0, idx);
+            }
+
+            if (map.containsKey(instance)) {
+                NewsReaderInstance newsReaderInstance = map.get(instance);
+                newsReaderInstance.setUri(instance);
+                newsReaderInstance.setInstanceType(instanceType);
+                newsReaderInstance.addLabel(label);
+                newsReaderInstance.addTypes(type);
+                if (dCount!=null) newsReaderInstance.addProjectDocs(project, Integer.parseInt(dCount));
+                if (mCount!=null) newsReaderInstance.addProjectCounts(project, Integer.parseInt(mCount));
+                map.put(instance, newsReaderInstance);
+            }
+            else {
+                NewsReaderInstance newsReaderInstance = new NewsReaderInstance();
+                newsReaderInstance.setUri(instance);
+                newsReaderInstance.setInstanceType(instanceType);
+                newsReaderInstance.addLabel(label);
+                newsReaderInstance.addTypes(type);
+                if (dCount!=null) newsReaderInstance.addProjectDocs(project, Integer.parseInt(dCount));
+                if (mCount!=null) newsReaderInstance.addProjectCounts(project, Integer.parseInt(mCount));
+                map.put(instance, newsReaderInstance);
+            }
+        }
+    }
+
+    public static void  getJSONMentionlistFromKnowledgeStore(String sparqlQuery, String instanceType, String project, HashMap<String, NewsReaderInstance> map)throws Exception {
+        HttpAuthenticator authenticator = new SimpleAuthenticator(user, pass.toCharArray());
+        QueryExecution x = QueryExecutionFactory.sparqlService(serviceEndpoint, sparqlQuery, authenticator);
+        ResultSet resultset = x.execSelect();
+        //// The problem is that the full hiearchy is given for
+        while (resultset.hasNext()) {
+            QuerySolution solution = resultset.nextSolution();
+            String label = solution.get("label").toString();
+            String instance = solution.get("a").toString();
+            String type = solution.get("type").toString();
+            String doc = solution.get("doc").toString();
+            String mention = solution.get("m").toString();
+            if (map.containsKey(instance)) {
+                NewsReaderInstance newsReaderInstance = map.get(instance);
+                newsReaderInstance.setUri(instance);
+                newsReaderInstance.setInstanceType(instanceType);
+                newsReaderInstance.addLabel(label);
+                newsReaderInstance.addSource(doc);
+                newsReaderInstance.addTypes(type);
+                if (mention!=null) newsReaderInstance.addProjectMentions(project, mention);
+                map.put(instance, newsReaderInstance);
+            }
+            else {
+                NewsReaderInstance newsReaderInstance = new NewsReaderInstance();
+                newsReaderInstance.setUri(instance);
+                newsReaderInstance.setInstanceType(instanceType);
+                newsReaderInstance.addLabel(label);
+                newsReaderInstance.addSource(doc);
+                newsReaderInstance.addTypes(type);
+                if (mention!=null) newsReaderInstance.addProjectMentions(project, mention);
+                map.put(instance, newsReaderInstance);
+            }
+        }
+    }
+
     private static boolean isEventUri (String subject) {
         String name = subject;
         int idx = subject.lastIndexOf("#");
@@ -1027,6 +1192,5 @@ public class GetTriplesFromKnowledgeStore {
         }
         return relation.startsWith("http://www.newsreader-project.eu/domain-ontology");
     }
-
 
 }

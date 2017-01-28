@@ -18,7 +18,8 @@ euroVocLabelFile="$RESOURCES/mapping_eurovoc_skos.label.concept.gz"
 euroVocHierarchyFile="$RESOURCES/eurovoc_in_skos_core_concepts.rdf.gz"
 entityTypeFile="$RESOURCES/instance_types_en.ttl.gz"
 entityHierarchyFile="$RESOURCES/DBpediaHierarchy_parent_child.tsv"
-MCOUNT=-1;
+entityCustomFile="$RESOURCES/NERC_DBpediaHierarchy_mapping.tsv"
+MCOUNT=0;
 
 # get KS stats in json for query generator for a specified type of data.
 # Supported types are:
@@ -32,14 +33,15 @@ MCOUNT=-1;
 # perspectives
 
 
-#OPTIONAL parameter --debug (writes JSON to file for debugging to a file and prints debug information toi standard out)
+#OPTIONAL parameter --debug (writes JSON to file for debugging to a file and prints debug information to standard out)
+#OPTIONAL parameter --out to specify the output file
 #OPTIONAL parameter --mention (takes a counter as argument that restricts the phrases and concepts to those that are mentioned more than this threshold
 
 # generate a JSON output stream for ligh-entities using the DBPedia ontology, --entity-hiearchy parameter expects a text file with parent<TAB>child on separate lines.
 java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --ks-service $SERVER --entity-hierarchy $entityHierarchyFile --data "light-entities" --mention $MCOUNT
 
-# generate a JSON output stream for dark-entities using the ENTITY classes assigned to entities in the NAF file.
-java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --ks-service $SERVER --data "dark-entities" --mention $MCOUNT
+# generate a JSON output stream for dark-entities using the ENTITY classes assigned to entities in the NAF file. The ENTITY classes are mapped to DBPedia classes through mappings provided by the entityCustomFile
+java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --ks-service $SERVER --data "dark-entities"  --entity-hierarchy $entityHierarchyFile --entity-custom $entityCustomFile --mention $MCOUNT
 
 # generate a JSON output stream for concepts. Concepts are anything that is not an entity but plays an important role in an event. It uses the DBPedia ontology, --entity-hiearchy parameter expects a text file with parent<TAB>child on separate lines, --entity-type expects a gz file with  <dbpedia resource uri><TAB><dbpedia ontology uri>
 java -Xmx2000m -cp "$LIB/StoryTeller-v1.0-jar-with-dependencies.jar" vu.cltl.storyteller.json.JsonQueryHierarchy --ks-service $SERVER  --entity-hierarchy $entityHierarchyFile --entity-type $entityTypeFile --data "concepts" --mention $MCOUNT

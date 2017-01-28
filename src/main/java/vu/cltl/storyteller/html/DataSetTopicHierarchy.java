@@ -105,7 +105,7 @@ public class DataSetTopicHierarchy {
 
             OutputStream jsonOut = new FileOutputStream(topicPath+".words.json");
             JSONObject tree = new JSONObject();
-            simpleTaxonomy.jsonTree(tree, "topic", "", tops, -1, 1, cnt, cntPredicates, null);
+            simpleTaxonomy.jsonTree(tree, "topic", "", "", tops, -1, 1, cnt, cntPredicates, null);
             //jsonOut.write(tree.toString().getBytes());
             jsonOut.write(tree.toString(0).getBytes());
             jsonOut.close();

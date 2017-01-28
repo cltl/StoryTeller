@@ -80,7 +80,7 @@ public class DataSetEventHierarchy {
             fos.close();
             OutputStream jsonOut = new FileOutputStream(eventPath+".words.json");
             JSONObject tree = new JSONObject();
-            esoReader.simpleTaxonomy.jsonTree(tree, "event", "eso:",tops, -1, 1, cnt, cntPredicates, null);
+            esoReader.simpleTaxonomy.jsonTree(tree, "event", "eso:","", tops, -1, 1, cnt, cntPredicates, null);
             //jsonOut.write(tree.toString().getBytes());
 
             jsonOut.write(tree.toString(0).getBytes());

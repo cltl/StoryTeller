@@ -533,14 +533,14 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
         }
     }
 
-    public void  jsonTree (JSONObject tree, String gType, String ns, ArrayList<String> tops,
+    public void  jsonTree (JSONObject tree, String gType, String iType, String ns, ArrayList<String> tops,
                            int mCount,
                                  int level,
                                  HashMap<String, Integer> typeCounts,
                                  HashMap<String, ArrayList<PhraseCount>> phrases,
                                  HashMap<String, TypedPhraseCount> typedPredicates) throws IOException, JSONException {
         ArrayList<String> covered = new ArrayList<String>();
-        jsonTree ( tree,  gType,  ns,  tops, covered, mCount,
+        jsonTree ( tree,  gType,  iType, ns,  tops, covered, mCount,
          level,
          typeCounts,
          phrases,
@@ -549,7 +549,7 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
 
 
 
-    public void  jsonTree (JSONObject tree, String gType, String ns, ArrayList<String> tops,
+    public void  jsonTree (JSONObject tree, String gType, String iType, String ns, ArrayList<String> tops,
                            ArrayList<String> covered,
                            int mCount,
                            int level,
@@ -629,7 +629,7 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                         });
                         for (int j = 0; j < phraseCounts.size(); j++) {
                             PhraseCount phraseCount = phraseCounts.get(j);
-                            if (phraseCount.getCount()>mCount) {
+                            if (phraseCount.getCount()>=mCount) {
                                 JSONObject phraseCountJsonObject = new JSONObject();
                                 name = phraseCount.getPhrase().trim();
                                 idx = phraseCount.getPhrase().lastIndexOf("/");
@@ -641,10 +641,10 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                                 if (phraseCount.getPhrase().indexOf("http")> -1) {
                                     ///what about eso and eurovoc
                                     phraseCountJsonObject.put("url", phraseCount.getPhrase());
-                                    phraseCountJsonObject.put("type", gType+"Instance");
+                                    phraseCountJsonObject.put("type", iType+"Instance");
                                 }
                                 else {
-                                    phraseCountJsonObject.put("type", gType+"Phrase");
+                                    phraseCountJsonObject.put("type", iType+"Phrase");
                                 }
                                 phraseCountJsonObject.put("mention_count", phraseCount.getCount());
                                 //@TODO provide an additional structure for ILI mappings to support cross-lingual search
@@ -674,7 +674,7 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                         }
                     };
                     if (children.size()>0) {
-                        jsonTree(node, gType, ns, children, covered, mCount, level, typeCounts, phrases, typedPredicates);
+                        jsonTree(node, gType, iType, ns, children, covered, mCount, level, typeCounts, phrases, typedPredicates);
                     }
                     else {
                         //  System.out.println("has no children top = " + top);

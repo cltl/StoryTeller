@@ -262,10 +262,10 @@ public class Util {
                 while (in.ready()&&(inputLine = in.readLine()) != null) {
                     //System.out.println(inputLine);
                     if (inputLine.trim().length()>0) {
-                        int idx_s = inputLine.indexOf("\t");
-                        if (idx_s>-1) {
-                            String key = inputLine.substring(0, idx_s).trim();
-                            String value = inputLine.substring(idx_s+1).trim();
+                        String [] fields = inputLine.split("\t");
+                        if (fields.length == 2) {
+                            String key = fields[0].trim();
+                            String value = fields[1].trim();
                             if (lineHashMap.containsKey(key)) {
                                 ArrayList<String> files = lineHashMap.get(key);
                                 files.add(value);
@@ -276,6 +276,32 @@ public class Util {
                                 files.add(value);
                                 lineHashMap.put(key, files);
                             }
+                        }
+                    }
+                }
+                in.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return lineHashMap;
+    }
+    static public HashMap<String, String> ReadFileToStringStringHashMap(String fileName) {
+        HashMap<String, String> lineHashMap = new HashMap<String, String>();
+        if (new File(fileName).exists() ) {
+            try {
+                FileInputStream fis = new FileInputStream(fileName);
+                InputStreamReader isr = new InputStreamReader(fis);
+                BufferedReader in = new BufferedReader(isr);
+                String inputLine;
+                while (in.ready()&&(inputLine = in.readLine()) != null) {
+                    //System.out.println(inputLine);
+                    if (inputLine.trim().length()>0) {
+                        String [] fields = inputLine.split("\t");
+                        if (fields.length == 2) {
+                            String key = fields[0].trim();
+                            String value = fields[1].trim();
+                            lineHashMap.put(key, value);
                         }
                     }
                 }
