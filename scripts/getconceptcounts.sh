@@ -6,7 +6,7 @@ ROOT="$( cd $DIR && cd .. && pwd)"
 LIB="$ROOT"/target
 
 #KnowledgeStore server address and credentials if needed
-SERVER="http://130.37.53.35:50053"
+SERVER="http://145.100.58.139:50053"
 KS="nwr/wikinews-new"
 KSUSER="wikinews"
 KSPASS="wikinews"

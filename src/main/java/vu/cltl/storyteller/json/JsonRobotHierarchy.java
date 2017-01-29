@@ -129,14 +129,14 @@ public class JsonRobotHierarchy {
                 }
             }
             String sparqlPhrases = "";
-            if (DATA.equals("light-entity")) {
+            if (DATA.equals("light-entities")) {
                 sparqlPhrases = SparqlGenerator.makeSparqlQueryForLightEntityProjectFromKs(project);
             }
-            else if (DATA.equals("dark-entity")) {
+            else if (DATA.equals("dark-entities")) {
                 sparqlPhrases = SparqlGenerator.makeSparqlQueryForDarkEntityProjectFromKs(project);
 
             }
-            else if (DATA.equals("non-entity")) {
+            else if (DATA.equals("non-entities")) {
                 sparqlPhrases = SparqlGenerator.makeSparqlQueryForNonEntityProjectFromKs(project);
             }
             if (!sparqlPhrases.isEmpty()) {
