@@ -5,52 +5,47 @@ import org.json.JSONObject;
 import vu.cltl.storyteller.knowledgestore.GetTriplesFromKnowledgeStore;
 import vu.cltl.storyteller.knowledgestore.SparqlGenerator;
 import vu.cltl.storyteller.objects.NewsReaderInstance;
+import vu.cltl.storyteller.objects.PhraseCount;
 
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by piek on 26/01/2017.
  */
 public class JsonRobotHierarchy {
 
-    static boolean DEBUG = false;
-    static String fnPath = "/Code/vu/newsreader/vua-resources/frAllRelation.xml";
-    static String esoPath = "/Code/vu/newsreader/vua-resources/ESO_Version2.owl";
-    static String euroVocLabelFile = "/Code/vu/newsreader/vua-resources/mapping_eurovoc_skos.label.concept.gz";
-    //static String euroVocLabelFile = "/Code/vu/newsreader/vua-resources/mapping_eurovoc_skos.csv.gz";
-    static String euroVocHierarchyFile = "/Code/vu/newsreader/vua-resources/eurovoc_in_skos_core_concepts.rdf.gz";
-    static String entityTypeFile = "/Code/vu/newsreader/vua-resources/instance_types_en.ttl.gz";
-    static String entityHierarchyFile = "/Code/vu/newsreader/vua-resources/DBpediaHierarchy_parent_child.tsv";
-    static String entityCustomFile = "";
+    static OutputStream outputStream = null;
 
     static String KSSERVICE = "http://145.100.58.139:50053";
     static String KS = ""; //"nwr/wikinews-new";
     static String KSuser = ""; //"nwr/wikinews-new";
     static String KSpass = ""; //"nwr/wikinews-new";
-    static boolean ALLEVENTYPES = false;
-    static String DATA = "events";
+    static String DATA = "";
     static Integer mCount = -1;
     static ArrayList<String> projects = new ArrayList<String>();
 
     static public void main (String[] args) {
-        DEBUG = true;
-        //ALLEVENTYPES = true;
-        DATA = "light-entity";
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.equals("--data") && args.length > (i + 1)) {
                 DATA = args[i+1];
             }
-            if (arg.equals("--mention") && args.length > (i + 1)) {
+            else if (arg.equals("--mention") && args.length > (i + 1)) {
                 try {
                     mCount = Integer.parseInt(args[i+1]);
                 } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+            else if (arg.equals("--out") && args.length > (i + 1)) {
+                String pathToOutputFile = args[i+1];
+                try {
+                    outputStream = new FileOutputStream(pathToOutputFile);
+                } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 }
             }
@@ -61,27 +56,7 @@ public class JsonRobotHierarchy {
                     projects.add(s);
                 }
             }
-            else if (arg.equals("--eso") && args.length > (i + 1)) {
-                esoPath = args[i+1];
-            }
-            else if (arg.equals("--framenet") && args.length > (i + 1)) {
-                fnPath = args[i+1];
-            }
-            else if (arg.equals("--eurovoc-label") && args.length > (i + 1)) {
-                euroVocLabelFile = args[i+1];
-            }
-            else if (arg.equals("--eurovoc-core") && args.length > (i + 1)) {
-                euroVocHierarchyFile = args[i+1];
-            }
-            else if (arg.equals("--entity-hierarchy") && args.length > (i + 1)) {
-                entityHierarchyFile = args[i+1];
-            }
-            else if (arg.equals("--entity-type") && args.length > (i + 1)) {
-                entityTypeFile = args[i+1];
-            }
-            else if (arg.equals("--entity-custom") && args.length > (i + 1)) {
-                entityCustomFile = args[i+1];
-            }
+
             else if (arg.equalsIgnoreCase("--ks-service") && args.length > (i + 1)) {
                 KSSERVICE = args[i + 1];
             }
@@ -91,15 +66,7 @@ public class JsonRobotHierarchy {
             else if (arg.equalsIgnoreCase("--ks-passw") && args.length > (i + 1)) {
                 KSpass = args[i + 1];
             }
-            else if (arg.equalsIgnoreCase("--debug")) {
-                DEBUG = true;
-            }
-            else if (arg.equalsIgnoreCase("--all-events")) {
-                ALLEVENTYPES = true;
-            }
         }
-        projects.add("<http://www.newsreader-project.eu/project/London>");
-        projects.add("<http://www.newsreader-project.eu/project/AI>");
         HashMap<String, NewsReaderInstance> map = new HashMap<String, NewsReaderInstance>();
         for (int i = 0; i < projects.size(); i++) {
             String project = projects.get(i);
@@ -109,17 +76,36 @@ public class JsonRobotHierarchy {
 
         try {
             JSONObject tree = new JSONObject();
+            ArrayList<PhraseCount> countedNodes = new ArrayList<PhraseCount>();
             Set keySet = map.keySet();
             Iterator<String> keys = keySet.iterator();
             while (keys.hasNext()) {
                 String key = keys.next();
                 NewsReaderInstance newsReaderInstance = map.get(key);
+                if (newsReaderInstance.countMentions()>=mCount) {
+                    PhraseCount phraseCount = new PhraseCount(newsReaderInstance.getUri(), newsReaderInstance.countMentions());
+                    countedNodes.add(phraseCount);
+                }
+            }
+            Collections.sort(countedNodes, new Comparator<PhraseCount>() {
+                @Override
+                public int compare(PhraseCount p1, PhraseCount p2) {
+                    return p2.getCount().compareTo(p1.getCount());
+                }
+            });
+            for (int i = 0; i < countedNodes.size(); i++) {
+                PhraseCount node = countedNodes.get(i);
+                NewsReaderInstance newsReaderInstance = map.get(node.getPhrase());
                 JSONObject iObject = newsReaderInstance.toJSONObject();
                 tree.append("instance", iObject);
             }
-            OutputStream fos = new FileOutputStream(DATA+"-instances.json");
-            fos.write(tree.toString(0).getBytes());
-            fos.close();
+            if (outputStream != null)   {
+                outputStream.write(tree.toString(0).getBytes());
+                outputStream.close();
+            }
+            else {
+                System.out.write(tree.toString(0).getBytes());
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (IOException e) {

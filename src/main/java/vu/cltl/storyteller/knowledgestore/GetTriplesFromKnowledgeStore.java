@@ -1075,41 +1075,67 @@ public class GetTriplesFromKnowledgeStore {
         //// The problem is that the full hiearchy is given for
         while (resultset.hasNext()) {
             QuerySolution solution = resultset.nextSolution();
-            String label = solution.get("label").toString();
-            String instance = solution.get("a").toString();
-            String type = solution.get("type").toString();
-            String dCount = solution.get("dcount").toString();
-            String mCount = solution.get("mcount").toString();
+            String label = "";
+            String instance = "";
+            String type = "";
+            String dCount = "";
+            String mCount = "";
 
-            if (dCount!=null) {
-                int idx = dCount.indexOf("^^");
-                if (idx > -1) dCount = dCount.substring(0, idx);
-                System.out.println("dCount = " + dCount);
+            try {
+                label = solution.get("label").toString();
+            } catch (Exception e) {
+               // e.printStackTrace();
             }
-            if (mCount!=null) {
-                int idx = mCount.indexOf("^^");
-                if (idx > -1) mCount = mCount.substring(0, idx);
+            try {
+                instance = solution.get("a").toString();
+            } catch (Exception e) {
+              //  e.printStackTrace();
             }
+            try {
+                type = solution.get("type").toString();
+            } catch (Exception e) {
+               // e.printStackTrace();
+            }
+            try {
+                dCount = solution.get("dcount").toString();
+            } catch (Exception e) {
+               // e.printStackTrace();
+            }
+            try {
+                mCount = solution.get("mcount").toString();
+            } catch (Exception e) {
+               // e.printStackTrace();
+            }
+            if (!instance.isEmpty()) {
+                if (dCount != null) {
+                    int idx = dCount.indexOf("^^");
+                    if (idx > -1) dCount = dCount.substring(0, idx);
+                   // System.out.println("dCount = " + dCount);
+                }
+                if (mCount != null) {
+                    int idx = mCount.indexOf("^^");
+                    if (idx > -1) mCount = mCount.substring(0, idx);
+                }
 
-            if (map.containsKey(instance)) {
-                NewsReaderInstance newsReaderInstance = map.get(instance);
-                newsReaderInstance.setUri(instance);
-                newsReaderInstance.setInstanceType(instanceType);
-                newsReaderInstance.addLabel(label);
-                newsReaderInstance.addTypes(type);
-                if (dCount!=null) newsReaderInstance.addProjectDocs(project, Integer.parseInt(dCount));
-                if (mCount!=null) newsReaderInstance.addProjectCounts(project, Integer.parseInt(mCount));
-                map.put(instance, newsReaderInstance);
-            }
-            else {
-                NewsReaderInstance newsReaderInstance = new NewsReaderInstance();
-                newsReaderInstance.setUri(instance);
-                newsReaderInstance.setInstanceType(instanceType);
-                newsReaderInstance.addLabel(label);
-                newsReaderInstance.addTypes(type);
-                if (dCount!=null) newsReaderInstance.addProjectDocs(project, Integer.parseInt(dCount));
-                if (mCount!=null) newsReaderInstance.addProjectCounts(project, Integer.parseInt(mCount));
-                map.put(instance, newsReaderInstance);
+                if (map.containsKey(instance)) {
+                    NewsReaderInstance newsReaderInstance = map.get(instance);
+                    newsReaderInstance.setUri(instance);
+                    newsReaderInstance.setInstanceType(instanceType);
+                    newsReaderInstance.addLabel(label);
+                    newsReaderInstance.addTypes(type);
+                    if (dCount != null) newsReaderInstance.addProjectDocs(project, Integer.parseInt(dCount));
+                    if (mCount != null) newsReaderInstance.addProjectCounts(project, Integer.parseInt(mCount));
+                    map.put(instance, newsReaderInstance);
+                } else {
+                    NewsReaderInstance newsReaderInstance = new NewsReaderInstance();
+                    newsReaderInstance.setUri(instance);
+                    newsReaderInstance.setInstanceType(instanceType);
+                    newsReaderInstance.addLabel(label);
+                    newsReaderInstance.addTypes(type);
+                    if (dCount != null) newsReaderInstance.addProjectDocs(project, Integer.parseInt(dCount));
+                    if (mCount != null) newsReaderInstance.addProjectCounts(project, Integer.parseInt(mCount));
+                    map.put(instance, newsReaderInstance);
+                }
             }
         }
     }

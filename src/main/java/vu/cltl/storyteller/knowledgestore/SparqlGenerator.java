@@ -1167,8 +1167,8 @@ order by DESC(?count)
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
                 "SELECT ?a ?label ?type (COUNT (DISTINCT ?m) as ?mcount) (COUNT (DISTINCT ?doc) as ?dcount)\n" +
                 "WHERE {\n" +
-              //  "?e sem:hasActor ?a.\n" +
-                "?a gaf:denotedBy ?m .\n" +
+                "?e sem:hasActor ?a.\n" +
+                "?e gaf:denotedBy ?m .\n" +
                 "?a rdfs:label ?label .\n" +
                 "?attribution grasp:isAttributionFor ?m .\n" +
                 "bind( URI(strbefore( str(?m), \"#\" )) as ?doc ).\n" +
@@ -1193,8 +1193,8 @@ order by DESC(?count)
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
                 "SELECT ?a ?label ?type (COUNT (DISTINCT ?m) as ?mcount) (COUNT (DISTINCT ?doc) as ?dcount)\n" +
                 "WHERE {\n" +
-              //  "?e sem:hasActor ?a.\n" +
-                "?a gaf:denotedBy ?m .\n" +
+                "?e sem:hasActor ?a.\n" +
+                "?e gaf:denotedBy ?m .\n" +
                 "?a rdfs:label ?label .\n" +
                 "?attribution grasp:isAttributionFor ?m .\n" +
                 "bind( URI(strbefore( str(?m), \"#\" )) as ?doc ).\n" +
@@ -1213,13 +1213,14 @@ order by DESC(?count)
         String sparqQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
                 "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n" +
                 "PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
+                "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
                 "PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> \n" +
                 "PREFIX grasp: <http://groundedannotationframework.org/grasp#>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
                 "SELECT ?a ?label ?type (COUNT (DISTINCT ?m) as ?mcount) (COUNT (DISTINCT ?doc) as ?dcount)\n" +
                 "WHERE {\n" +
-              //  "?e sem:hasActor ?a.\n" +
-                "?a gaf:denotedBy ?m .\n" +
+                "?e sem:hasActor ?a.\n" +
+                "?e gaf:denotedBy ?m .\n" +
                 "?a rdfs:label ?label .\n" +
                 "?attribution grasp:isAttributionFor ?m .\n" +
                 "bind( URI(strbefore( str(?m), \"#\" )) as ?doc ).\n" +
@@ -1298,7 +1299,7 @@ order by DESC(?count)
             "group by ?label ?doc ?a ?type ?project\n" +
             "order by DESC(?count)";
 
-    String s2 = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n" +
+    static String s2 = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n" +
             "PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
             "PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> \n" +
             "PREFIX grasp: <http://groundedannotationframework.org/grasp#>\n" +
@@ -1316,7 +1317,7 @@ order by DESC(?count)
             "FILTER (CONTAINS(STR(?type), \"dbpedia\"))\n" +
             "}";
 
-    String s3 = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n" +
+    static String s3 = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n" +
             "PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
             "PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> \n" +
             "PREFIX grasp: <http://groundedannotationframework.org/grasp#>\n" +
@@ -1334,7 +1335,7 @@ order by DESC(?count)
             "FILTER (CONTAINS(STR(?type), \"dbpedia\"))\n" +
             "}";
 
-    String s4 = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
+    static String s4 = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
             "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n" +
             "PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
             "PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> \n" +
@@ -1355,10 +1356,48 @@ order by DESC(?count)
             "group by ?a ?label ?type\n" +
             "order by DESC(?mcount)";
 
+    static String s5 = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
+            "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n" +
+            "PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
+            "PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> \n" +
+            "PREFIX grasp: <http://groundedannotationframework.org/grasp#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+            "SELECT ?project ?a ?type (COUNT (DISTINCT ?m) as ?mcount) (COUNT (DISTINCT ?doc) as ?dcount)\n" +
+            "WHERE {\n" +
+            "?a gaf:denotedBy ?m .\n" +
+            "?attribution grasp:isAttributionFor ?m .\n" +
+            "bind( URI(strbefore( str(?m), \"#\" )) as ?doc ).\n" +
+            "?doc rdfs:comment ?project .\n" +
+            "OPTIONAL {?a a ?type . }\n" +
+            "FILTER (CONTAINS(STR(?a), \"dbpedia\"))\n" +
+            "FILTER (CONTAINS(STR(?type), \"dbpedia\"))\n" +
+            "}\n" +
+            "group by ?a ?type ?project\n" +
+            "order by DESC(?mcount)";
+
+    static String s6 = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
+            "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n" +
+            "PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
+            "PREFIX nwrauthor: <http://www.newsreader-project.eu/provenance/author/> \n" +
+            "PREFIX grasp: <http://groundedannotationframework.org/grasp#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+            "SELECT ?a ?project (COUNT (DISTINCT ?m) as ?mcount) (COUNT (DISTINCT ?doc) as ?dcount)\n" +
+            "WHERE {\n" +
+            "?e sem:hasActor ?a. \n" +
+            "?a gaf:denotedBy ?m .\n" +
+            "?attribution grasp:isAttributionFor ?m .\n" +
+            "bind( URI(strbefore( str(?m), \"#\" )) as ?doc ).\n" +
+            "?doc rdfs:comment ?project .\n" +
+            "}\n" +
+            "group by ?a ?project\n" +
+            "order by DESC(?mcount)\n";
+
     static public void main (String [] args) {
-        //System.out.println(SparqlGenerator.makeSparqlQueryForLightEntityProjectFromKs("<http://www.newsreader-project.eu/project/London>"));
-        System.out.println(SparqlGenerator.makeSparqlQueryForCitedSourcesFromKs());
-        System.out.println(SparqlGenerator.makeSparqlQueryForAuthorsFromKs());
+        System.out.println(SparqlGenerator.makeSparqlQueryForLightEntityProjectFromKs("<http://www.newsreader-project.eu/project/London>"));
+        //System.out.println(SparqlGenerator.makeSparqlQueryForCitedSourcesFromKs());
+        //System.out.println(SparqlGenerator.makeSparqlQueryForAuthorsFromKs());
+        //System.out.println( SparqlGenerator.makeSparqlQueryForLightEntityProjectFromKs("<http://www.newsreader-project.eu/project/London>"));
+       // System.out.println(SparqlGenerator.s6);
     }
 
 }

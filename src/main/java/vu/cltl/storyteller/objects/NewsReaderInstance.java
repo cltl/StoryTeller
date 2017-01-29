@@ -83,7 +83,7 @@ public class NewsReaderInstance {
             this.projectDocs.put(project, dCount);
         }
         else {
-            this.projectCounts.put(project, projectDoc);
+            this.projectDocs.put(project, projectDoc);
         }
     }
 
@@ -170,6 +170,19 @@ public class NewsReaderInstance {
         }
     }
 
+    public Integer countMentions () {
+        Integer cnt = 0;
+        if (this.projects.size()>0) {
+            for (int i = 0; i < projects.size(); i++) {
+                String project = projects.get(i);
+                if (projectCounts.containsKey(project)) {
+                    cnt += projectCounts.get(project);
+                }
+            }
+        }
+        return cnt;
+    }
+
     public JSONObject toJSONObject () throws JSONException {
         JSONObject jsonObject = new JSONObject();
         if (!uri.isEmpty()) jsonObject.put("uri", uri);
@@ -215,21 +228,21 @@ public class NewsReaderInstance {
             for (int i = 0; i < projects.size(); i++) {
                 String project = projects.get(i);
                 JSONObject mObject = new JSONObject();
-                mObject.append("project", project);
+                mObject.put("project", project);
 
                 if (projectCounts.containsKey(project)) {
                         Integer count = projectCounts.get(project);
-                        mObject.append("mentions", count);
+                        mObject.put("mentions", count);
                 }
                 else {
-                    mObject.append("mentions", "0");
+                    mObject.put("mentions", "0");
                 }
                 if (projectDocs.containsKey(project)) {
                         Integer count = projectDocs.get(project);
-                        mObject.append("sources", count);
+                        mObject.put("sources", count);
                 }
                 else {
-                    mObject.append("sources", "0");
+                    mObject.put("sources", "0");
                 }
                 jsonObject.append("projects", mObject);
 
