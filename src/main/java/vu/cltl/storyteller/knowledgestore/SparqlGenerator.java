@@ -1154,11 +1154,13 @@ order by DESC(?count)
         return sparqQuery;
     }
 
+
+    ////// Next queries are used to get the concepts and counts from the KS for the VUbot
     /**
      * Gives light entity data for Robot
      * @return
      */
-    public static String makeSparqlQueryForLightEntityProjectFromKs(String project) {
+    public static String makeSparqlQueryForLightEntityProjectFromKs(String project, String mcount) {
         String sparqQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
         "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n" +
                 "PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
@@ -1178,13 +1180,14 @@ order by DESC(?count)
                 "FILTER (CONTAINS(STR(?type), \"dbpedia\"))\n" +
                 "}\n" +
                 "group by ?a ?label ?type\n" +
+                "HAVING (COUNT (DISTINCT ?m) > "+mcount+")\n" +
                 "order by DESC(?mcount)";
         //System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
     }
 
 
-    public static String makeSparqlQueryForDarkEntityProjectFromKs(String project) {
+    public static String makeSparqlQueryForDarkEntityProjectFromKs(String project, String mcount) {
         String sparqQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
                 "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n" +
                 "PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
@@ -1203,13 +1206,14 @@ order by DESC(?count)
                 "FILTER (CONTAINS(STR(?a), \"/entities/\"))\n" +
                 "}\n" +
                 "group by ?a ?label ?type\n" +
+                "HAVING (COUNT (DISTINCT ?m) > "+mcount+")\n" +
                 "order by DESC(?mcount)";
         // System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
     }
 
 
-    public static String makeSparqlQueryForNonEntityProjectFromKs(String project) {
+    public static String makeSparqlQueryForNonEntityProjectFromKs(String project, String mcount) {
         String sparqQuery = "PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/> \n" +
                 "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n" +
                 "PREFIX prov:  <http://www.w3.org/ns/prov#>\n" +
@@ -1229,6 +1233,7 @@ order by DESC(?count)
                 "FILTER (CONTAINS(STR(?a), \"/non-entities/\"))\n" +
                 "}\n" +
                 "group by ?a ?label ?type\n" +
+                "HAVING (COUNT (DISTINCT ?m) > "+mcount+")\n" +
                 "order by DESC(?mcount)";
         // System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
@@ -1393,7 +1398,7 @@ order by DESC(?count)
             "order by DESC(?mcount)\n";
 
     static public void main (String [] args) {
-        System.out.println(SparqlGenerator.makeSparqlQueryForLightEntityProjectFromKs("<http://www.newsreader-project.eu/project/London>"));
+        System.out.println(SparqlGenerator.makeSparqlQueryForLightEntityProjectFromKs("<http://www.newsreader-project.eu/project/London>", "5"));
         //System.out.println(SparqlGenerator.makeSparqlQueryForCitedSourcesFromKs());
         //System.out.println(SparqlGenerator.makeSparqlQueryForAuthorsFromKs());
         //System.out.println( SparqlGenerator.makeSparqlQueryForLightEntityProjectFromKs("<http://www.newsreader-project.eu/project/London>"));

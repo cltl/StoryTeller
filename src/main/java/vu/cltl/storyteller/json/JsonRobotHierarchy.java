@@ -25,7 +25,8 @@ public class JsonRobotHierarchy {
     static String KSuser = ""; //"nwr/wikinews-new";
     static String KSpass = ""; //"nwr/wikinews-new";
     static String DATA = "";
-    static Integer mCount = -1;
+    static Integer mCount = 0;
+    static String mCountString = "0";
     static ArrayList<String> projects = new ArrayList<String>();
 
     static public void main (String[] args) {
@@ -35,6 +36,7 @@ public class JsonRobotHierarchy {
                 DATA = args[i+1];
             }
             else if (arg.equals("--mention") && args.length > (i + 1)) {
+                mCountString = args[i+1];
                 try {
                     mCount = Integer.parseInt(args[i+1]);
                 } catch (NumberFormatException e) {
@@ -130,14 +132,14 @@ public class JsonRobotHierarchy {
             }
             String sparqlPhrases = "";
             if (DATA.equals("light-entities")) {
-                sparqlPhrases = SparqlGenerator.makeSparqlQueryForLightEntityProjectFromKs(project);
+                sparqlPhrases = SparqlGenerator.makeSparqlQueryForLightEntityProjectFromKs(project,mCountString );
             }
             else if (DATA.equals("dark-entities")) {
-                sparqlPhrases = SparqlGenerator.makeSparqlQueryForDarkEntityProjectFromKs(project);
+                sparqlPhrases = SparqlGenerator.makeSparqlQueryForDarkEntityProjectFromKs(project, mCountString);
 
             }
             else if (DATA.equals("non-entities")) {
-                sparqlPhrases = SparqlGenerator.makeSparqlQueryForNonEntityProjectFromKs(project);
+                sparqlPhrases = SparqlGenerator.makeSparqlQueryForNonEntityProjectFromKs(project, mCountString);
             }
             if (!sparqlPhrases.isEmpty()) {
                 System.out.println("sparqlPhrases = " + sparqlPhrases);
