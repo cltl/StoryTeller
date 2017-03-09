@@ -5,6 +5,8 @@
 FROM ubuntu:latest
 MAINTAINER m.vanmeersbergen@esciencecenter.nl
 
+VOLUME /data
+
 # Generic stuff
 RUN locale-gen en_US.UTF-8
 ENV LANG='en_US.UTF-8' LC_ALL='en_US.UTF-8'
@@ -42,7 +44,7 @@ RUN curl -sL https://deb.nodesource.com/setup_7.x | bash -
 RUN apt-get install -y nodejs
 
 # environment
-ENV JAVA_HOME /usr/lib/jvm/default-java
+ENV JAVA_HOME /usr/lib/jvm/java-8-oracle
 ENV PYTHON_HOME /usr/lib/python3
 
 # make barebones
@@ -50,12 +52,26 @@ RUN mkdir /src
 
 # download and unzip git releases
 
-# vua-resources
-RUN git clone https://github.com/cltl/vua-resources.git /src/vua-resources/
+# vua-resources (done by install script of cltl/StoryTeller)
+# RUN git clone https://github.com/cltl/vua-resources.git /src/vua-resources/
 
 # cltl/StoryTeller
 RUN mkdir /src/StoryTeller
 COPY scripts src pom.xml install.sh /src/StoryTeller/
 WORKDIR /src/StoryTeller
 RUN chmod +wrx install.sh
-# RUN ./install.sh
+RUN ./install.sh
+
+# query-builder-preprocessing
+RUN git clone https://github.com/NLeSC-StoryTeller/query-builder-preprocessing.git /src/query-builder-preprocessing/
+# WORKDIR /src/query-builder-preprocessing
+
+# query-builder-server
+RUN git clone https://github.com/NLeSC-StoryTeller/query-builder-server.git /src/query-builder-server/
+WORKDIR /src/query-builder-server
+RUN npm install
+
+# query-builder-daemon
+RUN git clone https://github.com/NLeSC-StoryTeller/query-builder-daemon.git /src/query-builder-daemon/
+WORKDIR /src/query-builder-daemon/
+RUN ./gradlew installDist
