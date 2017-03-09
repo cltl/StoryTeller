@@ -145,6 +145,9 @@ public class JsonQueryHierarchy {
 
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForAttributionValuesFromKs();
             ArrayList<PhraseCount> cntPredicates = GetTriplesFromKnowledgeStore.getCountsFromKnowledgeStore(sparqlPhrases);
+            if (DEBUG) {
+                System.out.println("nr. of perspectives = " + cntPredicates.size());
+            }
             JSONObject jsonPerspectives = new JSONObject();
             for (int i = 0; i < cntPredicates.size(); i++) {
                 PhraseCount phraseCount = cntPredicates.get(i);
@@ -181,10 +184,18 @@ public class JsonQueryHierarchy {
                 }
             }
 
+            if (DEBUG)  System.out.println("Reading hierarchy into simpleTaxonomy = " + entityHierarchyFile);
+
             SimpleTaxonomy simpleTaxonomy = new SimpleTaxonomy();
             simpleTaxonomy.readSimpleTaxonomyFromFile(pathToHierarchyFile);
+            if (DEBUG) {
+                System.out.println("simpleTaxonomy.subToSuper.size() = " + simpleTaxonomy.subToSuper.size());
+                System.out.println("simpleTaxonomy.superToSub.size() = " + simpleTaxonomy.superToSub.size());
+                System.out.println("simpleTaxonomy.getTops().size() = " + simpleTaxonomy.getTops().size());
+            }
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForLightEntityFromKs();
             HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getLabelsTypesAndInstanceCountsFromKnowledgeStore(sparqlPhrases, null);
+            if (DEBUG) System.out.println("Nr. of instances with types and phrases, cntTypedPredicates.size() = " + cntTypedPredicates.size());
             HashMap<String, ArrayList<PhraseCount>> cntPredicates = deriveTypePhraseCountsFromTypedPhrases(cntTypedPredicates, simpleTaxonomy);
             if (DEBUG) System.out.println("cntPredicates.size() = " + cntPredicates.size());
             ArrayList<String> tops = simpleTaxonomy.getTops();
@@ -221,14 +232,23 @@ public class JsonQueryHierarchy {
                     GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS, KSuser, KSpass);
                 }
             }
+            if (DEBUG)  System.out.println("Reading hierarchy into simpleTaxonomy = " + pathToHierarchyFile);
 
             SimpleTaxonomy simpleTaxonomy = new SimpleTaxonomy();
             simpleTaxonomy.readSimpleTaxonomyFromFile(pathToHierarchyFile);
            // simpleTaxonomy.readSimpleTaxonomyFromFile(hierarchyMappingFile);
+            if (DEBUG) {
+                System.out.println("simpleTaxonomy.subToSuper.size() = " + simpleTaxonomy.subToSuper.size());
+                System.out.println("simpleTaxonomy.superToSub.size() = " + simpleTaxonomy.superToSub.size());
+                System.out.println("simpleTaxonomy.getTops().size() = " + simpleTaxonomy.getTops().size());
+            }
 
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForDarkEntitiesFromKs();
+            if (DEBUG)  System.out.println("Reading hiearchy mapping file = " + hierarchyMappingFile);
             HashMap<String, String> map = Util.ReadFileToStringStringHashMap(hierarchyMappingFile);
+            if (DEBUG) System.out.println("Nr. of hierarchy mappings = " + map.size());
             HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getLabelsTypesAndInstanceCountsFromKnowledgeStore (sparqlPhrases, map);
+            if (DEBUG) System.out.println("Nr. of instances with types and phrases, cntTypedPredicates.size() = " + cntTypedPredicates.size());
             HashMap<String, ArrayList<PhraseCount>> cntPredicates = deriveTypePhraseCountsFromTypedPhrases(cntTypedPredicates, simpleTaxonomy);
             if (DEBUG) System.out.println("cntPredicates.size() = " + cntPredicates.size());
             ArrayList<String> tops = simpleTaxonomy.getTops();
@@ -251,6 +271,7 @@ public class JsonQueryHierarchy {
             e.printStackTrace();
         }
     }
+
     static public void getJsonConceptHierarchyFromKnowledgeStore (String KSSERVICE,
                                                                   String KSuser,
                                                                   String KSpass,
@@ -265,17 +286,31 @@ public class JsonQueryHierarchy {
                     GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS, KSuser, KSpass);
                 }
             }
+            if (DEBUG)  System.out.println("Reading hierarchy into simpleTaxonomy = " + pathToHierarchyFile);
 
             SimpleTaxonomy simpleTaxonomy = new SimpleTaxonomy();
             simpleTaxonomy.readSimpleTaxonomyFromFile(pathToHierarchyFile);
+            if (DEBUG) {
+                System.out.println("simpleTaxonomy.subToSuper.size() = " + simpleTaxonomy.subToSuper.size());
+                System.out.println("simpleTaxonomy.superToSub.size() = " + simpleTaxonomy.superToSub.size());
+                System.out.println("simpleTaxonomy.getTops().size() = " + simpleTaxonomy.getTops().size());
+            }
 
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForPhraseSkosRelatedTypeCountsFromKs();
             HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getTypesAndInstanceCountsFromKnowledgeStore (sparqlPhrases);
+            if (DEBUG) System.out.println("Nr. of instances with types and phrases, cntTypedPredicates.size() = " + cntTypedPredicates.size());
             //HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getTypesAndLabelCountsFromKnowledgeStore (sparqlPhrases);
             HashMap<String, ArrayList<PhraseCount>> cntPredicates = deriveTypePhraseCountsFromTypedPhrases(cntTypedPredicates, simpleTaxonomy);
             if (DEBUG) System.out.println("cntPredicates.size() = " + cntPredicates.size());
 
+            if (DEBUG)  System.out.println("Reading instance to type mapping into simpleTaxonomy for relevant instances = " + pathToTypeFile);
             simpleTaxonomy.readSimpleTaxonomyFromDbpFile(pathToTypeFile, cntPredicates.keySet());
+
+            if (DEBUG) {
+                System.out.println("simpleTaxonomy.subToSuper.size() = " + simpleTaxonomy.subToSuper.size());
+                System.out.println("simpleTaxonomy.superToSub.size() = " + simpleTaxonomy.superToSub.size());
+                System.out.println("simpleTaxonomy.getTops().size() = " + simpleTaxonomy.getTops().size());
+            }
 
             ArrayList<String> tops = simpleTaxonomy.getTops();
 
@@ -299,6 +334,15 @@ public class JsonQueryHierarchy {
     }
 
 
+/*        if (DEBUG) {
+        System.out.println("eso = " + esoPath);
+        System.out.println("framenet = " + fnPath);
+        System.out.println("eurovoc-label = " + euroVocLabelFile);
+        System.out.println("eurovoc-core = " + euroVocHierarchyFile);
+        System.out.println("entity-hierarchy = " + entityHierarchyFile);
+        System.out.println("entity-type = " + entityTypeFile);
+        System.out.println("entity-custom = " + entityCustomFile);
+    }*/
 
     static public void getJsonHierarchyAuthorsKnowledgeStoreOrg (String KSSERVICE, String KSuser, String KSpass) {
         try {
@@ -345,10 +389,16 @@ public class JsonQueryHierarchy {
                     GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS, KSuser, KSpass);
                 }
             }
+            if (DEBUG)  System.out.println("Reading hierarchy into simpleTaxonomy = " + pathToHierarchyFile);
 
             SimpleTaxonomy simpleTaxonomy = new SimpleTaxonomy();
             simpleTaxonomy.readSimpleTaxonomyFromFile(pathToHierarchyFile);
             // simpleTaxonomy.readSimpleTaxonomyFromFile(hierarchyMappingFile);
+            if (DEBUG) {
+                System.out.println("simpleTaxonomy.subToSuper.size() = " + simpleTaxonomy.subToSuper.size());
+                System.out.println("simpleTaxonomy.superToSub.size() = " + simpleTaxonomy.superToSub.size());
+                System.out.println("simpleTaxonomy.getTops().size() = " + simpleTaxonomy.getTops().size());
+            }
 
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForAuthorsFromKs();
             //HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getLabelsTypesAndInstanceCountsFromKnowledgeStore (sparqlPhrases, null);
@@ -387,10 +437,16 @@ public class JsonQueryHierarchy {
                     GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS, KSuser, KSpass);
                 }
             }
+            if (DEBUG)  System.out.println("Reading hierarchy into simpleTaxonomy = " + pathToHierarchyFile);
 
             SimpleTaxonomy simpleTaxonomy = new SimpleTaxonomy();
             simpleTaxonomy.readSimpleTaxonomyFromFile(pathToHierarchyFile);
             // simpleTaxonomy.readSimpleTaxonomyFromFile(hierarchyMappingFile);
+            if (DEBUG) {
+                System.out.println("simpleTaxonomy.subToSuper.size() = " + simpleTaxonomy.subToSuper.size());
+                System.out.println("simpleTaxonomy.superToSub.size() = " + simpleTaxonomy.superToSub.size());
+                System.out.println("simpleTaxonomy.getTops().size() = " + simpleTaxonomy.getTops().size());
+            }
 
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForCitedSourcesFromKs();
             //HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getLabelsTypesAndInstanceCountsFromKnowledgeStore (sparqlPhrases, null);
@@ -473,18 +529,25 @@ public class JsonQueryHierarchy {
                     GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS, KSuser, KSpass);
                 }
             }
+            if (DEBUG)  System.out.println("Reading eso into simpleTaxonomy = " + esoPath);
+
             EsoReader esoReader = new EsoReader();
             esoReader.parseFile(esoPath);
             SimpleTaxonomy simpleTaxonomy = esoReader.simpleTaxonomy;
             if (DEBUG) System.out.println("ESO");
             if (DEBUG) System.out.println("simpleTaxonomy.superToSub.size() = " + simpleTaxonomy.superToSub.size());
             if (DEBUG) System.out.println("simpleTaxonomy.subToSuper.size() = " + simpleTaxonomy.subToSuper.size());
+            if (DEBUG) System.out.println("simpleTaxonomy.getTops().size() = " + simpleTaxonomy.getTops().size());
+
+            if (DEBUG)  System.out.println("Reading framenet into simpleTaxonomy = " + fnPath);
+
             FrameNetReader frameNetReader = new FrameNetReader();
             frameNetReader.parseFile(fnPath);
             simpleTaxonomy.addToTaxonymy(frameNetReader.subToSuperFrame);
             if (DEBUG) System.out.println("FRAMENET");
             if (DEBUG) System.out.println("simpleTaxonomy.superToSub.size() = " + simpleTaxonomy.superToSub.size());
             if (DEBUG) System.out.println("simpleTaxonomy.subToSuper.size() = " + simpleTaxonomy.subToSuper.size());
+            if (DEBUG) System.out.println("simpleTaxonomy.getTops().size() = " + simpleTaxonomy.getTops().size());
 
 
 
@@ -511,9 +574,10 @@ public class JsonQueryHierarchy {
             if (DEBUG) System.out.println("cntPredicates.size() = " + cntPredicates.size());
             if (ALLEVENTYPES) {
                 simpleTaxonomy.topEvents(cntPredicates.keySet().iterator());
-                if (DEBUG) System.out.println("TOPPED");
+                if (DEBUG) System.out.println("ALL EVENT TYPES");
                 if (DEBUG) System.out.println("simpleTaxonomy.superToSub.size() = " + simpleTaxonomy.superToSub.size());
                 if (DEBUG) System.out.println("simpleTaxonomy.subToSuper.size() = " + simpleTaxonomy.subToSuper.size());
+                if (DEBUG) System.out.println("simpleTaxonomy.getTops().size() = " + simpleTaxonomy.getTops().size());
             }
 
             ArrayList<String> tops = simpleTaxonomy.getTops();
