@@ -66,10 +66,6 @@ RUN ./install.sh
 # Setup git to hadle line endings properly
 RUN git config --global core.autocrlf input
 
-# query-builder-preprocessing
-RUN git clone https://github.com/NLeSC-StoryTeller/query-builder-preprocessing.git /src/query-builder-preprocessing/
-# WORKDIR /src/query-builder-preprocessing
-
 # query-builder-server
 RUN git clone https://github.com/NLeSC-StoryTeller/query-builder-server.git /src/query-builder-server/
 WORKDIR /src/query-builder-server
@@ -79,3 +75,7 @@ RUN npm install
 RUN git clone https://github.com/NLeSC-StoryTeller/query-builder-daemon.git /src/query-builder-daemon/
 WORKDIR /src/query-builder-daemon/
 RUN ./gradlew installDist
+
+# query-builder-preprocessing
+RUN a=a git clone https://github.com/NLeSC-StoryTeller/query-builder-preprocessing.git /src/query-builder-preprocessing/
+# WORKDIR /src/query-builder-preprocessing
