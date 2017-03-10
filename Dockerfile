@@ -63,6 +63,9 @@ WORKDIR /src/StoryTeller
 RUN chmod +wrx install.sh
 RUN ./install.sh
 
+# Setup git to hadle line endings properly
+RUN git config --global core.autocrlf input
+
 # query-builder-preprocessing
 RUN git clone https://github.com/NLeSC-StoryTeller/query-builder-preprocessing.git /src/query-builder-preprocessing/
 # WORKDIR /src/query-builder-preprocessing
