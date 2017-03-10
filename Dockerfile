@@ -55,7 +55,10 @@ RUN mkdir /src
 
 # cltl/StoryTeller
 RUN mkdir /src/StoryTeller
-COPY scripts src pom.xml install.sh /src/StoryTeller/
+COPY pom.xml install.sh /src/StoryTeller/
+COPY scripts /src/StoryTeller/scripts
+COPY src /src/StoryTeller/src
+
 WORKDIR /src/StoryTeller
 RUN chmod +wrx install.sh
 RUN ./install.sh
