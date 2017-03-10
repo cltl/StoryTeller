@@ -5,8 +5,6 @@
 FROM ubuntu:latest
 MAINTAINER m.vanmeersbergen@esciencecenter.nl
 
-VOLUME /data
-
 # Generic stuff
 RUN locale-gen en_US.UTF-8
 ENV LANG='en_US.UTF-8' LC_ALL='en_US.UTF-8'
