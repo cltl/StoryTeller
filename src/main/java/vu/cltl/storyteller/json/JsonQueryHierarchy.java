@@ -32,6 +32,7 @@ import java.util.Set;
  * - perspective values
  */
 public class JsonQueryHierarchy {
+
     static boolean DEBUG = false;
     static OutputStream outputStream = null;
     static String fnPath = "/Code/vu/newsreader/vua-resources/frAllRelation.xml";
@@ -52,6 +53,7 @@ public class JsonQueryHierarchy {
     static Integer mCount = -1;
 
     static public void main (String[] args) {
+        org.apache.log4j.BasicConfigurator.configure();
         //DEBUG = true;
         //ALLEVENTYPES = true;
         //DATA = "perspectives";
