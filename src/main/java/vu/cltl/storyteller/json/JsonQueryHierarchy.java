@@ -53,7 +53,7 @@ public class JsonQueryHierarchy {
     static Integer mCount = -1;
 
     static public void main (String[] args) {
-        org.apache.log4j.BasicConfigurator.configure();
+        //org.apache.log4j.BasicConfigurator.configure();
         //DEBUG = true;
         //ALLEVENTYPES = true;
         //DATA = "perspectives";
