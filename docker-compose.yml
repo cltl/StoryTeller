@@ -3,13 +3,13 @@ services:
   query-builder-preprocessing:
     image: nlescstoryteller/query-builder-preprocessing
     volumes:
-      - data:/data/
+      - data:/data
 
   query-builder-daemon:
     restart: always
     image: nlescstoryteller/query-builder-daemon
     volumes:
-      - data:/data/
+      - data:/data
     ports:
       - "4567:4567"
     links:
@@ -21,7 +21,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - data:/data/
+      - data:/data
     links:
       - query-builder-daemon:daemon
 
