@@ -42,18 +42,26 @@ Some of the functions require resources that need to be cloned from
 The download of these resources is included in the install.sh script. The scripts assume these resources to be present
 next to the installation of the StoryTeller. If not, you need to adapt the paths in the scripts.
 
-## Troubleshooting
-The user may encounter an interface with one or more empty lists under the list categories. This is probably due to a malfunction in the preprocessing steps. Please see the https://github.com/NLeSC-Storyteller/query-builder-preprocessing repository for tips on how to resolve these issues.
-
-### Connect to the docker container for troubleshooting
+## Connect to the docker container for troubleshooting
+The user may wish to connect to the running docker components for troubleshooting purposes. The following is a listing of possible commands to connect to the various components.
 **linux**
 ```bash
-    sudo docker exec -v data:/data -it nlescstoryteller/query-builder-client /bin/bash
+    sudo docker exec -v data:/data -it nlescstoryteller/storyteller /bin/bash
+    sudo docker exec -v data:/data -it nlescstoryteller/query-builder-preprocessing /bin/bash
+    sudo docker exec -v data:/data -it nlescstoryteller/query-builder-server /bin/bash
+    sudo docker exec -v data:/data -it nlescstoryteller/query-builder-daemon /bin/bash    
+    sudo docker exec -it nlescstoryteller/query-builder-client /bin/bash
+    sudo docker exec -it nlescstoryteller/uncertainty-visualization /bin/bash
 ```
 
 **windows**
 ```bash
-    winpty docker exec -v data:/data -ti nlescstoryteller/query-builder-client //bin/bash
+    winpty docker exec -v data:/data -it nlescstoryteller/storyteller //bin/bash
+    winpty docker exec -v data:/data -it nlescstoryteller/query-builder-preprocessing //bin/bash
+    winpty docker exec -v data:/data -it nlescstoryteller/query-builder-server //bin/bash
+    winpty docker exec -v data:/data -it nlescstoryteller/query-builder-daemon //bin/bash    
+    winpty docker exec -it nlescstoryteller/query-builder-client //bin/bash
+    winpty docker exec -it nlescstoryteller/uncertainty-visualization //bin/bash    
 ```
 
 # LICENSE
