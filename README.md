@@ -1,14 +1,27 @@
-# StoryTeller
-================
-version 1.0
-Copyright: VU University Amsterdam, Piek Vossen
-email: piek.vossen@vu.nl
-website: cltl.nl
+StoryTeller
+===========
+version 1.0  
+Copyright: VU University Amsterdam, Piek Vossen  
+email: piek.vossen@vu.nl  
+website: cltl.nl  
 
-SOURCE CODE:
+## SOURCE CODE:
 https://github.com/cltl/StoryTeller
 
-INSTALLATION
+## AUTOMATED INSTALLATION of the complete query building and visualization suite
+(please make sure to install docker and docker-compose https://www.docker.com/)
+
+1. docker volume create --name=data
+2. docker-compose up
+
+## AUTOMATED INSTALLATION of this component only
+*Please Note that this will also install all necessary dependencies in the docker container*  
+```bash
+    docker build -t nlescstoryteller/storyteller
+```
+
+## MANUAL INSTALLATION of this component only
+*If the steps below do not suffice, please refer to the Dockerfile for more information on dependencies etc.*  
 1. git clone https://github.com/cltl/StoryTeller
 2. cd StoryTeller
 3. chmod +wrx install.sh
@@ -16,7 +29,7 @@ INSTALLATION
 
 The install.sh will build the binary through apache-maven-2.2.1 and the pom.xml and move it to the "lib" folder.
 
-REQUIREMENTS
+### REQUIREMENTS
 StoryTeller is developed in Java 1.6 and can run on any platform that supports Java 1.6
 The code includes a JENA library for excecuting SPARQL and reading the results. Running JENA requires
 the jena-log4j.properties file to be present from the location that the code is excecuted.
@@ -29,8 +42,21 @@ Some of the functions require resources that need to be cloned from
 The download of these resources is included in the install.sh script. The scripts assume these resources to be present
 next to the installation of the StoryTeller. If not, you need to adapt the paths in the scripts.
 
+## Troubleshooting
+The user may encounter an interface with one or more empty lists under the list categories. This is probably due to a malfunction in the preprocessing steps. Please see the https://github.com/NLeSC-Storyteller/query-builder-preprocessing repository for tips on how to resolve these issues.
 
-LICENSE
+### Connect to the docker container for troubleshooting
+**linux**
+```bash
+    sudo docker exec -v data:/data -it nlescstoryteller/query-builder-client /bin/bash
+```
+
+**windows**
+```bash
+    winpty docker exec -v data:/data -ti nlescstoryteller/query-builder-client //bin/bash
+```
+
+# LICENSE
     StoryTeller is free software: you can redistribute it and/or modify
     it under the terms of the The Apache License, Version 2.0:
         http://www.apache.org/licenses/LICENSE-2.0.txt.
@@ -41,7 +67,7 @@ LICENSE
     License for more details.
 
 
-DESCRIPTION
+# DESCRIPTION
 
 Toolkit to query the NewsReader KnowledgeStore with SPARQL and create a JSON story.
 The NewsReader KnowledgeStore contains event-centric knowledge graphs (ECKGs) according to the
@@ -60,7 +86,7 @@ the sentiment, the denial/confirmation, the certainty, the time perspective. Lik
 mentioned by specific sources and/or on which a certain perspective is expressed.
 
 The JSON story that is returned for a query consists of a list of ECKGs, where each ECKG has the following structure (see also Zwaan et al 2016):
-
+```javascript
  {  "actors": {"actor:": [
         "co:virus",
         "co:expert"
@@ -109,6 +135,7 @@ The JSON story that is returned for a query consists of a list of ECKGs, where e
     "sentence": "6377",
     "time": "20160504"
 },
+```
 
 The stories consists of groups of ECKGs identified by the groupName, where each ECKG has a climax score that indicates how prominent the
 event is in the group. Groups have scores based on the highest climax score in the group.
@@ -333,3 +360,5 @@ M. Rospocher, M. van Erp, P. Vossen, A. Fokkens, I. Aldabe, G. Rigau, A. Soroa, 
 Zwaan van der J., M. van Meersbergen, A. Fokkens, S. ter Braake, I. Leemans, E. Kuijpers, P. Vossen, I. Maks, “Storyteller: visualizing perspectives in digital humanities projects,” in Proceedings of the 2nd ifip international workshop on computational history and data-driven humanities, Dublin, Ireland, Ireland, May 25, 2016.
 
 Van Hage, W.R., Malaisé, V., Segers, R., Hollink, L., Schreiber, G.: Design and use of the simple event model (sem). Web Semant. Sci. Serv. Agent. World Wide Web 9(2), 128–136 (2011)
+
+
