@@ -9,19 +9,20 @@ website: cltl.nl
 https://github.com/cltl/StoryTeller
 
 ## Installation
-### AUTOMATED INSTALLATION of the complete query building and visualization suite
-(please make sure to install docker and docker-compose https://www.docker.com/)
+### Automated installation of the complete query building and visualization suite
+(please make sure to install docker and docker-compose https://www.docker.com/)  
+![diagram of the stack](https://cdn.rawgit.com/NLeSC-Storyteller/StoryTeller/master/doc/stack-diagram.svg "Stack diagram")
 
 1. docker volume create --name=data
 2. docker-compose up
 
-### AUTOMATED INSTALLATION of this component only
+### Automated installation of this component only
 *Please Note that this will also install all necessary dependencies in the docker container*  
 ```bash
     docker build -t nlescstoryteller/storyteller
 ```
 
-### MANUAL INSTALLATION of this component only
+### Manual installation of this component only
 *If the steps below do not suffice, please refer to the Dockerfile for extra information on dependencies etc.*  
 
 _Requirements_  
@@ -46,30 +47,6 @@ _Manual Installation_
 ```
 
 The install.sh will build the binary through apache-maven-2.2.1 and the pom.xml and move it to the "lib" folder.
-
-
-
-## Connect to the docker container for troubleshooting
-The user may wish to connect to the running docker components for troubleshooting purposes. The following is a list of possible commands to connect to the various components.
-**linux**
-```bash
-    sudo docker exec -v data:/data -it nlescstoryteller/storyteller /bin/bash
-    sudo docker exec -v data:/data -it nlescstoryteller/query-builder-preprocessing /bin/bash
-    sudo docker exec -v data:/data -it nlescstoryteller/query-builder-server /bin/bash
-    sudo docker exec -v data:/data -it nlescstoryteller/query-builder-daemon /bin/bash    
-    sudo docker exec -it nlescstoryteller/query-builder-client /bin/bash
-    sudo docker exec -it nlescstoryteller/uncertainty-visualization /bin/bash
-```
-
-**windows**
-```bash
-    winpty docker exec -v data:/data -it nlescstoryteller/storyteller //bin/bash
-    winpty docker exec -v data:/data -it nlescstoryteller/query-builder-preprocessing //bin/bash
-    winpty docker exec -v data:/data -it nlescstoryteller/query-builder-server //bin/bash
-    winpty docker exec -v data:/data -it nlescstoryteller/query-builder-daemon //bin/bash    
-    winpty docker exec -it nlescstoryteller/query-builder-client //bin/bash
-    winpty docker exec -it nlescstoryteller/uncertainty-visualization //bin/bash    
-```
 
 # LICENSE
     StoryTeller is free software: you can redistribute it and/or modify
@@ -315,6 +292,7 @@ Parameters
 Return
     gzip file with the token index in which the URI of a source is mapped to the token layer from NAF:
     
+```xml
     <?xml version="1.0" encoding="UTF-8" standalone="no"?>
     <index>
     <text>
@@ -326,7 +304,7 @@ Return
     <wf id="w5" sent="1" length="7" offset="29"><![CDATA[sparked]]></wf>
     <wf id="w6" sent="1" length="11" offset="37"><![CDATA[vaccination]]></wf>
     </text>
-
+```
 
 6. Outputting
 
@@ -366,7 +344,29 @@ The API is illustrated in the script getoverview.sh
 
 Any update of the KnowledgeStore requires running the script again to update the statistics.
 
-References:
+## Connect to the docker containers for troubleshooting
+The user may wish to connect to the running docker components for troubleshooting purposes. The following is a list of possible commands to connect to the various components.
+**linux**
+```bash
+    sudo docker exec -v data:/data -it nlescstoryteller/storyteller /bin/bash
+    sudo docker exec -v data:/data -it nlescstoryteller/query-builder-preprocessing /bin/bash
+    sudo docker exec -v data:/data -it nlescstoryteller/query-builder-server /bin/bash
+    sudo docker exec -v data:/data -it nlescstoryteller/query-builder-daemon /bin/bash    
+    sudo docker exec -it nlescstoryteller/query-builder-client /bin/bash
+    sudo docker exec -it nlescstoryteller/uncertainty-visualization /bin/bash
+```
+
+**windows**
+```bash
+    winpty docker exec -v data:/data -it nlescstoryteller/storyteller //bin/bash
+    winpty docker exec -v data:/data -it nlescstoryteller/query-builder-preprocessing //bin/bash
+    winpty docker exec -v data:/data -it nlescstoryteller/query-builder-server //bin/bash
+    winpty docker exec -v data:/data -it nlescstoryteller/query-builder-daemon //bin/bash    
+    winpty docker exec -it nlescstoryteller/query-builder-client //bin/bash
+    winpty docker exec -it nlescstoryteller/uncertainty-visualization //bin/bash    
+```
+
+## References
 
 P. Vossen, R. Agerri, I. Aldabe, A. Cybulska, M. van Erp, A. Fokkens, E. Laparra, A. Minard, A. P. Aprosio, G. Rigau, M. Rospocher, and R. Segers, “Newsreader: how semantic web helps natural language processing helps semantic web,” Special issue knowledge-based systems, elsevier, 2016. doi:http://dx.doi.org/10.1016/j.knosys.2016.07.013
 
