@@ -11,10 +11,14 @@ https://github.com/cltl/StoryTeller
 ## Installation
 ### Automated installation of the complete query building and visualization suite
 (please make sure to install docker and docker-compose https://www.docker.com/)  
-![diagram of the stack](https://cdn.rawgit.com/NLeSC-Storyteller/StoryTeller/master/doc/stack-diagram.svg "Stack diagram")
 
-1. docker volume create --name=data
-2. docker-compose up
+```bash
+    docker volume create --name=data
+    docker-compose up
+```
+This will create a set of docker containers that will run the following system for you:  
+![diagram of the stack](https://cdn.rawgit.com/NLeSC-Storyteller/StoryTeller/master/doc/stack-diagram.svg "Stack diagram")  
+
 
 ### Automated installation of this component only
 *Please Note that this will also install all necessary dependencies in the docker container*  
