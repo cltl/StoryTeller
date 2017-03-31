@@ -8,28 +8,23 @@ website: cltl.nl
 ## SOURCE CODE:
 https://github.com/cltl/StoryTeller
 
-## AUTOMATED INSTALLATION of the complete query building and visualization suite
+## Installation
+### AUTOMATED INSTALLATION of the complete query building and visualization suite
 (please make sure to install docker and docker-compose https://www.docker.com/)
 
 1. docker volume create --name=data
 2. docker-compose up
 
-## AUTOMATED INSTALLATION of this component only
+### AUTOMATED INSTALLATION of this component only
 *Please Note that this will also install all necessary dependencies in the docker container*  
 ```bash
     docker build -t nlescstoryteller/storyteller
 ```
 
-## MANUAL INSTALLATION of this component only
-*If the steps below do not suffice, please refer to the Dockerfile for more information on dependencies etc.*  
-1. git clone https://github.com/cltl/StoryTeller
-2. cd StoryTeller
-3. chmod +wrx install.sh
-4. run the install.sh script
+### MANUAL INSTALLATION of this component only
+*If the steps below do not suffice, please refer to the Dockerfile for extra information on dependencies etc.*  
 
-The install.sh will build the binary through apache-maven-2.2.1 and the pom.xml and move it to the "lib" folder.
-
-### REQUIREMENTS
+_Requirements_  
 StoryTeller is developed in Java 1.6 and can run on any platform that supports Java 1.6
 The code includes a JENA library for excecuting SPARQL and reading the results. Running JENA requires
 the jena-log4j.properties file to be present from the location that the code is excecuted.
@@ -42,8 +37,20 @@ Some of the functions require resources that need to be cloned from
 The download of these resources is included in the install.sh script. The scripts assume these resources to be present
 next to the installation of the StoryTeller. If not, you need to adapt the paths in the scripts.
 
+_Manual Installation_
+```bash
+    git clone https://github.com/cltl/StoryTeller
+    cd StoryTeller
+    chmod +wrx install.sh
+    ./install.sh
+```
+
+The install.sh will build the binary through apache-maven-2.2.1 and the pom.xml and move it to the "lib" folder.
+
+
+
 ## Connect to the docker container for troubleshooting
-The user may wish to connect to the running docker components for troubleshooting purposes. The following is a listing of possible commands to connect to the various components.
+The user may wish to connect to the running docker components for troubleshooting purposes. The following is a list of possible commands to connect to the various components.
 **linux**
 ```bash
     sudo docker exec -v data:/data -it nlescstoryteller/storyteller /bin/bash
