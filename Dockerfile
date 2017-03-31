@@ -61,6 +61,7 @@ COPY src /src/StoryTeller/src
 
 WORKDIR /src/StoryTeller
 RUN chmod +wrx install.sh
+RUN sync
 RUN ./install.sh
 
 # # Setup git to hadle line endings properly
