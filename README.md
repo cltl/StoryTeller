@@ -8,9 +8,14 @@ website: cltl.nl
 ## SOURCE CODE:
 https://github.com/cltl/StoryTeller
 
+## DESCRIPTION of the StoryTeller stack
+The Storyteller system will allow you to generate general queries about topics on the [KnowledgeStore](https://knowledgestore.fbk.eu/) and visualize the results for analysis and exploration. It tries to accomplish this task by providing the user with web frontends that simplify the information needed for the complex tasks required and allowing the user to explore the knowledge with custom selections.
+
 ## Installation
 ### Automated installation of the complete query building and visualization suite
 (please make sure to install docker and docker-compose https://www.docker.com/)  
+
+After installation of docker, the following bash commands should suffice to install the entire system:
 
 ```bash
     docker volume create --name=data
@@ -19,6 +24,7 @@ https://github.com/cltl/StoryTeller
 This will create a set of docker containers that will run the following system for you:  
 ![diagram of the stack](https://cdn.rawgit.com/NLeSC-Storyteller/StoryTeller/master/doc/stack-diagram.svg "Stack diagram")  
 
+Please allow the installation process some time. After installation is complete, the web frontends can be found at [localhost:9000](http://localhost:9000) for the query builder component, and at [localhost:9001](http://localhost:9001) for the visualization component
 
 ### Automated installation of this component only
 *Please Note that this will also install all necessary dependencies in the docker container*  
@@ -63,7 +69,7 @@ The install.sh will build the binary through apache-maven-2.2.1 and the pom.xml 
     License for more details.
 
 
-# DESCRIPTION
+# DESCRIPTION of the CLTL/StoryTeller component
 
 Toolkit to query the NewsReader KnowledgeStore with SPARQL and create a JSON story.
 The NewsReader KnowledgeStore contains event-centric knowledge graphs (ECKGs) according to the
