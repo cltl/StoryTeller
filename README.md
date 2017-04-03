@@ -26,12 +26,14 @@ After installation of docker, the following bash commands should suffice to inst
     docker volume create --name=data
     docker-compose up
 ```
-This will create a set of docker containers that will run the following system for you:  
+This will create a set of docker containers that will run the following system
 ![diagram of the stack](https://cdn.rawgit.com/NLeSC-Storyteller/StoryTeller/master/doc/stack-diagram.svg "Stack diagram")  
 
 ## Useage
 
 Please allow the installation process some time. After installation is complete, the web frontends can be found at [localhost:9000](http://localhost:9000) for the query builder component, and at [localhost:9001](http://localhost:9001) for the visualization component
+
+Please be aware that we have targeted these web applications for Google Chrome. Results on other browsers may vary.
 
 The install.sh will build the binary through apache-maven-2.2.1 and the pom.xml and move it to the "lib" folder.
 
