@@ -23,6 +23,8 @@ The Storyteller system will allow you to generate general queries about topics o
 After installation of docker, the following bash commands should suffice to install the entire system:
 
 ```bash
+    git clone git@github.com:NLeSC-Storyteller/StoryTeller.git
+    cd StoryTeller/
     docker volume create --name=data
     docker-compose up
 ```
