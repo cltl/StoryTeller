@@ -1,6 +1,6 @@
 This README provides information about the complete storyteller software stack. If you are looking for information on the Computational Linguistics Library alone, please refer to [StoryTeller_Library.md](StoryTeller_Library.md)
 
-StoryTeller knowlegde store querying and visualization suite.
+StoryTeller knowledge store querying and visualization suite.
 =============================================================
 version 1.0  
 Shared Copyright:  
