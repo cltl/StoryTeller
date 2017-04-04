@@ -10,16 +10,16 @@ services:
     image: nlescstoryteller/query-builder-daemon
     volumes:
       - data:/data
-    ports:
-      - "4567:4567"
+    expose:
+      - "4567"
     links:
       - query-builder-preprocessing:preprocessing
 
   query-builder-server:
     restart: always
     image: nlescstoryteller/query-builder-server
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
     volumes:
       - data:/data
     links:
@@ -40,6 +40,16 @@ services:
       - "9001:9001"
     links:
       - query-builder-server:server
+
+  nginx:
+    build: nginx/
+    ports:
+      - "80:80"
+    links:
+      - query-builder-daemon
+      - query-builder-server
+      - query-builder-client
+      - uncertainty-visualization
 
 volumes:
   data:
