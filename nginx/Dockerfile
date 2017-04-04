@@ -1,2 +1,2 @@
 FROM nginx
-ADD storyteller.conf /etc/nginx/sites-enabled/default
+ADD storyteller.conf /etc/nginx/conf.d/default.conf
