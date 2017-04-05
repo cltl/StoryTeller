@@ -31,9 +31,12 @@ After installation of docker, the following bash commands should suffice to inst
 This will create a set of docker containers that will run the following system
 ![diagram of the stack](https://cdn.rawgit.com/NLeSC-Storyteller/StoryTeller/master/doc/stack-diagram.svg "Stack diagram")  
 
-## Useage
+## Usage
 
-Please allow the installation process some time. After installation is complete, the web frontends can be found at [localhost:9000](http://localhost:9000) for the query builder component, and at [localhost:9001](http://localhost:9001) for the visualization component
+Please allow the installation process some time.
+When the installation process is completed the message `storyteller_query-builder-preprocessing_1 exited with code 0` will be printed.
+
+After installation is complete, the web frontends can be found at [http://localhost/builder](http://localhost/builder) for the query builder component, and at [http://localhost](http://localhost) for the visualization component
 
 Please be aware that we have targeted these web applications for Google Chrome. Results on other browsers may vary.
 
