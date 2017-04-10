@@ -547,7 +547,15 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
          typedPredicates);
     }
 
-
+    String cleanName (String name) {
+        String clName = name.replaceAll("unknown", "");
+        clName = clName.replaceAll("%2C", ":");
+        clName = clName.replaceAll("%2F", "/");
+        clName = clName.replaceAll("%27", "'");
+        clName = clName.replace("+", "_");
+       // System.out.println("clName = " + clName);
+        return clName;
+    }
 
     public void  jsonTree (JSONObject tree, String gType, String iType, String ns, ArrayList<String> tops,
                            ArrayList<String> covered,
@@ -611,7 +619,7 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
 
                     JSONObject node = new JSONObject();
                    // node.put("level", new Integer(level).toString());
-                    if (!name.isEmpty()) node.put("name", name);
+                    if (!name.isEmpty()) node.put("name", cleanName(name));
                     node.put("query", topCount.getPhrase());
                     if (!type.isEmpty()) node.put("type", type);
                     if (!ref.isEmpty()) node.put("url", ref);
@@ -636,7 +644,9 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                                 if (idx > -1) {
                                     name = phraseCount.getPhrase().substring(idx + 1);
                                 }
-                                phraseCountJsonObject.put("name", name.replace("+","_"));
+                                if (!name.isEmpty()) name =  cleanName(name);
+
+                                //phraseCountJsonObject.put("name", name.replace("+","_"));
                                 phraseCountJsonObject.put("query", phraseCount.getPhrase());
                                 if (phraseCount.getPhrase().indexOf("http")> -1) {
                                     ///what about eso and eurovoc
@@ -679,6 +689,91 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                     else {
                         //  System.out.println("has no children top = " + top);
                     }
+                    tree.append("children", node);
+                }
+                else {
+                    //// no use for this class
+                   /* System.out.println("ignoring topCount = " + topCount.getPhraseCount());
+                    System.out.println("instances. = " + instances);
+                    System.out.println("children = "+children.size());*/
+                }
+            }
+            else {
+                   System.out.println("ns = " + ns);
+                   System.out.println("top = " + topCount.getPhraseCount());
+            }
+        }
+    }
+    public void  jsonPerspectiveTree (JSONObject tree, String gType, String iType, String ns, ArrayList<String> tops,
+                           ArrayList<String> covered,
+                           int mCount,
+                           int level,
+                           HashMap<String, Integer> typeCounts,
+                           HashMap<String, ArrayList<PhraseCount>> phrases,
+                           HashMap<String, TypedPhraseCount> typedPredicates) throws IOException, JSONException {
+
+
+
+        level++;
+        ArrayList<PhraseCount> countedTops = new ArrayList<PhraseCount>();
+        for (int i = 0; i < tops.size(); i++) {
+            String top = tops.get(i);
+            if (!covered.contains(top)) {
+                covered.add(top);
+                Integer cnt = 0;
+                if (typeCounts.containsKey(top)) {
+                    cnt = typeCounts.get(top);
+                }
+                PhraseCount phraseCount = new PhraseCount(top, cnt);
+                countedTops.add(phraseCount);
+            }
+        }
+        Collections.sort(countedTops, new Comparator<PhraseCount>() {
+            @Override
+            public int compare(PhraseCount p1, PhraseCount p2) {
+                return p2.getCount().compareTo(p1.getCount());
+            }
+        });
+        for (int i = 0; i < countedTops.size(); i++) {
+            PhraseCount topCount = countedTops.get(i);
+            if (topCount.getPhrase().startsWith(ns) || ns.isEmpty()) {
+                ArrayList<String> children = new ArrayList<String>();
+                //// This check is needed since children can belong to multiple types (count several times) and some hiearchies have cycles
+                if (superToSub.containsKey(topCount.getPhrase())) {
+                     ArrayList<String> oChildren = superToSub.get(topCount.getPhrase());
+                    for (int j = 0; j < oChildren.size(); j++) {
+                        String oChild = oChildren.get(j);
+                        if (!covered.contains(oChild) && !children.contains(oChild)) {
+                            children.add(oChild);
+                        }
+                    }
+                }
+                int instances = 0;
+                if (phrases.containsKey(topCount.getPhrase())) {
+                    ArrayList<PhraseCount> phraseCounts = phrases.get(topCount.getPhrase());
+                    instances = phraseCounts.size();
+                }
+                if (topCount.getCount()>0 && (instances>0 || children.size()>0)) {
+                    String ref = topCount.getPhrase();
+                    String type = getType(gType, topCount.getPhrase());
+
+                    String name = topCount.getPhrase();
+                    int idx = topCount.getPhrase().lastIndexOf("/");
+                    //if (idx==-1) idx = topCount.getPhrase().indexOf(":");  /// this is to remove ns but it is actually useful to keep these
+                    if (idx > -1) {
+                        name = topCount.getPhrase().substring(idx + 1);
+                    }
+
+                    JSONObject node = new JSONObject();
+                   // node.put("level", new Integer(level).toString());
+                    if (!name.isEmpty()) node.put("name", cleanName(name));
+                    node.put("query", topCount.getPhrase());
+                    if (!type.isEmpty()) node.put("type", type);
+                    if (!ref.isEmpty()) node.put("url", ref);
+                    node.put("child_count", children.size());
+                    node.put("instance_count", instances);
+                    node.put("mention_count", topCount.getCount());
+
                     tree.append("children", node);
                 }
                 else {
@@ -750,7 +845,8 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                         }
                     }
                 }
-                if (topCount.getCount()>0 || children.size()>0) {
+                if (topCount.getCount()>0) {
+                //if (topCount.getCount()>0 || children.size()>0) {
                     String ref = topCount.getPhrase();
                     String type = getType(gType, topCount.getPhrase());
 
@@ -805,10 +901,17 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
             type =gType+"Instance";
         }
         else if (reference.startsWith("http://dbpedia.org/ontology") ||
+                reference.startsWith("http://www.w3.org/2002/07/owl#Thing") ||
                 reference.startsWith("https://www.w3.org/2002/07/owl#Thing")) {
             type = gType+"Type";
         }
         else if (reference.indexOf("ontology")>-1) {
+            type = gType+"Type";
+        }
+        else if (reference.indexOf("ontologies")>-1) {
+            type = gType+"Type";
+        }
+        else if (reference.indexOf("eso:")>-1) {
             type = gType+"Type";
         }
         else if (reference.indexOf("fn:")>-1) {
@@ -820,11 +923,11 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
         else if (reference.indexOf("Event")>-1) {
             type = gType+"Type";
         }
-        else if (reference.indexOf("eso:")>-1) {
-            type = gType+"Type";
-        }
         else if (reference.indexOf("eurovoc")>-1) {
             type = gType+"Type";
+        }
+        else {
+          //  System.out.println("reference = " + reference);
         }
         return type;
     }
@@ -904,14 +1007,18 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                     if (superToSub.containsKey(top)) {
                         ArrayList<String> oChildren = superToSub.get(top);
                         ArrayList<String> children = new ArrayList<String>();
-                        //// This check is needed since children can belong to multiple types (count several times) and some hiearchies have cycles
+                        //// This check is needed since children can belong to multiple types (count several times) and some hierarchies have cycles
                         for (int j = 0; j < oChildren.size(); j++) {
                             String oChild = oChildren.get(j);
                             if (!covered.contains(oChild) && !children.contains(oChild)) {
                                 children.add(oChild);
                             }
                         }
+                        /// we first recurse over the children depth first to obtain their counts
+                        /// initial counts are based on the direct mentions
                         cumulateScores(ns, children, eventCounts, covered);
+
+                        /// we now cumulate the mention counts of the children to their parent
                         int cCount = 0;
                         for (int j = 0; j < children.size(); j++) {
                             String child = children.get(j);

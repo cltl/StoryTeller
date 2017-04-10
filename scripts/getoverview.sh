@@ -3,7 +3,7 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 ROOT="$( cd $DIR && cd .. && pwd)"
 LIB="$ROOT"/target
 
-RESOURCES="$( cd $ROOT && cd .. && pwd)"/vua-resources
+RESOURCES="$( cd $ROOT && cd .. && pwd)"/newsreader/vua-resources
 # assumes vua-resources is installed next to this installation
 # git clone https://github.com/cltl/vua-resources.git
 

@@ -132,6 +132,15 @@ public class JsonQueryHierarchy {
         }
     }
 
+    /*
+    {
+“mention_count": 26426,
+“query": "http://groundedannotationframework.org/grasp#CERTAIN”
+"name": "CERTAIN”,
+“type”: “grasp"
+},
+
+     */
     static public void getPerspectiveCountsFromKnowledgeStore(String KSSERVICE,
                                                               String KSuser,
                                                               String KSpass) {
@@ -154,9 +163,14 @@ public class JsonQueryHierarchy {
             for (int i = 0; i < cntPredicates.size(); i++) {
                 PhraseCount phraseCount = cntPredicates.get(i);
                 JSONObject jsonObject = new JSONObject();
-                jsonObject.put("value", phraseCount.getPhrase());
-                jsonObject.put("count", phraseCount.getCount());
-                jsonPerspectives.append("perspectives",jsonObject);
+                jsonObject.put("query", phraseCount.getPhrase());
+                String name = phraseCount.getPhrase();
+                int idx = name.lastIndexOf("#");
+                if (idx>-1) name = name.substring(idx+1);
+                jsonObject.put("name", name);
+                jsonObject.put("type", "grasp");
+                jsonObject.put("mention_count", phraseCount.getCount());
+                jsonPerspectives.append("children",jsonObject);
             }
             if (outputStream!=null) {
                 outputStream.write(jsonPerspectives.toString(0).getBytes());
@@ -207,6 +221,7 @@ public class JsonQueryHierarchy {
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
             simpleTaxonomy.jsonTree(tree, "entity", "lightEntity", "", tops, mCount, 1, cnt, cntPredicates, cntTypedPredicates);
+           // simpleTaxonomy.jsonTree(tree, "entity", "entity", "", tops, mCount, 1, cnt, cntPredicates, cntTypedPredicates);
 
             if (outputStream!=null) {
                 outputStream.write(tree.toString(0).getBytes());
@@ -261,6 +276,7 @@ public class JsonQueryHierarchy {
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
             simpleTaxonomy.jsonTree(tree, "entity", "darkEntity", "", tops, mCount, 1, cnt, cntPredicates, cntTypedPredicates);
+           // simpleTaxonomy.jsonTree(tree, "entity", "entity", "", tops, mCount, 1, cnt, cntPredicates, cntTypedPredicates);
 
             if (outputStream!=null) {
                 outputStream.write(tree.toString(0).getBytes());
@@ -321,7 +337,7 @@ public class JsonQueryHierarchy {
             simpleTaxonomy.cumulateScores("", tops, cnt);
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
-            simpleTaxonomy.jsonTree(tree, "concept", "nonEntity", "", tops, mCount, 1, cnt, cntPredicates, null);
+            simpleTaxonomy.jsonTree(tree, "concept", "concept", "", tops, mCount, 1, cnt, cntPredicates, null);
 
             if (outputStream!=null) {
                 outputStream.write(tree.toString(0).getBytes());
@@ -345,41 +361,6 @@ public class JsonQueryHierarchy {
         System.out.println("entity-type = " + entityTypeFile);
         System.out.println("entity-custom = " + entityCustomFile);
     }*/
-
-    static public void getJsonHierarchyAuthorsKnowledgeStoreOrg (String KSSERVICE, String KSuser, String KSpass) {
-        try {
-            if (!KSSERVICE.isEmpty()) {
-                if (KSuser.isEmpty()) {
-                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS);
-                }
-                else {
-                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS, KSuser, KSpass);
-                }
-            }
-            String sparqlPhrases = SparqlGenerator.makeSparqlQueryForAuthorsFromKs();
-            HashMap<String, ArrayList<PhraseCount>> cntPredicates = GetTriplesFromKnowledgeStore.getCountsFromKnowledgeStore (sparqlPhrases, "authors");
-            if (DEBUG) System.out.println("cntPredicates.size() = " + cntPredicates.size());
-            SimpleTaxonomy simpleTaxonomy = new SimpleTaxonomy();
-            ArrayList<String> tops = simpleTaxonomy.getTops();
-            simpleTaxonomy.addTypesToTops(cntPredicates.keySet().iterator(), tops);
-            if (DEBUG) System.out.println("tops.toString() = " + tops.toString());
-            HashMap<String, Integer> cnt = cntPhrases(cntPredicates);
-            simpleTaxonomy.cumulateScores("", tops, cnt);
-            if (DEBUG) System.out.println("building hierarchy");
-            JSONObject tree = new JSONObject();
-            simpleTaxonomy.jsonTree(tree, "author", "agent", "", tops, mCount, 1, cnt, cntPredicates, null);
-
-            if (outputStream!=null) {
-                outputStream.write(tree.toString(0).getBytes());
-                outputStream.close();
-            }
-            else {
-                System.out.write(tree.toString(0).getBytes());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     static public void getJsonHierarchyAuthorsKnowledgeStore (String KSSERVICE, String KSuser, String KSpass, String pathToHierarchyFile) {
         try {
@@ -415,7 +396,7 @@ public class JsonQueryHierarchy {
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
 
-            simpleTaxonomy.jsonTree(tree, "author", "agent", "", tops, mCount, 1, cnt, cntPredicates, null);
+            simpleTaxonomy.jsonTree(tree, "author", "author", "", tops, mCount, 1, cnt, cntPredicates, null);
 
             if (outputStream!=null) {
                 outputStream.write(tree.toString(0).getBytes());
@@ -462,7 +443,7 @@ public class JsonQueryHierarchy {
             simpleTaxonomy.cumulateScores("", tops, cnt);
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
-            simpleTaxonomy.jsonTree(tree, "cite", "agent", "", tops, mCount, 1, cnt, cntPredicates, null);
+            simpleTaxonomy.jsonTree(tree, "cite", "cite", "", tops, mCount, 1, cnt, cntPredicates, null);
 
             if (outputStream!=null) {
                 outputStream.write(tree.toString(0).getBytes());
@@ -475,42 +456,7 @@ public class JsonQueryHierarchy {
             e.printStackTrace();
         }
     }
-
-    static public void getJsonHierarchyCiteKnowledgeStoreOrg (String KSSERVICE, String KSuser, String KSpass) {
-        try {
-            if (!KSSERVICE.isEmpty()) {
-                if (KSuser.isEmpty()) {
-                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS);
-                }
-                else {
-                    GetTriplesFromKnowledgeStore.setServicePoint(KSSERVICE, KS, KSuser, KSpass);
-                }
-            }
-            String sparqlPhrases = SparqlGenerator.makeSparqlQueryForCitedSourcesFromKs();
-            HashMap<String, ArrayList<PhraseCount>> cntPredicates = GetTriplesFromKnowledgeStore.getCountsFromKnowledgeStore (sparqlPhrases, "cited");
-            if (DEBUG) System.out.println("cntPredicates.size() = " + cntPredicates.size());
-            SimpleTaxonomy simpleTaxonomy = new SimpleTaxonomy();
-            ArrayList<String> tops = simpleTaxonomy.getTops();
-            simpleTaxonomy.addTypesToTops(cntPredicates.keySet().iterator(), tops);
-            if (DEBUG) System.out.println("tops.toString() = " + tops.toString());
-            HashMap<String, Integer> cnt = cntPhrases(cntPredicates);
-            simpleTaxonomy.cumulateScores("", tops, cnt);
-            if (DEBUG) System.out.println("building hierarchy");
-            JSONObject tree = new JSONObject();
-            simpleTaxonomy.jsonTree(tree, "cite", "agent", "", tops, mCount, 1, cnt, cntPredicates, null);
-
-            if (outputStream!=null) {
-                outputStream.write(tree.toString(0).getBytes());
-                outputStream.close();
-            }
-            else {
-                System.out.write(tree.toString(0).getBytes());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
+    
 
     /**
      * Creates event hiearchy from KS data using ESO and FRAMENET ontologies
@@ -588,7 +534,7 @@ public class JsonQueryHierarchy {
             simpleTaxonomy.cumulateScores("", tops, cnt);
             if (DEBUG) System.out.println("building hierarchy");
             JSONObject tree = new JSONObject();
-            simpleTaxonomy.jsonTree(tree, "eso", "event", "", tops, 1, mCount, cnt, cntPredicates, cntTypedPredicates);
+            simpleTaxonomy.jsonTree(tree, "event", "event", "", tops, 1, mCount, cnt, cntPredicates, cntTypedPredicates);
 
             if (outputStream!=null) {
                 outputStream.write(tree.toString(0).getBytes());

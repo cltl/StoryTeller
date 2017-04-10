@@ -350,9 +350,23 @@ public class SparqlGenerator {
         String filter = "{ ";
         String[] fields = query.split(";");
         for (int i = 0; i < fields.length; i++) {
-            String field = makeValidUriString(fields[i]);
+          //  String field = makeValidUriString(fields[i]);
+            String field = fields[i];
             if (i>0)  filter +=" UNION ";
             filter += " { "+variable+" sem:hasActor "+field+" } ";
+        }
+        filter += " }\n" ;
+        return filter;
+    }
+
+    static public String makeInstanceFilter(String variable, String property, String query) {
+        // "?event sem:hasActor ?ent .\n" +
+        String filter = "{ ";
+        String[] fields = query.split(";");
+        for (int i = 0; i < fields.length; i++) {
+            String field = makeValidUriString(fields[i]);
+            if (i>0)  filter +=" UNION ";
+            filter += " { "+variable+" "+property +" "+field+" } ";
         }
         filter += " }\n" ;
         return filter;
@@ -372,6 +386,17 @@ public class SparqlGenerator {
     }
 
     static public String getSource (String sourceQuery) {
+        String [] fields = sourceQuery.split(";");
+        String sources = "";
+        for (int i = 0; i < fields.length; i++) {
+            String field = fields[i].trim().replace('^', ' ');
+            if (!sources.isEmpty()) sources += ";";
+            sources += "<"+field+">";
+        }
+        return sources;
+    }
+
+    static public String getSourcePhrase (String sourceQuery) {
         String [] fields = sourceQuery.split(";");
         String sources = "";
         for (int i = 0; i < fields.length; i++) {
@@ -397,10 +422,21 @@ public class SparqlGenerator {
         return labels;
     }
 
-    static public String getTypeQueryforEvent(String entityQuery) {
+    static public String getTypeQueryforEvent(String entityEvent) {
         String labels = "";
-        String [] fields = entityQuery.split(";");
-        // System.out.println("entityQuery = " + entityQuery);
+        String [] fields = entityEvent.split(";");
+        for (int i = 0; i < fields.length; i++) {
+            String field = fields[i].trim().replace('^', ' ');
+            // field = multiwordFix(field);
+            if (!labels.isEmpty()) labels += ";";
+            labels += field;
+        }
+        return labels;
+    }
+
+    static public String getTypeQueryforEventFiltered(String entityEvent) {
+        String labels = "";
+        String [] fields = entityEvent.split(";");
         for (int i = 0; i < fields.length; i++) {
             String field = fields[i].trim().replace('^', ' ');
             // field = multiwordFix(field);
@@ -419,6 +455,19 @@ public class SparqlGenerator {
         for (int i = 0; i < fields.length; i++) {
             String field = fields[i].trim().replace('^', ' ');
             // field = multiwordFix(field);
+            if (!labels.isEmpty()) labels += ";";
+            labels += field;
+        }
+        return labels;
+    }
+
+    static public String getLabelQueryforEntityFiltered(String entityQuery) {
+        String labels = "";
+        String [] fields = entityQuery.split(";");
+        // System.out.println("entityQuery = " + entityQuery);
+        for (int i = 0; i < fields.length; i++) {
+            String field = fields[i].trim().replace('^', ' ');
+            // field = multiwordFix(field);
             if (field.indexOf("dbp:")==-1 && field.indexOf("//cltl.nl/")==-1 && field.indexOf("dbpedia:")==-1 && field.indexOf("dbpedianl:")==-1) {
                 if (!labels.isEmpty()) labels += ";";
                 labels += field;
@@ -428,6 +477,21 @@ public class SparqlGenerator {
     }
 
     static public String getTypeQueryforEntity(String entityQuery) {
+        String labels = "";
+        if (!entityQuery.isEmpty()) {
+            String[] fields = entityQuery.split(";");
+            // System.out.println("entityQuery = " + entityQuery);
+            for (int i = 0; i < fields.length; i++) {
+                String field = fields[i].trim().replace('^', ' ');
+                // field = multiwordFix(field);
+                if (!labels.isEmpty()) labels += ";";
+                labels += "<" + field + ">";
+            }
+        }
+        return labels;
+    }
+
+    static public String getTypeQueryforEntityFiltered(String entityQuery) {
         String labels = "";
         String [] fields = entityQuery.split(";");
         // System.out.println("entityQuery = " + entityQuery);
@@ -442,7 +506,7 @@ public class SparqlGenerator {
         return labels;
     }
 
-    static public String getInstanceQueryforEntity(String entityQuery) {
+    static public String getInstanceQueryforEntityFiltered(String entityQuery) {
         String labels = "";
         String[] fields = entityQuery.split(";");
         // System.out.println("entityQuery = " + entityQuery);
@@ -452,6 +516,21 @@ public class SparqlGenerator {
             if ((field.indexOf("dbpedia:") > -1) || (field.indexOf("dbpedianl:") > -1)) {
                 if (!labels.isEmpty()) labels += ";";
                 labels += field;
+            }
+        }
+        return labels;
+    }
+
+    static public String getInstanceQueryforEntity(String entityQuery) {
+        String labels = "";
+        if (!entityQuery.isEmpty()) {
+            String[] fields = entityQuery.split(";");
+            // System.out.println("entityQuery = " + entityQuery);
+            for (int i = 0; i < fields.length; i++) {
+                String field = fields[i].trim().replace('^', ' ');
+                // field = multiwordFix(field);
+                if (!labels.isEmpty()) labels += ";";
+                labels += "<" + field + ">";
             }
         }
         return labels;
