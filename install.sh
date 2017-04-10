@@ -12,6 +12,7 @@ mvn clean
 mvn install
 
 echo "#Installing the vua-resources"
-cd "$PARENT"
-git clone https://github.com/cltl/vua-resources.git
-
+if [ ! -d "$PARENT/vua-resources" ]; then
+    cd "$PARENT"
+    git clone https://github.com/cltl/vua-resources.git
+fi

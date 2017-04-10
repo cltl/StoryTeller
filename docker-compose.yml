@@ -1,0 +1,57 @@
+version: '3'
+services:
+  query-builder-preprocessing:
+    image: nlescstoryteller/query-builder-preprocessing
+    volumes:
+      - data:/data
+
+  query-builder-daemon:
+    restart: always
+    image: nlescstoryteller/query-builder-daemon
+    volumes:
+      - data:/data
+    expose:
+      - "4567"
+    links:
+      - query-builder-preprocessing:preprocessing
+
+  query-builder-server:
+    restart: always
+    image: nlescstoryteller/query-builder-server
+    expose:
+      - "5000"
+    volumes:
+      - data:/data
+    links:
+      - query-builder-daemon:daemon
+
+  query-builder-client:
+    restart: always
+    image: nlescstoryteller/query-builder-client
+    ports:
+      - "9000:9000"
+    links:
+      - query-builder-server:server
+
+  uncertainty-visualization:
+    restart: always
+    image: nlescstoryteller/uncertainty-visualization
+    ports:
+      - "9001:9001"
+    links:
+      - query-builder-server:server
+
+  nginx:
+    build: nginx/
+    ports:
+      - "80:80"
+    links:
+      - query-builder-daemon
+      - query-builder-server
+      - query-builder-client
+      - uncertainty-visualization
+
+volumes:
+  data:
+    external:
+      name: data
