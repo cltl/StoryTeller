@@ -646,6 +646,7 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
                                 }
                                 if (!name.isEmpty()) name =  cleanName(name);
 
+                                phraseCountJsonObject.put("name", name);
                                 //phraseCountJsonObject.put("name", name.replace("+","_"));
                                 phraseCountJsonObject.put("query", phraseCount.getPhrase());
                                 if (phraseCount.getPhrase().indexOf("http")> -1) {
