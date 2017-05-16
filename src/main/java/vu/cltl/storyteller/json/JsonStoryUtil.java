@@ -1231,11 +1231,12 @@ public class JsonStoryUtil {
                 Iterator oKeys = oActorObject.sortedKeys();
                 while (oKeys.hasNext()) {
                     String oKey = oKeys.next().toString();
+                    System.err.println("oKey" + oKey);
                     try {
                         JSONArray actors = oActorObject.getJSONArray(oKey);
                         for (int j = 0; j < actors.length(); j++) {
                             String nextActor = actors.getString(j);
-                            System.out.println("nextActor = " + nextActor);
+                            System.err.println("nextActor = " + nextActor);
                             if (!actorNames.contains(nextActor)) {
                                 nActorObject.append("actor:", nextActor);
                                 actorNames.add(nextActor);
