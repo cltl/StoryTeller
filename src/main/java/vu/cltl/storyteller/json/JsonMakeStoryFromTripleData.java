@@ -194,7 +194,13 @@ public class JsonMakeStoryFromTripleData {
         try {
             jsonObjects = JsonStoryUtil.getJSONObjectArray(trigTripleData);
             jsonObjects = JsonStoryUtil.createStoryLinesForJSONArrayList(jsonObjects, climaxThreshold, topicThreshold);
-            JsonStoryUtil.minimalizeActors(jsonObjects, roles);
+            if (!roles.equalsIgnoreCase("all") )
+                if (roles.isEmpty()) {
+                    JsonStoryUtil.minimalizeActors(jsonObjects);
+                }
+                else {
+                    JsonStoryUtil.selectActors(jsonObjects, roles);
+                }
             if (euroVoc!=null) {
                 JsonStoryUtil.renameStories(jsonObjects, euroVoc, euroVocBlackList);
             }
