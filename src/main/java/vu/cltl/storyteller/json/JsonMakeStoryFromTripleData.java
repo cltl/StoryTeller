@@ -34,6 +34,8 @@ public class JsonMakeStoryFromTripleData {
     static EuroVoc euroVocBlackList = null;
     static String pathToEuroVocFile = "";
     static String pathToEuroVocBlackListFile = "";
+    static String roleNs = "";
+
 
     /**
      * The main function needs a number of parameters to run:
@@ -99,6 +101,10 @@ public class JsonMakeStoryFromTripleData {
                     pathToTokenIndexFile = args[i + 1];
                     log += " -- token-index = " + pathToTokenIndexFile+"\n";
                 }
+                else if (arg.equalsIgnoreCase("--roles") && args.length>(i+1)) {
+                    roleNs = args[i+1];
+                    log += " -- showing roles = " + roleNs;
+                }
                 else if (arg.equalsIgnoreCase("--eurovoc") && args.length > (i + 1)) {
                     pathToEuroVocFile = args[i + 1];
                     log += " -- eurovoc = " + pathToEuroVocFile+"\n";
@@ -129,7 +135,7 @@ public class JsonMakeStoryFromTripleData {
             GetTriplesFromKnowledgeStore.readTriplesFromKs(sparqlQuery,trigTripleData);
             long estimatedTime = System.currentTimeMillis() - startTime;
             log += " -- Time elapsed to get results from KS:" + estimatedTime / 1000.0+"\n";
-            ArrayList<JSONObject> storyObjects = makeUpStory(trigTripleData, 1, 30, euroVoc, euroVocBlackList);
+            ArrayList<JSONObject> storyObjects = makeUpStory(trigTripleData, 1, 30, roleNs, euroVoc, euroVocBlackList);
             log += " -- Result: "+storyObjects.size()+" events.\n";
             if (storyObjects.size()>0) {
                 addPerspectiveToStory(storyObjects);
@@ -182,12 +188,13 @@ public class JsonMakeStoryFromTripleData {
     static public ArrayList<JSONObject> makeUpStory(TrigTripleData trigTripleData,
                                                     int climaxThreshold,
                                                     int topicThreshold,
+                                                    String roles,
                                                     EuroVoc euroVoc, EuroVoc euroVocBlackList) {
         ArrayList<JSONObject> jsonObjects = new ArrayList<JSONObject>();
         try {
             jsonObjects = JsonStoryUtil.getJSONObjectArray(trigTripleData);
             jsonObjects = JsonStoryUtil.createStoryLinesForJSONArrayList(jsonObjects, climaxThreshold, topicThreshold);
-            //JsonStoryUtil.minimalizeActors(jsonObjects);
+            JsonStoryUtil.minimalizeActors(jsonObjects, roles);
             if (euroVoc!=null) {
                 JsonStoryUtil.renameStories(jsonObjects, euroVoc, euroVocBlackList);
             }

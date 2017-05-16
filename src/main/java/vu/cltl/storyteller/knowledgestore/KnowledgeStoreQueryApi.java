@@ -15,7 +15,7 @@ public class KnowledgeStoreQueryApi {
                                 "--eventPhrase", "kill", "--eventType", "eso:Killing", "--topic", "eurovoc:16789", "--grasp", "POSITIVE"};
         }
         query = createSparqlQuery(args);
-        //System.out.print(query);
+        System.out.print(query);
         //System.out.println("query = " + query);
         //System.out.println("log = " + log);
     }

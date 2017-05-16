@@ -1539,7 +1539,7 @@ public class JsonStoryFromCat extends DefaultHandler {
 
         }
 
-        JsonStoryUtil.minimalizeActors(events);
+        JsonStoryUtil.minimalizeActors(events, "");
 
         return events;
     }

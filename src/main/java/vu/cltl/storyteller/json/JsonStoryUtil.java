@@ -1220,7 +1220,7 @@ public class JsonStoryUtil {
     }
 
 
-    public static void minimalizeActors(ArrayList<JSONObject> events) {
+    public static void minimalizeActors(ArrayList<JSONObject> events, String roles) {
         for (int i = 0; i < events.size(); i++) {
             JSONObject oEvent = events.get(i);
             ArrayList<String> actorNames = new ArrayList<String>();
@@ -1235,6 +1235,7 @@ public class JsonStoryUtil {
                         JSONArray actors = oActorObject.getJSONArray(oKey);
                         for (int j = 0; j < actors.length(); j++) {
                             String nextActor = actors.getString(j);
+                            System.out.println("nextActor = " + nextActor);
                             if (!actorNames.contains(nextActor)) {
                                 nActorObject.append("actor:", nextActor);
                                 actorNames.add(nextActor);
