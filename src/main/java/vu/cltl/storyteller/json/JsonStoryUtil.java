@@ -1291,8 +1291,8 @@ public class JsonStoryUtil {
             } catch (JSONException e) {
                //  e.printStackTrace();
             }
+            oEvent.remove("actors");
             if (nActorObject.length()>0) {
-                oEvent.remove("actors");
                 try {
                     // System.out.println("oActorObject.toString() = " + oActorObject.toString());
                     // System.out.println("nActorObject.toString() = " + nActorObject.toString());
