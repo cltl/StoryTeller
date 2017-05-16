@@ -1266,7 +1266,6 @@ public class JsonStoryUtil {
         String [] roleNameSpaces = roles.split(";");
         for (int i = 0; i < events.size(); i++) {
             JSONObject oEvent = events.get(i);
-            ArrayList<String> actorNames = new ArrayList<String>();
             JSONObject nActorObject = new JSONObject();
             JSONObject oActorObject = null;
             try {
@@ -1281,17 +1280,13 @@ public class JsonStoryUtil {
                                 JSONArray actors = oActorObject.getJSONArray(oKey);
                                 for (int j = 0; j < actors.length(); j++) {
                                     String nextActor = actors.getString(j);
-                                    if (!actorNames.contains(nextActor)) {
-                                        nActorObject.append(oKey, nextActor);
-                                        actorNames.add(nextActor);
-                                    }
+                                    nActorObject.append(oKey, nextActor);
                                 }
                             } catch (JSONException e) {
                                 //  e.printStackTrace();
                             }
                         }
                     }
-                    //System.err.println("oKey" + oKey);
                 }
             } catch (JSONException e) {
                //  e.printStackTrace();
