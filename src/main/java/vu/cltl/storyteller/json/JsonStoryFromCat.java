@@ -178,6 +178,7 @@ public class JsonStoryFromCat extends DefaultHandler {
     String source = "";
     String target = "";
     String relType = "";
+    String relId = "";
     String causedBy = "";
     String causes = "";
     String contextualModality = "";
@@ -197,7 +198,7 @@ public class JsonStoryFromCat extends DefaultHandler {
     public HashMap<String, ArrayList<String>> storyMap;
     public HashMap<String, ArrayList<ActorLink>> eventActorLinksMap;
     public HashMap<String, ArrayList<LocationLink>> eventLocationLinksMap;
-    public HashMap<String, ArrayList<TimeLink>> eventTimeLinksMap;
+        public HashMap<String, ArrayList<TimeLink>> eventTimeLinksMap;
     public HashMap<String, ArrayList<PlotLink>> eventPlotLinksMap;
     public HashMap<String, JSONObject> eventMentionMap;
     public ArrayList<KafWordForm> kafWordFormArrayList;
@@ -222,7 +223,9 @@ public class JsonStoryFromCat extends DefaultHandler {
         initAll();
     }
 
-
+    /**
+     *
+     */
     public void makeGroupsForInstance () {
         HashMap<String, ArrayList<String>> groupings = new HashMap<String, ArrayList<String>>();
         Set keySet = eventCorefMap.keySet();
@@ -230,7 +233,9 @@ public class JsonStoryFromCat extends DefaultHandler {
         while (keys.hasNext()) {
             String corefId1 = keys.next();
             ArrayList<String> group = new ArrayList<String>();
+            // the event instance is added to a group
             group.add(corefId1);
+            // greedy algorithm, it absorbs any other event instance that is somehow related to it
             Iterator<String> keys2 = keySet.iterator();
             while (keys2.hasNext()) {
                 String corefId2 = keys2.next();
@@ -272,6 +277,27 @@ public class JsonStoryFromCat extends DefaultHandler {
         }
     }
 
+    public boolean isClimaxEvent (String corefId) {
+        if (eventCorefMap.containsKey(corefId)) {
+            ArrayList<KafTerm> eventTerms = eventCorefMap.get(corefId);
+            for (int j = 0; j < eventTerms.size(); j++) {
+                KafTerm eventTerm = eventTerms.get(j);
+                if (eventTerm.getParent().equalsIgnoreCase("TRUE")) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
+     * The number of risng and falling actions determines the climax score
+     * @param corefId
+     * @return
+     */
     public int getClimaxScore (String corefId) {
        int cnt = 0;
         if (eventCorefMap.containsKey(corefId)) {
@@ -296,15 +322,25 @@ public class JsonStoryFromCat extends DefaultHandler {
         return cnt;
     }
 
+    /**
+     * The climax event is the event that has the highest climax score
+     * The climax score is based on the number of FALLING and RISING actions
+     * Counts are restricted to events with a climaxEvent=TRUE value
+     *
+     * @param corefIds
+     * @return
+     */
     public String getClimaxEvent (ArrayList<String> corefIds) {
         String climax = "";
         int max = 0;
         for (int i = 0; i < corefIds.size(); i++) {
             String corefId = corefIds.get(i);
-            int cnt = getClimaxScore(corefId);
-            if (cnt>max) {
-                climax = corefId;
-                max = cnt;
+            if (isClimaxEvent(corefId)) {
+                int cnt = getClimaxScore(corefId);
+                if (cnt > max) {
+                    climax = corefId;
+                    max = cnt;
+                }
             }
         }
         return climax;
@@ -344,6 +380,13 @@ public class JsonStoryFromCat extends DefaultHandler {
         }
     }
 
+    /**
+     * This function defines whether or not events are related through any mention of the event
+     * 
+     * @param corefId1
+     * @param corefId2
+     * @return
+     */
     public boolean areRelated (String corefId1, String corefId2) {
         if (this.eventCorefMap.containsKey(corefId1) && this.eventCorefMap.containsKey(corefId2)) {
             ArrayList<KafTerm> eventTerms1 = this.eventCorefMap.get(corefId1);
@@ -1156,9 +1199,22 @@ public class JsonStoryFromCat extends DefaultHandler {
             kafTerm = new KafTerm();
             kafTerm.setType(qName);
             kafTerm.setTid(fileName+"_"+attributes.getValue("m_id"));
+            String climax = attributes.getValue("climaxEvent");
+            if (climax!=null) {
+                kafTerm.setParent(climax);
+            }
             TIME = false;
         }
         else if (qName.equalsIgnoreCase("TIME_DATE")) {
+            timeTerm = new TimeTerm();
+            timeTerm.setType(qName);
+            timeTerm.setTid(fileName+"_"+attributes.getValue("m_id"));
+            timeTerm.setDct(attributes.getValue("DCT").equalsIgnoreCase("true"));
+            timeTerm.setValue(attributes.getValue("value"));
+            timeTerm.setAnchorTimeId(attributes.getValue("anchorTimeID"));
+            TIME = true;
+        }
+        else if (qName.equalsIgnoreCase("TIME_OF_THE_DAY")) {
             timeTerm = new TimeTerm();
             timeTerm.setType(qName);
             timeTerm.setTid(fileName+"_"+attributes.getValue("m_id"));
@@ -1193,6 +1249,7 @@ public class JsonStoryFromCat extends DefaultHandler {
         }
         else if (qName.equalsIgnoreCase("tlink")) {
             relType =attributes.getValue("relType");
+            relId = attributes.getValue("r_id");
         }
         else if (qName.equalsIgnoreCase("plot_link")) {
             relType = attributes.getValue("relType");
@@ -1232,6 +1289,11 @@ public class JsonStoryFromCat extends DefaultHandler {
             timeTerm = new TimeTerm();
             TIME = false;
         }
+        else if (qName.equalsIgnoreCase("TIME_OF_THE_DAY")) {
+            timeTermArrayList.add(timeTerm);
+            timeTerm = new TimeTerm();
+            TIME = false;
+        }
         else if (qName.equalsIgnoreCase("LOCATION_LINK")) {
             LocationLink locationLink = new LocationLink();
             locationLink.setSource(source);
@@ -1240,6 +1302,16 @@ public class JsonStoryFromCat extends DefaultHandler {
             source = "";
             target = "";
         }
+        /*
+        *Additional Notes on TLINK and PLOT_LINK*
+
+The annotation of the TLINK value has been limited in this phase to relations between temporal expressions and events. The <source> of a TLINK is always a temporal expression; the <target> of a TLINK is always an event markable. The <value> of the link is complaint to this directionality; e.g.:
+
+<TLINK relType=CONTAINS>: the temporal expressions CONTAINS the event markable
+<TLINK relType=BEFORE>: the temporal expressions is BEFORE the event markable
+
+*To select valid TLINK, check if the relType attribute is NOT empty.* 
+         */
         else if (qName.equalsIgnoreCase("TLINK")) {
             TimeLink timeLink = new TimeLink();
             //// we need to switch between source and targets for includes links due to way it is annotated
@@ -1251,13 +1323,19 @@ public class JsonStoryFromCat extends DefaultHandler {
                 timeLink.setSource(source);
                 timeLink.setTarget(target);
             }
-            timeLink.setRelType(relType);
-           // System.out.println("timeLink.getTarget() = " + timeLink.getTarget());
-           // System.out.println("relType = " + relType);
+            if (relType!=null) {
+                timeLink.setRelType(relType);
+                timeLink.setLinkId(relId);
+                // System.out.println("timeLink.getTarget() = " + timeLink.getTarget());
+                // System.out.println("relType = " + relType);
+                if (!relType.isEmpty()) {
+                   timeLinks.add(timeLink);
+                }
+            }
+            relId = "";
             relType = "";
             source = "";
             target = "";
-            timeLinks.add(timeLink);
         }
         else if (qName.equalsIgnoreCase("PLOT_LINK")) {
             PlotLink plotLink = new PlotLink();
@@ -1407,18 +1485,19 @@ public class JsonStoryFromCat extends DefaultHandler {
         Iterator<String> keys = keySet.iterator();
         while (keys.hasNext()) {
             String eventCorefKey = keys.next();
-           // System.out.println("eventCorefKey = " + eventCorefKey);
+            System.out.println("eventCorefKey = " + eventCorefKey);
             JSONObject eventObject = new JSONObject();
             JSONObject actors = new JSONObject();
             ArrayList<String> actorStrings = new ArrayList<String>();
             ArrayList<String> phraseStrings = new ArrayList<String>();
             ArrayList<String> timeStrings = new ArrayList<String>();
             ArrayList<KafTerm> eventTerms = eventCorefMap.get(eventCorefKey);
-            Map<String, Integer> storyCount = new HashMap<String, Integer>();
             for (int i = 0; i < eventTerms.size(); i++) {
                 KafTerm eventTerm = eventTerms.get(i);
                 String eventPhrase = eventTerm.getTokenString().replaceAll(" ", "_");
+
                 if (!eventPhrase.isEmpty()) {
+                    System.out.println("eventPhrase = " + eventPhrase);
                     if (eventMentionMap.containsKey(eventTerm.getTid())) {
                         JSONObject mention = eventMentionMap.get(eventTerm.getTid());
                         eventObject.append("mentions", mention);
@@ -1428,7 +1507,6 @@ public class JsonStoryFromCat extends DefaultHandler {
                         eventObject.append("prefLabel", eventPhrase);
                         phraseStrings.add(eventPhrase);
                     }
-
                     if (eventActorLinksMap.containsKey(eventTerm.getTid())) {
                         ArrayList<ActorLink> actorLinks = eventActorLinksMap.get(eventTerm.getTid());
                         for (int j = 0; j < actorLinks.size(); j++) {
@@ -1473,20 +1551,32 @@ public class JsonStoryFromCat extends DefaultHandler {
                         String timeString = "";
                         for (int j = 0; j < timeLinks.size(); j++) {
                             TimeLink timeLink = timeLinks.get(j);
-                            if (timeLink.getRelType() != null && timeLink.getRelType().equalsIgnoreCase("INCLUDES")) {
+                            if (timeLink.getRelType() != null) {
+                          //  if (timeLink.getRelType() != null && timeLink.getRelType().equalsIgnoreCase("INCLUDES")) {
                                 String targetId = timeLink.getTarget();
-                                if (timeMap.containsKey(targetId)) {
-                                    TimeTerm time = timeMap.get(targetId);
-                                    timeString = time.getValue().replaceAll("-", "");
-                                    if (timeString.length() == 4) timeString += "0101";
-                                    if (timeString.length() == 6) timeString += "01";
-                                    if (!timeString.isEmpty() && !timeStrings.contains(timeString)) {
-                                        timeStrings.add(timeString);
-                                    }
+                                String sourceId = timeLink.getSource();
+                                String id = targetId;
+                                if (!timeMap.containsKey(id)) {
+                                    id = sourceId;
+                                }
+                                if (timeMap.containsKey(id)) {
+                                        TimeTerm time = timeMap.get(id);
+                                        timeString = time.getValue().replaceAll("-", "");
+                                        if (timeString.length() == 4) timeString += "0101";
+                                        if (timeString.length() == 6) timeString += "01";
+                                        if (!timeString.isEmpty() && !timeStrings.contains(timeString)) {
+                                            timeStrings.add(timeString);
+                                        }
+                                }
+                                else {
+                                    System.out.println("id");
+                                    System.out.println("timeLink.getLinkId() = " + timeLink.getLinkId());
+                                    System.out.println("timeMap.keySet().toString() = " + timeMap.keySet().toString());
+                                    System.out.println("Could not find the targetId = " + targetId);
+                                    System.out.println("Could not find the sourceId = " + sourceId);
                                 }
                             }
                         }
-
                         if (timeStrings.isEmpty()) {
                             for (int j = 0; j < timeLinks.size(); j++) {
                                 TimeLink timeLink = timeLinks.get(j);
@@ -1502,14 +1592,20 @@ public class JsonStoryFromCat extends DefaultHandler {
                                 }
                             }
                         }
+                        System.out.println("timeString = " + timeString);
+                    }
+                    else {
+                        System.out.println("No anchoring for eventTerm.getId = " + eventTerm.getTid());
                     }
                 }
             }
+
 /*
             System.out.println("phraseStrings = " + phraseStrings.toString());
             System.out.println("actorStrings = " + actorStrings.toString());
             System.out.println("timeStrings = " + timeStrings.toString());
 */
+
             if (actors.length() == 0) {
                 actors.append("actor:", "noactors:");
             }
@@ -1522,6 +1618,16 @@ public class JsonStoryFromCat extends DefaultHandler {
                     //////
                     timeString = "20160101";
                     //System.out.println("No timeString, timeStrings = " + timeStrings.toString());
+                    String group = instanceToStoryMap.get(eventCorefKey);
+                    int groupScore = getClimaxScore(group);
+                    int score = getClimaxScore(eventCorefKey);
+                    eventObject.put("time", timeString);
+                    eventObject.put("event", eventCorefKey);
+                    eventObject.put("group", groupScore + ":[" + group + "]");
+                    eventObject.put("groupName", "[" + group + "]");
+                    eventObject.put("groupScore", groupScore);
+                    eventObject.put("climax", score);
+                    events.add(eventObject);
                 }
                 else {
                     String group = instanceToStoryMap.get(eventCorefKey);
@@ -1622,13 +1728,13 @@ public class JsonStoryFromCat extends DefaultHandler {
 
 
     static public void main (String[] args) {
-        String demo = "/Users/piek/Desktop/WorkshopsConferences/StorylineWorkshop/UncertaintyVisualizationGold/app/data";
+        String demo = "/Users/piek/Desktop/DEMO/Storyteller/mockup/UncertaintyVisualization/app/data/brexit2/";
         String folder = "";
         String pathToCatFile = "";
         String fileExtension = "";
 
-        //pathToCatFile = "/Users/piek/Desktop/StorylineWorkshop/ECB-manual/ECBplus_Topic37CAT/37_9ecbplus.xml";
-        folder = "/Users/piek/Desktop/WorkshopsConferences/StorylineWorkshop/ECB-manual/ECBStar-mergeT37";
+        //pathToCatFile = "/Users/piek/Desktop/ecb/annotated_data/1/1_1ecbplus.xml.xml";
+        folder = "/Users/piek/Desktop/ecb/annotated_data/37";
         fileExtension = ".xml";
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
@@ -1667,6 +1773,7 @@ public class JsonStoryFromCat extends DefaultHandler {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            System.out.println("final set of events:"+events.size());
             jsonStoryFromCat.writeJsonObjectArray(demo, "ecb*", events);
         }
         else if (!folder.isEmpty()) {
@@ -1697,6 +1804,7 @@ public class JsonStoryFromCat extends DefaultHandler {
             }
             System.out.println("jsonFromCat.eventCorefMap = " + jsonStoryFromCat.eventCorefMap.size());
             System.out.println("jsonFromCat.instanceToStoryMap.size() = " + jsonStoryFromCat.instanceToStoryMap.size());
+            System.out.println("final set of events:"+events.size());
             jsonStoryFromCat.writeJsonObjectArray(demo, "ecb*", events);
         }
         System.out.println("DONE.");

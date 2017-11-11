@@ -79,6 +79,7 @@ public class NafTokenLayerIndex extends DefaultHandler {
         tokenMap = new HashMap<String, ArrayList<KafWordForm>>();
         init();
         uriFilter = uriList;
+       // System.err.println("uriList.size() = " + uriList.size());
        // System.out.println("uriList.toString() = " + uriList.toString());
     }
 
@@ -159,7 +160,6 @@ public class NafTokenLayerIndex extends DefaultHandler {
     {
         try
         {
-            init();
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setValidating(false);
             SAXParser parser = factory.newSAXParser();
@@ -241,10 +241,15 @@ public class NafTokenLayerIndex extends DefaultHandler {
             throws SAXException {
         if (qName.equals("text")) {
 
-            if (uriFilter.contains(urlString)) {
+            if (uriFilter.contains(urlString) || uriFilter.isEmpty()) {
+             //   System.out.println("urlString = " + urlString);
                 tokenMap.put(urlString, kafWordForms);
             }
             else {
+               // System.out.println("uriFilter = " + uriFilter);
+               // System.out.println("cannot find urlString = " + urlString);
+                //tokenMap.put(urlString, kafWordForms);
+
             }
             urlString = "";
             kafWordForms = new ArrayList<KafWordForm>();
@@ -371,7 +376,7 @@ public class NafTokenLayerIndex extends DefaultHandler {
 
         // System.out.println(" * Getting sourcedocuments for unique sources = " + sourceUriList.size());
         long startTime = System.currentTimeMillis();
-
+      //  System.out.println("urls = " + urls);
         NafTokenLayerIndex nafTokenLayerIndex = new NafTokenLayerIndex(urls);
 
 
@@ -397,8 +402,8 @@ public class NafTokenLayerIndex extends DefaultHandler {
             nafTokenLayerIndex.parseFile(pathToTokenIndex);
         }
 
-        /*System.out.println("pathToTokenIndex = " + pathToTokenIndex);
-        System.out.println("nafTokenLayerIndex.tokenMap.size() = " + nafTokenLayerIndex.tokenMap.size());   */
+     //   System.out.println("pathToTokenIndex = " + pathToTokenIndex);
+     //   System.out.println("nafTokenLayerIndex.tokenMap.size() = " + nafTokenLayerIndex.tokenMap.size());
         Set keySet = sourceUriList.keySet();
         Iterator<String> keys = keySet.iterator();
         while (keys.hasNext()) {
@@ -492,7 +497,7 @@ public class NafTokenLayerIndex extends DefaultHandler {
                         }
                     }
                     else if (wordForms==null || offsetBegin==null) {
-                        // System.out.println("uString = " + uString);
+                       // System.out.println("uString = " + uString);
                         mObject.append("snippet", "Could not find the original text.");
                         mObject.append("snippet_char", 0);
                         mObject.append("snippet_char", 0);

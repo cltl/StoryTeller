@@ -4,11 +4,13 @@ import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import vu.cltl.storyteller.objects.PhraseCount;
+import vu.cltl.storyteller.objects.TrigTripleData;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.*;
 
 /**
  * Created by piek on 23/06/15.
@@ -17,6 +19,275 @@ public class TrigUtil {
 
     static final public String provenanceGraph = "http://www.newsreader-project.eu/provenance";
     static final public String instanceGraph = "http://www.newsreader-project.eu/instances";
+
+
+    /** KS util
+     * Obtains type statistics from KG
+     * @param statementMap
+     */
+    public static void getTypeStatistics(HashMap<String, ArrayList<Statement>> statementMap) {
+        Set keySet = statementMap.keySet();
+        HashMap<String, PhraseCount> typeCountMap = new HashMap<String, PhraseCount>();
+        Iterator<String> keys = keySet.iterator();
+        while (keys.hasNext()) {
+            String tripleKey = keys.next();
+            ArrayList<Statement> statements = statementMap.get(tripleKey);
+            for (int i = 0; i < statements.size(); i++) {
+                Statement statement = statements.get(i);
+                if (statement.getPredicate().getLocalName().equals("type")) {
+                    String type = TrigUtil.getPrettyNSValue(statement.getObject().toString());
+                    if (typeCountMap.containsKey(type)) {
+                        PhraseCount phraseCount = typeCountMap.get(type);
+                        phraseCount.incrementCount();
+                        typeCountMap.put(type, phraseCount);
+                    } else {
+                        PhraseCount phraseCount = new PhraseCount(type, 1);
+                        typeCountMap.put(type, phraseCount);
+                    }
+                }
+            }
+        }
+        SortedSet<PhraseCount> treeSet = new TreeSet<PhraseCount>(new PhraseCount.Compare());
+        Set keySetP = typeCountMap.keySet();
+        Iterator<String> keysP = keySetP.iterator();
+        while(keysP.hasNext()) {
+            String label = keysP.next();
+            PhraseCount phraseCount = typeCountMap.get(label);
+            if (phraseCount != null) {
+                treeSet.add(phraseCount);
+            }
+        }
+        for( PhraseCount pcount :treeSet) {
+            PhraseCount phraseCount = typeCountMap.get(pcount.getPhrase());
+            System.out.println(phraseCount.getPhraseCount());
+        }
+    }
+
+
+    /**
+     * KS util
+     * @param trigTripleData
+     * @return
+     */
+    public static HashMap<String, ArrayList<Statement>> getPrimaryKnowledgeGraphHashMap (ArrayList<String> subjectUriArrayList, TrigTripleData trigTripleData) {
+        HashMap<String, ArrayList<Statement>>  eckgMap = new HashMap<String, ArrayList<Statement>>();
+        for (int k = 0; k < subjectUriArrayList.size(); k++) {
+            String tripleKey =  subjectUriArrayList.get(k);
+            ArrayList<Statement> statements = trigTripleData.tripleMapInstances.get(tripleKey);
+            ArrayList<String> objectKeys = new ArrayList<String>();
+            if (trigTripleData.tripleMapOthers.containsKey(tripleKey)) {
+                ArrayList<Statement> semStatements = trigTripleData.tripleMapOthers.get(tripleKey);
+                statements.addAll(semStatements);
+            }
+            eckgMap.put(tripleKey, statements);
+        }
+        return eckgMap;
+    }
+
+    /**
+     * KS util
+     * @param trigTripleData
+     * @return
+     */
+    public static HashMap<String, ArrayList<Statement>> getExtendedKnowledgeGraphHashMap (ArrayList<String> subjectUriArrayList, TrigTripleData trigTripleData) {
+        HashMap<String, ArrayList<Statement>>  eckgMap = new HashMap<String, ArrayList<Statement>>();
+        for (int k = 0; k < subjectUriArrayList.size(); k++) {
+            String tripleKey =  subjectUriArrayList.get(k);
+            ArrayList<Statement> statements = trigTripleData.tripleMapInstances.get(tripleKey);
+            ArrayList<String> objectKeys = new ArrayList<String>();
+            if (trigTripleData.tripleMapOthers.containsKey(tripleKey)) {
+                ArrayList<Statement> semStatements = trigTripleData.tripleMapOthers.get(tripleKey);
+                statements.addAll(semStatements);
+                for (int j = 0; j < semStatements.size(); j++) {
+                    Statement semStatement = semStatements.get(j);
+                    //String objectUri = semStatement.getObject().asLiteral().getString();
+                    String objectUri = TrigUtil.getObjectUriValueAsString(semStatement);
+                    //System.out.println("objectUri = " + objectUri);
+                    if (!objectKeys.contains(objectUri)) objectKeys.add(objectUri);
+                }
+            }
+            /// Next we get all the properties of the objects
+
+            for (int j = 0; j < objectKeys.size(); j++) {
+                String s = objectKeys.get(j);
+                if (trigTripleData.tripleMapInstances.containsKey(s))  {
+                    ArrayList<Statement> objStatements = trigTripleData.tripleMapInstances.get(s);
+                    statements.addAll(objStatements);
+                }
+
+            }
+            eckgMap.put(tripleKey, statements);
+        }
+        return eckgMap;
+    }
+    /**
+     * KS util
+     * @param trigTripleData
+     * @return
+     */
+    public static HashMap<String, ArrayList<Statement>> getSecondaryKnowledgeGraphHashMap (ArrayList<String> subjectUriArrayList, TrigTripleData trigTripleData) {
+        HashMap<String, ArrayList<Statement>>  eckgMap = new HashMap<String, ArrayList<Statement>>();
+        for (int k = 0; k < subjectUriArrayList.size(); k++) {
+            String tripleKey =  subjectUriArrayList.get(k);
+            ArrayList<Statement> statements = new ArrayList<Statement>();
+            ArrayList<String> objectKeys = new ArrayList<String>();
+            if (trigTripleData.tripleMapOthers.containsKey(tripleKey)) {
+                ArrayList<Statement> semStatements = trigTripleData.tripleMapOthers.get(tripleKey);
+                for (int j = 0; j < semStatements.size(); j++) {
+                    Statement semStatement = semStatements.get(j);
+                    //String objectUri = semStatement.getObject().asLiteral().getString();
+                    String objectUri = TrigUtil.getObjectUriValueAsString(semStatement);
+                    //System.out.println("objectUri = " + objectUri);
+                    if (!objectKeys.contains(objectUri)) objectKeys.add(objectUri);
+                }
+            }
+            /// Next we get all the properties of the objects
+            for (int j = 0; j < objectKeys.size(); j++) {
+                String s = objectKeys.get(j);
+                if (trigTripleData.tripleMapInstances.containsKey(s))  {
+                    ArrayList<Statement> objStatements = trigTripleData.tripleMapInstances.get(s);
+                    statements.addAll(objStatements);
+                }
+
+            }
+            eckgMap.put(tripleKey, statements);
+        }
+        return eckgMap;
+    }
+
+    /** KS util
+     * prints KG
+     * @param statementMap
+     */
+    public static void printKnowledgeGraph(OutputStream fos, HashMap<String, ArrayList<Statement>> statementMap) throws IOException {
+        Set keySet = statementMap.keySet();
+        Iterator<String> keys = keySet.iterator();
+        while (keys.hasNext()) {
+            String tripleKey = keys.next();
+            String str = tripleKey+"\n";
+            ArrayList<Statement> statements = statementMap.get(tripleKey);
+            for (int i = 0; i < statements.size(); i++) {
+                Statement statement = statements.get(i);
+                if (statement.getSubject().getURI().equals(tripleKey)) {
+                    str += "\t" + statement.getPredicate().getLocalName() + "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
+                }
+                else {
+                    str += "\t"+statement.getSubject().getLocalName()+"\t" + statement.getPredicate().getLocalName() + "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
+
+                }
+            }
+            str +="\n";
+            fos.write(str.getBytes());
+        }
+    }
+
+    static public class ComparePredicate implements Comparator {
+        public int compare (Object aa, Object bb) {
+            Statement a = (Statement) aa;
+            Statement b = (Statement) bb;
+            return a.getPredicate().getLocalName().compareTo(b.getPredicate().getLocalName());
+        }
+    }
+
+    /** KS util
+     * prints KG
+     * @param statementMap
+     */
+    public static void printKnowledgeGraph(OutputStream fos,
+                                           HashMap<String, ArrayList<Statement>> statementMap,
+                                           HashMap<String, ArrayList<Statement>> secondaryStatementMap
+    ) throws IOException {
+        Set keySet = statementMap.keySet();
+        Iterator<String> keys = keySet.iterator();
+        while (keys.hasNext()) {
+            String tripleKey = keys.next();
+            String str = tripleKey+"\n";
+            /// we first print the primary triples
+            ArrayList<Statement> statements = statementMap.get(tripleKey);
+            SortedSet<Statement> treeSet = new TreeSet<Statement>(new ComparePredicate());
+            for (int i = 0; i < statements.size(); i++) {
+                Statement statement = statements.get(i);
+                treeSet.add(statement);
+            }
+            for (Statement statement : treeSet) {
+                //str += "\t"+statement.getString()+"\n";
+                str +=  "\t" + TrigUtil.getPrettyNSValue(statement.getPredicate().toString())+
+                        "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
+            }
+             /// now print the secondary triples
+            treeSet = new TreeSet<Statement>(new ComparePredicate());
+            statements = secondaryStatementMap.get(tripleKey);
+            for (int i = 0; i < statements.size(); i++) {
+                Statement statement = statements.get(i);
+                treeSet.add(statement);
+            }
+            for (Statement statement : treeSet) {
+                //str += "\t\t"+statement.getString()+"\n";
+                str += "\t\t" + TrigUtil.getPrettyNSValue(statement.getSubject().toString())+
+                        "\t"+TrigUtil.getPrettyNSValue(statement.getPredicate().toString()) +
+                        "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
+            }
+            str +="\n";
+            fos.write(str.getBytes());
+        }
+    }
+
+    /** KS util
+     * prints KG
+     * @param statementMap
+     */
+    public static void printKnowledgeGraph(OutputStream fos,
+                                           ArrayList<String> eventKeys,
+                                           HashMap<String, ArrayList<Statement>> statementMap,
+                                           HashMap<String, ArrayList<Statement>> secondaryStatementMap
+    ) throws IOException {
+        for (int k = 0; k < eventKeys.size(); k++) {
+            String tripleKey =  eventKeys.get(k);
+            String str = tripleKey+"\n";
+            /// we first print the primary triples
+            ArrayList<Statement> statements = statementMap.get(tripleKey);
+            SortedSet<Statement> treeSet = new TreeSet<Statement>(new ComparePredicate());
+            for (int i = 0; i < statements.size(); i++) {
+                Statement statement = statements.get(i);
+                treeSet.add(statement);
+            }
+            for (Statement statement : treeSet) {
+                //str += "\t"+statement.getString()+"\n";
+                str +=  "\t" + TrigUtil.getPrettyNSValue(statement.getPredicate().toString())+
+                        "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
+            }
+             /// now print the secondary triples
+            treeSet = new TreeSet<Statement>(new ComparePredicate());
+            statements = secondaryStatementMap.get(tripleKey);
+            for (int i = 0; i < statements.size(); i++) {
+                Statement statement = statements.get(i);
+                treeSet.add(statement);
+            }
+            for (Statement statement : treeSet) {
+                //str += "\t\t"+statement.getString()+"\n";
+                str += "\t\t" + TrigUtil.getPrettyNSValue(statement.getSubject().toString())+
+                        "\t"+TrigUtil.getPrettyNSValue(statement.getPredicate().toString()) +
+                        "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
+            }
+            str +="\n";
+            fos.write(str.getBytes());
+        }
+    }
+
+
+
+    /**
+     * KS util
+     * @param triples
+     * @param statement
+     * @return
+     */
+    public static ArrayList<Statement> getObjectStatement (HashMap<String, ArrayList<Statement>> triples, Statement statement) {
+        ArrayList<Statement> statements = new ArrayList<Statement>();
+        return statements;
+    }
+
+
 
     static public ArrayList<String> getAllEntityEvents (Dataset dataset, String entity) {
         ArrayList<String> events = new ArrayList<String>();
@@ -28,7 +299,7 @@ public class TrigUtil {
                 StmtIterator siter = namedModel.listStatements();
                 while (siter.hasNext()) {
                     Statement s = siter.nextStatement();
-                    String object = getObjectValue(s).toLowerCase();
+                    String object = TrigUtil.getPrettyNSValue(s.getObject().toString()).toLowerCase();
                     if (object.indexOf(entity.toLowerCase()) > -1) {
                         String subject = s.getSubject().getURI();
                         if (!events.contains(subject)) {
@@ -223,32 +494,33 @@ public class TrigUtil {
         }
     }
 
-    static public String getObjectValue (Statement statement) {
+    static public String getPrettyNSValue (String element) {
         String object = "";
-        String value = "";
-        if (statement.getObject().isLiteral()) {
-            value = statement.getObject().asLiteral().toString();
-        } else if (statement.getObject().isURIResource()) {
-            value = statement.getObject().asResource().getLocalName();
-        }
-/*        int idx = value.lastIndexOf("/");
-        if (idx>-1) {
-            value = value.substring(value.lastIndexOf("/"));
-        }*/
-        value = getValue(statement.getObject().toString());
-        String nameSpace =  getNameSpaceString(statement.getObject().toString());
+        String value = getValue(element);
+        String nameSpace =  getNameSpaceString(element);
         if (nameSpace.isEmpty()) {
             object = value;
         }
         else {
             object = nameSpace+":" + value;
         }
-        //  System.out.println("object = " + object);
         return object;
     }
 
 
 
+
+    public static String getObjectUriValueAsString(Statement statement) {
+        String var2 = "";
+        if(statement.getObject().isLiteral()) {
+            var2 = statement.getObject().asLiteral().toString();
+        } else if(statement.getObject().isURIResource()) {
+            var2 = statement.getObject().asResource().getLocalName();
+        }
+
+        var2 = statement.getObject().toString();
+        return var2;
+    }
 
 
     static public String triplesToString (ArrayList<Statement> statements) {
@@ -262,7 +534,7 @@ public class TrigUtil {
                 if (!eventLabels.isEmpty()) {
                     eventLabels += ",";
                 }
-                eventLabels += getObjectValue(statement);
+                eventLabels += TrigUtil.getPrettyNSValue(statement.getObject().toString());
             } else {
                 if (isGafTriple(statement)) {
                     if (!gaf.isEmpty()) {
@@ -272,7 +544,7 @@ public class TrigUtil {
                 }
                 else {
                     roles += "\t" + getValue(statement.getPredicate().toString())
-                            + ":" + getObjectValue(statement);
+                            + ":" + TrigUtil.getPrettyNSValue(statement.getObject().toString());
                 }
             }
         }
@@ -295,7 +567,7 @@ public class TrigUtil {
                 if (!eventLabels.isEmpty()) {
                     eventLabels += ",";
                 }
-                eventLabels += getObjectValue(statement);
+                eventLabels += TrigUtil.getPrettyNSValue(statement.getObject().toString());
             }
             else {
                 if (isGafTriple(statement)) {
@@ -305,7 +577,7 @@ public class TrigUtil {
                     gaf += getMention(statement.getObject().toString());
                 }
                 else {
-                    String objectValue = getObjectValue(statement);
+                    String objectValue = TrigUtil.getPrettyNSValue(statement.getObject().toString());
                     if (objectValue.toLowerCase().contains(entity.toLowerCase())) {
                         hasEntity = true;
                       //  System.out.println("entity = "+objectValue);

@@ -262,6 +262,109 @@ public class JsonStoryUtil {
         return jsonObjectArrayList;
     }
 
+    public static ArrayList<JSONObject> getSimpleJSONObjectArray(TrigTripleData trigTripleData) throws JSONException {
+        Vector<String> coveredEventInstances = new Vector<String>();
+        ArrayList<JSONObject> jsonObjectArrayList = new ArrayList<JSONObject>();
+        int nSkip = 0;
+        Set keySet = trigTripleData.tripleMapInstances.keySet();
+        Iterator<String> keys = keySet.iterator();
+        while (keys.hasNext()) {
+            String key = keys.next(); //// this is the subject of the triple which should point to an event
+            if (!coveredEventInstances.contains(key)) {
+                coveredEventInstances.add(key);
+                if (trigTripleData.tripleMapOthers.containsKey(key)) {
+                    // System.out.println("key = " + key);
+                    ArrayList<Statement> instanceTriples = trigTripleData.tripleMapInstances.get(key);
+
+                        /// this means it is an instance and has semrelations
+                        ArrayList<Statement> otherTriples = trigTripleData.tripleMapOthers.get(key);
+                            /// we ignore events without actors.....
+                            JSONObject jsonObject = new JSONObject();
+                            //jsonObject.put("event", JsonStoryFromRdf.getValue(JsonStoryFromRdf.getSynsetsFromIli(key, iliMap)));
+                            // jsonObject.put("instance", getValue(key));
+                            jsonObject.put("instance", key); /// needs to be the full key otherwise not unique
+                            String timeAnchor = JsonStoryFromRdf.getTimeAnchor(trigTripleData.tripleMapInstances, otherTriples);
+                            //System.out.println("timeAnchor = " + timeAnchor);
+                            if (timeAnchor.isEmpty()) {
+                                continue;
+                            }
+                            int idx = timeAnchor.lastIndexOf("/");
+                            if (idx > -1) {
+                                timeAnchor = timeAnchor.substring(idx + 1);
+                            }
+                            ////// we need at least have the year!!!!
+                            ///// this check does not work for historic data!!!!
+                            if (timeAnchor.length() < 4) {
+                                continue;
+                            }
+                            if (timeAnchor.length() == 6) {
+                                //// this is a month so we pick the first day of the month
+                                timeAnchor += "01";
+                            }
+                            if (timeAnchor.length() == 4) {
+                                //// this is a year so we pick the first day of the year
+                                timeAnchor += "0101";
+                            }
+                            if (timeAnchor.length() == 3 || timeAnchor.length() == 5 || timeAnchor.length() == 7) {
+                                ///date error, e.g. 12-07-198"
+                                continue;
+                            }
+                            ///skipping historic events
+                            /* if (timeAnchor.startsWith("19") || timeAnchor.startsWith("20")) {
+                                continue;
+                               }
+                            */
+                            try {
+                                //System.out.println("timeAnchor = " + timeAnchor);
+                                Integer dateInteger = Integer.parseInt(timeAnchor.substring(0,4));
+                                if (dateInteger>1999 && dateInteger<2050) {
+                                //if (timeAnchor.startsWith("20")) {
+                                    jsonObject.put("time", timeAnchor);
+                                    JSONObject jsonClasses = JsonStoryFromRdf.getClassesJSONObjectFromInstanceStatement(instanceTriples);
+                                    if (jsonClasses.keys().hasNext()) {
+                                        jsonObject.put("classes", jsonClasses);
+                                    }
+
+                                    JSONObject jsonLabels = JsonStoryFromRdf.getLabelsJSONObjectFromInstanceStatement(instanceTriples);
+                                    if (jsonLabels.keys().hasNext()) {
+                                        jsonObject.put("labels", jsonLabels.get("labels"));
+                                    }
+                                    JSONObject jsonprefLabels = JsonStoryFromRdf.getPrefLabelsJSONObjectFromInstanceStatement(instanceTriples);
+                                    if (jsonprefLabels.keys().hasNext()) {
+                                        jsonObject.put("prefLabel", jsonprefLabels.get("prefLabel"));
+                                    }
+                                    JSONObject jsonMentions = JsonStoryFromRdf.getMentionsJSONObjectFromInstanceStatement(instanceTriples);
+                                    if (jsonMentions.keys().hasNext()) {
+                                        jsonObject.put("mentions", jsonMentions.get("mentions"));
+                                    }
+                                    JSONObject actors = JsonStoryFromRdf.getActorsJSONObjectFromInstanceStatement(otherTriples, new ArrayList<String>());
+                                    //JSONObject actors = JsonFromRdf.getActorsJSONObjectFromInstanceStatementSimple(otherTriples);
+                                    if (actors.keys().hasNext()) {
+                                        jsonObject.put("actors", actors);
+                                    }
+                                    JSONObject topics = JsonStoryFromRdf.getTopicsJSONObjectFromInstanceStatement(instanceTriples);
+                                    if (topics.keys().hasNext()) {
+                                        //  System.out.println("topics.length() = " + topics.length());
+                                        jsonObject.put("topics", topics.get("topics"));
+                                    }
+                                    jsonObjectArrayList.add(jsonObject);
+                                }
+                            } catch (NumberFormatException e) {
+                               // e.printStackTrace();
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        JSONObject jsonprefLabels = JsonStoryFromRdf.getPrefLabelsJSONObjectFromInstanceStatement(instanceTriples);
+
+                    }
+                } else {
+                    //  System.out.println("No sem relations for = " + key);
+                }
+            }
+       // System.out.println("Nr. of perspective generatedBy Events skipped = " + nSkip);
+        return jsonObjectArrayList;
+    }
+
     /**
      * Removes actors that are below the frequency threshold
      * @param events

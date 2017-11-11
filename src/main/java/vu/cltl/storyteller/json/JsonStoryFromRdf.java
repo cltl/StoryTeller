@@ -966,7 +966,7 @@ public class JsonStoryFromRdf {
                 for (int j = 0; j < values.length; j++) {
                     String value = values[j];
                     //System.out.println("value = " + value);
-                    if (blacklist.contains(value)) {
+                    if (blacklist!=null & blacklist.contains(value)) {
                         return true;
                     }
                 }
@@ -1036,7 +1036,7 @@ static JSONObject getTopicsJSONObjectFromInstanceStatement (ArrayList<Statement>
         while (siter.hasNext()) {
             Statement s = siter.nextStatement();
             String subject = s.getSubject().getURI();
-            if (TrigUtil.getObjectValue(s).toLowerCase().indexOf(entityFilter.toLowerCase()) >-1) {
+            if (TrigUtil.getPrettyNSValue(s.getObject().toString()).toLowerCase().indexOf(entityFilter.toLowerCase()) >-1) {
                 if (!events.contains(subject)) {
                     events.add(subject);
                 }

@@ -25,7 +25,7 @@ public class TrigToJsonStoryPerspectives {
     static TrigTripleData trigTripleData = new TrigTripleData();
     static HashMap<String, ArrayList<String>> iliMap = new HashMap<String, ArrayList<String>>();
     static ArrayList<String> blacklist = new ArrayList<String>();
-    static boolean ONESTORY = false;
+    static boolean ONESTORY = true;
     static boolean ALL = false; /// if true we do not filter events
     static boolean SKIPPEVENTS = false; /// if true we we exclude perspective events from the stories
     static boolean MERGE = false;
@@ -56,21 +56,18 @@ public class TrigToJsonStoryPerspectives {
 
     static public void main (String[] args) {
         trigTripleData = new TrigTripleData();
+        String demo = "/Users/piek/Desktop/DEMO/Storyteller/mockup/UncertaintyVisualization/app/data/brexit2";
         String project = "NewsReader storyline";
         String pathToILIfile = "";
-        String sparqlQuery = "";
-        String eventQuery = "";
-        String entityQuery = "";
-        String trigfolder = "";
+        String trigfolder = "/Users/piek/Desktop/ecb/ecb.trig/32";
         String trigfile = "";
         String pathToRawTextIndexFile = "";
-        String pathToFtDataFile = "";
         String blackListFile = "";
         String fnFile = "";
         String esoFile = "";
-        String euroVocFile = "";
+        String euroVocFile = "/Code/vu/newsreader/vua-resources/mapping_eurovoc_skos.label.concept.gz";
         String euroVocBlackListFile = "";
-        String pathToTokenIndex = "";
+        String pathToTokenIndex = "/Users/piek/Desktop/ecb/ecb.token.index.gz";
         log = "";
         fnLevel = 0;
         esoLevel = 0;
@@ -79,32 +76,15 @@ public class TrigToJsonStoryPerspectives {
             if (arg.equals("--trig-folder") && args.length>(i+1)) {
                 trigfolder = args[i+1];
             }
-            else if (arg.equals("--sparql") && args.length>(i+1)) {
-                sparqlQuery = args[i+1];
-            }
-            else if (arg.equals("--event") && args.length>(i+1)) {
-                eventQuery = args[i+1];
-                String[] fields = entityQuery.split(":");
-                if (fields.length==2) {
-                    EVENTSCHEMA = fields[0];
-                    entityQuery = fields[1];
-                }
-            }
 
             else if (arg.equals("--tokens") && args.length>(i+1)) {
                 pathToTokenIndex = args[i+1];
-            }
-            else if (arg.equals("--entity") && args.length>(i+1)) {
-                entityQuery = args[i+1];
             }
             else if (arg.equals("--year") && args.length>(i+1)) {
                 year = args[i+1];
             }
             else if (arg.equals("--onestory")) {
                 ONESTORY = true;
-            }
-            else if (arg.equals("--ft") && args.length>(i+1)) {
-                pathToFtDataFile = args[i+1];
             }
             else if (arg.equals("--time") && args.length>(i+1)) {
                 timeGran = args[i+1];
@@ -131,10 +111,7 @@ public class TrigToJsonStoryPerspectives {
             }
             else if (arg.equals("--merge")) {
                 MERGE = true;
-            }/*
-            else if (arg.equals("--perspective")) {
-                PERSPECTIVE = true;
-            }*/
+            }
             else if (arg.equals("--eurovoc") && args.length>(i+1)) {
                 euroVocFile = args[i+1];
                 euroVoc.readEuroVoc(euroVocFile,"en");
@@ -276,7 +253,6 @@ public class TrigToJsonStoryPerspectives {
                 JsonStoryUtil.renameStories(jsonObjects, euroVoc, euroVocBlackList);
             }
             ArrayList<JSONObject> rawTextArrayList = new ArrayList<JSONObject>();
-            ArrayList<JSONObject> perspectiveEvents = new ArrayList<JSONObject>();
             ArrayList<JSONObject> structuredEvents = new ArrayList<JSONObject>();
             if (PERSPECTIVE && jsonObjects.size()>0) {
                     JsonStoryUtil.integratePerspectivesInEventObjects(trigTripleData, jsonObjects, project);
@@ -294,7 +270,7 @@ public class TrigToJsonStoryPerspectives {
             nMentions = JsonStoryUtil.countMentions(jsonObjects);
             nStories = JsonStoryUtil.countGroups(jsonObjects);
 
-            JsonStorySerialization.writeJsonObjectArrayWithStructuredData(trigfolder, "", project,
+            JsonStorySerialization.writeJsonObjectArrayWithStructuredData(demo, "", project,
                     jsonObjects, rawTextArrayList, nEvents, nStories, nActors, nMentions, "polls", structuredEvents);
 
 

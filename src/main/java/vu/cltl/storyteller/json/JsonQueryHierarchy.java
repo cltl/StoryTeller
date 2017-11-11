@@ -45,6 +45,7 @@ public class JsonQueryHierarchy {
     static String entityCustomFile = "";
 
     static String KSSERVICE = "http://130.37.53.35:50053";
+    //145.100.59.22
     static String KS = ""; //"nwr/wikinews-new";
     static String KSuser = ""; //"nwr/wikinews-new";
     static String KSpass = ""; //"nwr/wikinews-new";

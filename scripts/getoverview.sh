@@ -8,7 +8,12 @@ RESOURCES="$( cd $ROOT && cd .. && pwd)"/newsreader/vua-resources
 # git clone https://github.com/cltl/vua-resources.git
 
 #KnowledgeStore server address and credentials if needed
-SERVER="http://130.37.53.35:50053"
+#dasym
+#SERVER="http://130.37.53.45:50053"
+#wikinews
+#SERVER="https://knowledgestore2.fbk.eu/nwr/wikinews"
+#vaccins
+SERVER="http://130.37.53.82:50053"
 KS="nwr/wikinews-new"
 KSUSER="wikinews"
 KSPASS="wikinews"
