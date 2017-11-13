@@ -77,29 +77,33 @@ public class TrigUtil {
             ArrayList<String> objectKeys = new ArrayList<String>();
             if (trigTripleData.tripleMapOthers.containsKey(tripleKey)) {
                 ArrayList<Statement> semStatements = trigTripleData.tripleMapOthers.get(tripleKey);
-                statements = addNewStatements(statements, semStatements);
+                addNewStatements(statements, semStatements);
             }
             eckgMap.put(tripleKey, statements);
         }
         return eckgMap;
     }
 
-    static public ArrayList<Statement>  addNewStatements(ArrayList<Statement> statements1, ArrayList<Statement> statements2) {
+    static public void  addNewStatements(ArrayList<Statement> statements1, ArrayList<Statement> statements2) {
         ArrayList<Statement> statementsMerge = statements1;
         for (int i = 0; i < statements2.size(); i++) {
             Statement statement2 = statements2.get(i);
-            boolean match = false;
-            for (int j = 0; j < statements1.size(); j++) {
-                Statement statement1 = statements1.get(j);
-                if (statement1.toString().equals(statement2.toString())) {
-                    match = true;
-                    break;
-                }
-            }
-            if (!match) statementsMerge.add(statement2);
+            addNewStatement(statements1, statement2);
         }
-        return statementsMerge;
     }
+
+    static public void addNewStatement(ArrayList<Statement> statements1, Statement statement2) {
+        boolean match = false;
+        for (int j = 0; j < statements1.size(); j++) {
+            Statement statement1 = statements1.get(j);
+            if (statement1.toString().equals(statement2.toString())) {
+                match = true;
+                break;
+            }
+        }
+        if (!match) statements1.add(statement2);
+    }
+
     /**
      * KS util
      * @param trigTripleData
@@ -113,7 +117,7 @@ public class TrigUtil {
             ArrayList<String> objectKeys = new ArrayList<String>();
             if (trigTripleData.tripleMapOthers.containsKey(tripleKey)) {
                 ArrayList<Statement> semStatements = trigTripleData.tripleMapOthers.get(tripleKey);
-                statements = addNewStatements(statements, semStatements);
+                addNewStatements(statements, semStatements);
                 for (int j = 0; j < semStatements.size(); j++) {
                     Statement semStatement = semStatements.get(j);
                     //String objectUri = semStatement.getObject().asLiteral().getString();
@@ -128,7 +132,7 @@ public class TrigUtil {
                 String s = objectKeys.get(j);
                 if (trigTripleData.tripleMapInstances.containsKey(s))  {
                     ArrayList<Statement> objStatements = trigTripleData.tripleMapInstances.get(s);
-                    statements = addNewStatements(statements, objStatements);
+                    addNewStatements(statements, objStatements);
                 }
 
             }
