@@ -179,32 +179,6 @@ public class TrigUtil {
         return eckgMap;
     }
 
-    /** KS util
-     * prints KG
-     * @param statementMap
-     */
-    public static void printKnowledgeGraph(OutputStream fos, HashMap<String, ArrayList<Statement>> statementMap) throws IOException {
-        Set keySet = statementMap.keySet();
-        Iterator<String> keys = keySet.iterator();
-        while (keys.hasNext()) {
-            String tripleKey = keys.next();
-            String str = tripleKey+"\n";
-            ArrayList<Statement> statements = statementMap.get(tripleKey);
-            for (int i = 0; i < statements.size(); i++) {
-                Statement statement = statements.get(i);
-                if (statement.getSubject().getURI().equals(tripleKey)) {
-                    str += "\t" + statement.getPredicate().getLocalName() + "\t" + getPrettyNSValue(statement.getObject().toString()) + "\n";
-                }
-                else {
-                    str += "\t"+statement.getSubject().getLocalName()+"\t" + statement.getPredicate().getLocalName() + "\t" + getPrettyNSValue(statement.getObject().toString()) + "\n";
-
-                }
-            }
-            str +="\n";
-            fos.write(str.getBytes());
-        }
-    }
-
     static public class ComparePredicate implements Comparator {
         public int compare (Object aa, Object bb) {
             Statement a = (Statement) aa;
@@ -264,6 +238,41 @@ public class TrigUtil {
                         "\t"+ getPrettyNSValue(statement.getPredicate().toString());
                 if (!isGafTriple(statement)) {
                     str+=  "\t" + getPrettyNSValue(statement.getObject().toString()) + "\n";
+                }
+                else {
+                    str+=  "\t" + getPrettyNSValueFile(statement.getObject().toString()) + "\n";
+                }
+            }
+            str +="\n";
+            fos.write(str.getBytes());
+        }
+    }
+
+    /** KS util
+     * prints KG
+     * @param statementMap
+     */
+    public static void printKnowledgeGraph(OutputStream fos,
+                                           HashMap<String, ArrayList<Statement>> statementMap
+
+    ) throws IOException {
+        Set keySet = statementMap.keySet();
+        Iterator<String> keys = keySet.iterator();
+        while (keys.hasNext()) {
+            String tripleKey = keys.next();
+            String str = tripleKey+"\n";
+            /// we first print the primary triples
+            ArrayList<Statement> statements = statementMap.get(tripleKey);
+            SortedSet<Statement> treeSet = new TreeSet<Statement>(new CompareStatement());
+            for (int i = 0; i < statements.size(); i++) {
+                Statement statement = statements.get(i);
+                treeSet.add(statement);
+            }
+            for (Statement statement : treeSet) {
+                //str += "\t"+statement.getString()+"\n";
+                str +=  "\t" + getPrettyNSValue(statement.getPredicate().toString());
+                if (!isGafTriple(statement)) {
+                  str+=  "\t" + getPrettyNSValue(statement.getObject().toString()) + "\n";
                 }
                 else {
                     str+=  "\t" + getPrettyNSValueFile(statement.getObject().toString()) + "\n";
