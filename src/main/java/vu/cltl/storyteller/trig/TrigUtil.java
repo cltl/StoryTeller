@@ -209,6 +209,14 @@ public class TrigUtil {
         }
     }
 
+    static public class CompareStatement implements Comparator {
+        public int compare (Object aa, Object bb) {
+            Statement a = (Statement) aa;
+            Statement b = (Statement) bb;
+            return a.toString().compareTo(b.toString());
+        }
+    }
+
     /** KS util
      * prints KG
      * @param statementMap
@@ -224,7 +232,7 @@ public class TrigUtil {
             String str = tripleKey+"\n";
             /// we first print the primary triples
             ArrayList<Statement> statements = statementMap.get(tripleKey);
-            SortedSet<Statement> treeSet = new TreeSet<Statement>(new ComparePredicate());
+            SortedSet<Statement> treeSet = new TreeSet<Statement>(new CompareStatement());
             for (int i = 0; i < statements.size(); i++) {
                 Statement statement = statements.get(i);
                 treeSet.add(statement);
@@ -235,7 +243,7 @@ public class TrigUtil {
                         "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
             }
              /// now print the secondary triples
-            treeSet = new TreeSet<Statement>(new ComparePredicate());
+            treeSet = new TreeSet<Statement>(new CompareStatement());
             statements = secondaryStatementMap.get(tripleKey);
             for (int i = 0; i < statements.size(); i++) {
                 Statement statement = statements.get(i);
@@ -266,7 +274,7 @@ public class TrigUtil {
             String str = tripleKey+"\n";
             /// we first print the primary triples
             ArrayList<Statement> statements = statementMap.get(tripleKey);
-            SortedSet<Statement> treeSet = new TreeSet<Statement>(new ComparePredicate());
+            SortedSet<Statement> treeSet = new TreeSet<Statement>(new CompareStatement());
             for (int i = 0; i < statements.size(); i++) {
                 Statement statement = statements.get(i);
                 treeSet.add(statement);
@@ -277,7 +285,7 @@ public class TrigUtil {
                         "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
             }
              /// now print the secondary triples
-            treeSet = new TreeSet<Statement>(new ComparePredicate());
+            treeSet = new TreeSet<Statement>(new CompareStatement());
             statements = secondaryStatementMap.get(tripleKey);
             for (int i = 0; i < statements.size(); i++) {
                 Statement statement = statements.get(i);
