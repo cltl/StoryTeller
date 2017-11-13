@@ -6,11 +6,15 @@ import com.hp.hpl.jena.rdf.model.Statement;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import vu.cltl.storyteller.objects.PhraseCount;
 import vu.cltl.storyteller.objects.TrigTripleData;
+import vu.cltl.storyteller.util.EventTypes;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
+
+import static vu.cltl.storyteller.util.Util.makeRecursiveFileList;
 
 /**
  * Created by piek on 23/06/15.
@@ -35,7 +39,7 @@ public class TrigUtil {
             for (int i = 0; i < statements.size(); i++) {
                 Statement statement = statements.get(i);
                 if (statement.getPredicate().getLocalName().equals("type")) {
-                    String type = TrigUtil.getPrettyNSValue(statement.getObject().toString());
+                    String type = getPrettyNSValue(statement.getObject().toString());
                     if (typeCountMap.containsKey(type)) {
                         PhraseCount phraseCount = typeCountMap.get(type);
                         phraseCount.incrementCount();
@@ -121,7 +125,7 @@ public class TrigUtil {
                 for (int j = 0; j < semStatements.size(); j++) {
                     Statement semStatement = semStatements.get(j);
                     //String objectUri = semStatement.getObject().asLiteral().getString();
-                    String objectUri = TrigUtil.getObjectUriValueAsString(semStatement);
+                    String objectUri = getObjectUriValueAsString(semStatement);
                     //System.out.println("objectUri = " + objectUri);
                     if (!objectKeys.contains(objectUri)) objectKeys.add(objectUri);
                 }
@@ -156,7 +160,7 @@ public class TrigUtil {
                 for (int j = 0; j < semStatements.size(); j++) {
                     Statement semStatement = semStatements.get(j);
                     //String objectUri = semStatement.getObject().asLiteral().getString();
-                    String objectUri = TrigUtil.getObjectUriValueAsString(semStatement);
+                    String objectUri = getObjectUriValueAsString(semStatement);
                     //System.out.println("objectUri = " + objectUri);
                     if (!objectKeys.contains(objectUri)) objectKeys.add(objectUri);
                 }
@@ -189,10 +193,10 @@ public class TrigUtil {
             for (int i = 0; i < statements.size(); i++) {
                 Statement statement = statements.get(i);
                 if (statement.getSubject().getURI().equals(tripleKey)) {
-                    str += "\t" + statement.getPredicate().getLocalName() + "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
+                    str += "\t" + statement.getPredicate().getLocalName() + "\t" + getPrettyNSValue(statement.getObject().toString()) + "\n";
                 }
                 else {
-                    str += "\t"+statement.getSubject().getLocalName()+"\t" + statement.getPredicate().getLocalName() + "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
+                    str += "\t"+statement.getSubject().getLocalName()+"\t" + statement.getPredicate().getLocalName() + "\t" + getPrettyNSValue(statement.getObject().toString()) + "\n";
 
                 }
             }
@@ -239,8 +243,13 @@ public class TrigUtil {
             }
             for (Statement statement : treeSet) {
                 //str += "\t"+statement.getString()+"\n";
-                str +=  "\t" + TrigUtil.getPrettyNSValue(statement.getPredicate().toString())+
-                        "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
+                str +=  "\t" + getPrettyNSValue(statement.getPredicate().toString());
+                if (!isGafTriple(statement)) {
+                  str+=  "\t" + getPrettyNSValue(statement.getObject().toString()) + "\n";
+                }
+                else {
+                    str+=  "\t" + getPrettyNSValueFile(statement.getObject().toString()) + "\n";
+                }
             }
              /// now print the secondary triples
             treeSet = new TreeSet<Statement>(new CompareStatement());
@@ -251,9 +260,14 @@ public class TrigUtil {
             }
             for (Statement statement : treeSet) {
                 //str += "\t\t"+statement.getString()+"\n";
-                str += "\t\t" + TrigUtil.getPrettyNSValue(statement.getSubject().toString())+
-                        "\t"+TrigUtil.getPrettyNSValue(statement.getPredicate().toString()) +
-                        "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
+                str += "\t\t" + getPrettyNSValue(statement.getSubject().toString())+
+                        "\t"+ getPrettyNSValue(statement.getPredicate().toString());
+                if (!isGafTriple(statement)) {
+                    str+=  "\t" + getPrettyNSValue(statement.getObject().toString()) + "\n";
+                }
+                else {
+                    str+=  "\t" + getPrettyNSValueFile(statement.getObject().toString()) + "\n";
+                }
             }
             str +="\n";
             fos.write(str.getBytes());
@@ -281,9 +295,13 @@ public class TrigUtil {
             }
             for (Statement statement : treeSet) {
                 //str += "\t"+statement.getString()+"\n";
-                str +=  "\t" + TrigUtil.getPrettyNSValue(statement.getPredicate().toString())+
-                        "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
-            }
+                str +=  "\t" + getPrettyNSValue(statement.getPredicate().toString());
+                if (!isGafTriple(statement)) {
+                    str+=  "\t" + getPrettyNSValue(statement.getObject().toString()) + "\n";
+                }
+                else {
+                    str+=  "\t" + getPrettyNSValueFile(statement.getObject().toString()) + "\n";
+                }            }
              /// now print the secondary triples
             treeSet = new TreeSet<Statement>(new CompareStatement());
             statements = secondaryStatementMap.get(tripleKey);
@@ -293,10 +311,14 @@ public class TrigUtil {
             }
             for (Statement statement : treeSet) {
                 //str += "\t\t"+statement.getString()+"\n";
-                str += "\t\t" + TrigUtil.getPrettyNSValue(statement.getSubject().toString())+
-                        "\t"+TrigUtil.getPrettyNSValue(statement.getPredicate().toString()) +
-                        "\t" + TrigUtil.getPrettyNSValue(statement.getObject().toString()) + "\n";
-            }
+                str += "\t\t" + getPrettyNSValue(statement.getSubject().toString())+
+                        "\t"+ getPrettyNSValue(statement.getPredicate().toString()) ;
+                if (!isGafTriple(statement)) {
+                    str+=  "\t" + getPrettyNSValue(statement.getObject().toString()) + "\n";
+                }
+                else {
+                    str+=  "\t" + getPrettyNSValueFile(statement.getObject().toString()) + "\n";
+                }            }
             str +="\n";
             fos.write(str.getBytes());
         }
@@ -327,7 +349,7 @@ public class TrigUtil {
                 StmtIterator siter = namedModel.listStatements();
                 while (siter.hasNext()) {
                     Statement s = siter.nextStatement();
-                    String object = TrigUtil.getPrettyNSValue(s.getObject().toString()).toLowerCase();
+                    String object = getPrettyNSValue(s.getObject().toString()).toLowerCase();
                     if (object.indexOf(entity.toLowerCase()) > -1) {
                         String subject = s.getSubject().getURI();
                         if (!events.contains(subject)) {
@@ -444,6 +466,16 @@ public class TrigUtil {
         }
     }
 
+    static public String getValueFile (String predicate) {
+            int idx = predicate.lastIndexOf("/");
+            if (idx>-1) {
+                return predicate.substring(idx + 1);
+            }
+            else {
+                return predicate;
+            }
+    }
+
 
     static public boolean hasStatement (ArrayList<Statement> statements, Statement s) {
         for (int i = 0; i < statements.size(); i++) {
@@ -534,6 +566,18 @@ public class TrigUtil {
         }
         return object;
     }
+    static public String getPrettyNSValueFile (String element) {
+        String object = "";
+        String value = getValueFile(element);
+        String nameSpace =  getNameSpaceString(element);
+        if (nameSpace.isEmpty()) {
+            object = value;
+        }
+        else {
+            object = nameSpace+":" + value;
+        }
+        return object;
+    }
 
 
 
@@ -562,7 +606,7 @@ public class TrigUtil {
                 if (!eventLabels.isEmpty()) {
                     eventLabels += ",";
                 }
-                eventLabels += TrigUtil.getPrettyNSValue(statement.getObject().toString());
+                eventLabels += getPrettyNSValue(statement.getObject().toString());
             } else {
                 if (isGafTriple(statement)) {
                     if (!gaf.isEmpty()) {
@@ -572,7 +616,7 @@ public class TrigUtil {
                 }
                 else {
                     roles += "\t" + getValue(statement.getPredicate().toString())
-                            + ":" + TrigUtil.getPrettyNSValue(statement.getObject().toString());
+                            + ":" + getPrettyNSValue(statement.getObject().toString());
                 }
             }
         }
@@ -595,7 +639,7 @@ public class TrigUtil {
                 if (!eventLabels.isEmpty()) {
                     eventLabels += ",";
                 }
-                eventLabels += TrigUtil.getPrettyNSValue(statement.getObject().toString());
+                eventLabels += getPrettyNSValue(statement.getObject().toString());
             }
             else {
                 if (isGafTriple(statement)) {
@@ -605,7 +649,7 @@ public class TrigUtil {
                     gaf += getMention(statement.getObject().toString());
                 }
                 else {
-                    String objectValue = TrigUtil.getPrettyNSValue(statement.getObject().toString());
+                    String objectValue = getPrettyNSValue(statement.getObject().toString());
                     if (objectValue.toLowerCase().contains(entity.toLowerCase())) {
                         hasEntity = true;
                       //  System.out.println("entity = "+objectValue);
@@ -707,8 +751,25 @@ public class TrigUtil {
     }
 
     static public void main (String[] args) {
-        String pathToFolder = "/Users/piek/Desktop/tweede-kamer/events/grammatical";
-        removeObjectFiles(new File(pathToFolder));
+        String pathToFolder = "";
+        //removeObjectFiles(new File(pathToFolder));
+        String pathToTrigFiles = "/Users/piek/Desktop/SemEval2018/trial_data/nwr/data";
+        ArrayList<File> trigFiles = makeRecursiveFileList(new File(pathToTrigFiles), ".trig");
+
+        TrigTripleData trigTripleData = TrigTripleReader.readTripleFromTrigFiles(trigFiles);
+        ArrayList<String> domainEvents = EventTypes.getEventSubjectUris(trigTripleData.tripleMapInstances);
+        HashMap<String, ArrayList<Statement>> eckgMap = getPrimaryKnowledgeGraphHashMap(domainEvents,trigTripleData);
+        HashMap<String, ArrayList<Statement>> seckgMap = getSecondaryKnowledgeGraphHashMap(domainEvents,trigTripleData);
+        System.out.println("eckgMap = " + eckgMap.size());
+        System.out.println("domainEvents = " + domainEvents.size());
+        System.out.println("eckgMap after merge = " + eckgMap.size());
+        try {
+            OutputStream fos = new FileOutputStream("/Users/piek/Desktop/SemEval2018/trial_data/nwr/"+"test.eckg");
+            printKnowledgeGraph(fos, eckgMap, seckgMap);
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
