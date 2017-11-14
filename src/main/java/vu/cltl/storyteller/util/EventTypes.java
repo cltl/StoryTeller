@@ -11,6 +11,7 @@ import java.util.Set;
 /**
  * Created by piek on 10/11/2017.
  */
+@Deprecated
 public class EventTypes {
 
     static final String[] types = {"eso:Attacking", "eso:BeingInExistence", "eso:Damaging", "eso:Destroying", "eso:Injuring",

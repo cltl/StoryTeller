@@ -13,7 +13,8 @@ RESOURCES="$( cd $ROOT && cd .. && pwd)"/newsreader/vua-resources
 #wikinews
 #SERVER="https://knowledgestore2.fbk.eu/nwr/wikinews"
 #vaccins
-SERVER="http://130.37.53.82:50053"
+#SERVER="http://130.37.53.82:50053"
+SERVER="http://145.100.58.47:50053"
 KS="nwr/wikinews-new"
 KSUSER="wikinews"
 KSPASS="wikinews"

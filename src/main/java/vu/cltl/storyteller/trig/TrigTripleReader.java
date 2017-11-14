@@ -15,6 +15,7 @@ import java.util.Iterator;
 /**
  * Created by piek on 05/02/16.
  */
+@Deprecated
 public class TrigTripleReader {
 
 

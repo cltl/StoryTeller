@@ -19,6 +19,7 @@ import static vu.cltl.storyteller.util.Util.makeRecursiveFileList;
 /**
  * Created by piek on 23/06/15.
  */
+@Deprecated
 public class TrigUtil {
 
     static final public String provenanceGraph = "http://www.newsreader-project.eu/provenance";

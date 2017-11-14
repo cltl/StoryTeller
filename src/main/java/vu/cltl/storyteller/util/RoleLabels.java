@@ -9,6 +9,7 @@ import java.util.Vector;
 /**
  * Created by piek on 5/11/14.
  */
+@Deprecated
 public class RoleLabels {
 
     /**
