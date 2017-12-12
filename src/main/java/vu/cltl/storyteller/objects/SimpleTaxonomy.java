@@ -803,7 +803,6 @@ inputLine = <http://dbpedia.org/resource/Cabot_Tower_(St._John's)> <http://www.w
     }
 
 
-
     public void  jsonTopicTree (JSONObject tree, String gType, String ns, ArrayList<String> tops,
                                 ArrayList<String> covered,
                                 int level,

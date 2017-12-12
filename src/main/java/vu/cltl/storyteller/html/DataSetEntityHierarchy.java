@@ -67,7 +67,7 @@ public class DataSetEntityHierarchy {
             str += "<div id=\"Entities\" class=\"tabcontent\">\n";
             str += "<div id=\"container\">\n";
             fos.write(str.getBytes());
-           // simpleTaxonomy.htmlTableTree(fos, "entity", "dbp:",tops, 1, cnt, cntPredicates);
+            //simpleTaxonomy.htmlTableTree(fos, "entity", "dbp:",tops, 1, cnt, cntPredicates);
             str = "</div></div>\n";
             fos.write(str.getBytes());
             str = TreeStaticHtml.bodyEnd;

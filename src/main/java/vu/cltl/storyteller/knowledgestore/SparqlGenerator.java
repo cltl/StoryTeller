@@ -931,6 +931,60 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
         return sparqQuery;
     }
 
+    /**
+     * "?a nwr:phrasecount ?phrasecount .\n" +
+       "?phrasecount rdfs:label ?label .\n" +
+       "?phrasecount nwr:count ?count .\n" +
+     * @return
+     */
+    public static String makeSparqlQueryForDarkEntitiesFromKsCountFilter() {
+        String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
+                "PREFIX nwr: <http://www.newsreader-project.eu/> \n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+                "SELECT  ?label ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
+                "WHERE {\n" +
+                "?a gaf:denotedBy ?m .\n" +
+                "?a nwr:phrasecount ?phrasecount .\n" +
+                "?phrasecount rdfs:label ?label .\n" +
+                "?a a ?type . \n" +
+                "FILTER(STRSTARTS(STR(?etype), \"http://www.newsreader-project.eu/domain-ontology\"))\n" +
+                "}\n" +
+                "group by  ?label ?a ?type\n" +
+                "order by DESC(?count)";
+        System.out.println("sparqQuery = " + sparqQuery);
+        return sparqQuery;
+    }
+
+    /**
+     * "?a nwr:phrasecount ?phrasecount .\n" +
+       "?phrasecount rdfs:label ?label .\n" +
+       "?phrasecount nwr:count ?count .\n" +
+     * @return
+     */
+    public static String makeSparqlQueryForDarkEntitiesFromKsCount() {
+        String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
+                "PREFIX nwr: <http://www.newsreader-project.eu/> \n" +
+                "PREFIX nwrontology: <http://www.newsreader-project.eu/ontologies/>\n"+
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+                "SELECT  ?label ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
+                "WHERE {\n" +
+                "?a gaf:denotedBy ?m .\n" +
+                "?a nwr:phrasecount ?phrasecount .\n" +
+                "?phrasecount rdfs:label ?label .\n" +
+                "{?ent rdf:type nwrontology:PER}\n" +
+                "UNION\n" +
+                "{?ent rdf:type nwrontology:LOC}\n" +
+                "UNION\n" +
+                "{?ent rdf:type nwrontology:ORG}\n" +
+                "UNION\n" +
+                "{?ent rdf:type nwrontology:MISC}\n"+
+                "}\n" +
+                "group by  ?label ?a ?type\n" +
+                "order by DESC(?count)";
+        System.out.println("sparqQuery = " + sparqQuery);
+        return sparqQuery;
+    }
+
     public static String makeSparqlQueryForPhraseSkosRelatedTypeCountsFromKs () {
         String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
                 "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
@@ -1477,7 +1531,9 @@ order by DESC(?count)
             "order by DESC(?mcount)\n";
 
     static public void main (String [] args) {
-        System.out.println(SparqlGenerator.makeSparqlQueryForLightEntityProjectFromKs("<http://www.newsreader-project.eu/project/London>", "5"));
+        //System.out.println(s6);
+        System.out.println(makeSparqlQueryForLightEntityProjectFromKs("test", "nr"));
+        //System.out.println(SparqlGenerator.makeSparqlQueryForLightEntityProjectFromKs("<http://www.newsreader-project.eu/project/London>", "5"));
         //System.out.println(SparqlGenerator.makeSparqlQueryForCitedSourcesFromKs());
         //System.out.println(SparqlGenerator.makeSparqlQueryForAuthorsFromKs());
         //System.out.println( SparqlGenerator.makeSparqlQueryForLightEntityProjectFromKs("<http://www.newsreader-project.eu/project/London>"));

@@ -1,10 +1,183 @@
 package vu.cltl.storyteller.html;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * Created by piek on 15/04/16.
  */
-@Deprecated
+
 public class TreeStaticHtml {
+    static final int colmax = 650;
+    static final int colmaxevents = 150;
+    static final String buttons1 = "<button type=\"button\" onclick=\"document.getElementById('cell2').style.display='table-cell'\">Show</button>\n";
+    static public final String accordion = "<div class=\"accordionItem\">";
+    public String makeToggle (String id) {
+        String str = "<a data-toggle=\"collapse\" href=\"#collapse"+id+"\">Collapsible</a>\n";
+        return str;
+    }
+    public static void  htmlTableTree(OutputStream fos,
+                                      JSONObject jsonObject,
+                                      String type,
+                                      int level) throws Exception {
+        level++;
+        outputNode(fos, jsonObject, type, level);
+        org.json.simple.JSONArray instances = (org.json.simple.JSONArray) jsonObject.get("instances");
+        if (instances != null) {
+            for (int i = 0; i < instances.size(); i++) {
+                JSONObject o = (JSONObject) instances.get(i);
+                htmlTableTree(fos, o, type, level);
+            }
+        }
+        org.json.simple.JSONArray children = (org.json.simple.JSONArray) jsonObject.get("children");
+        if (children != null) {
+            for (int i = 0; i < children.size(); i++) {
+                JSONObject o = (JSONObject) children.get(i);
+                htmlTableTree(fos, o, type, level);
+            }
+        }
+        
+    }
+
+    public static void outputNode (OutputStream fos,
+                                   org.json.simple.JSONObject object,
+                                   String type,
+                                   int level) throws IOException {
+
+        String ref = "";
+        String refName = "";
+        ref = (String) object.get("name");
+        if (ref!=null) {
+            String str = accordion+ "\n<h2>\n";
+            for (int j = 2; j < level; j++) {
+                str += "<div id=\"cell\"></div>";
+            }
+            String tb = TreeStaticHtml.makeTickBox(type, ref);
+            if (ref.startsWith("http")) {
+                int idx = ref.lastIndexOf("/");
+                //String name = top;
+                if (idx > -1) {
+                    refName = ref.substring(idx + 1);
+                }
+                tb = TreeStaticHtml.makeTickBox(type, refName);
+                ref = refName;
+            }
+            else if (ref.startsWith("dbp:")) {
+                int idx = ref.lastIndexOf(":");
+                if (idx > -1) {
+                    refName = ref.substring(idx + 1);
+                }
+                tb = TreeStaticHtml.makeTickBox(type, refName, ref);
+                ref = "<a href=\"http://dbpedia.org/ontology/" + refName + "\">" + refName;
+            }
+            Long mentionCount = (Long) object.get("mention_count");
+            Long instanceCount = (Long) object.get("instance_count");
+            str += "<div id=\"cell\">" + ref + "</a></div><div id=\"cell7\">";
+            if (instanceCount!=null) str += instanceCount;
+            str += ";";
+            if (mentionCount!=null) str += mentionCount;
+            str += tb;
+            str +=  "</div>";
+            str += "\n</h2>\n";
+            for (int j = 2; j < level; j++) {
+                str += "<div id=\"cell\"></div>";
+
+            }
+            fos.write(str.getBytes());
+            str = "";
+            
+            JSONArray labels = (org.json.simple.JSONArray) object.get("labels");
+            if (labels != null) {
+                String phraseString = "[";
+                for (int j = 0; j < labels.size(); j++) {
+                    String name = (String) labels.get(j);
+                    tb = TreeStaticHtml.makeTickBox(type, name);
+                    ref = name.replace("+", "_") + ":" + tb;
+                    phraseString += ref;
+                }
+                phraseString += "]";
+                str = "<div id=\"cell2\"  class=\"collapse\"><p>" + phraseString + "</p></div>\n";
+                fos.write(str.getBytes());
+            }
+            else {
+
+            }
+            str = "</div>\n"; // closing accordion
+            fos.write(str.getBytes());
+        }
+    }
+
+    public static void outputLeaf (OutputStream fos,
+                                   org.json.simple.JSONObject object,
+                                   String type,
+                                   int level) throws IOException {
+
+        String ref = "";
+        String refName = "";
+        ref = (String) object.get("name");
+        if (ref!=null) {
+            String str = accordion+ "\n<h2>\n";
+            for (int j = 2; j < level; j++) {
+                str += "<div id=\"cell\"></div>";
+            }
+            String tb = TreeStaticHtml.makeTickBox(type, ref);
+            if (ref.startsWith("http")) {
+                int idx = ref.lastIndexOf("/");
+                //String name = top;
+                if (idx > -1) {
+                    refName = ref.substring(idx + 1);
+                }
+                tb = TreeStaticHtml.makeTickBox(type, refName);
+                ref = refName;
+            }
+            else if (ref.startsWith("dbp:")) {
+                int idx = ref.lastIndexOf(":");
+                if (idx > -1) {
+                    refName = ref.substring(idx + 1);
+                }
+                tb = TreeStaticHtml.makeTickBox(type, refName, ref);
+                ref = "<a href=\"http://dbpedia.org/ontology/" + refName + "\">" + refName;
+            }
+            Long mentionCount = (Long) object.get("mention_count");
+            Long instanceCount = (Long) object.get("instance_count");
+            str += "<div id=\"cell\">" + ref + "</a></div><div id=\"cell7\">";
+            if (instanceCount!=null) str += instanceCount;
+            str += ";";
+            if (mentionCount!=null) str += mentionCount;
+            str += tb;
+            str +=  "</div>";
+            str += "\n</h2>\n";
+            for (int j = 2; j < level; j++) {
+                str += "<div id=\"cell\"></div>";
+
+            }
+            fos.write(str.getBytes());
+            str = "";
+
+            JSONArray labels = (org.json.simple.JSONArray) object.get("labels");
+            if (labels != null) {
+                String phraseString = "[";
+                for (int j = 0; j < labels.size(); j++) {
+                    String name = (String) labels.get(j);
+                    tb = TreeStaticHtml.makeTickBox(type, name);
+                    ref = name.replace("+", "_") + ":" + tb;
+                    phraseString += ref;
+                }
+                phraseString += "]";
+                str = "<div id=\"cell2\"  class=\"collapse\"><p>" + phraseString + "</p></div>\n";
+                fos.write(str.getBytes());
+            }
+            else {
+
+            }
+            str = "</div>\n"; // closing accordion
+            fos.write(str.getBytes());
+        }
+    }
+
     static final String scripts =
             "<script src=\"https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js\"></script>\n" +
             "<script src=\"http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js\"></script>\n" +
