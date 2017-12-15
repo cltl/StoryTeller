@@ -77,6 +77,12 @@
             <artifactId>jackson-xc</artifactId>
             <version>1.9.12</version>
         </dependency>
+        <dependency>
+        <groupId>com.github.cltl</groupId>
+        <artifactId>nwr-triple-api</artifactId>
+        <version>1.0</version>
+        <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <repositories>
