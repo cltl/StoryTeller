@@ -261,7 +261,10 @@ public class JsonQueryHierarchy {
                 System.out.println("simpleTaxonomy.getTops().size() = " + simpleTaxonomy.getTops().size());
             }
 
-            String sparqlPhrases = SparqlGenerator.makeSparqlQueryForDarkEntitiesFromKsCount();
+            String sparqlPhrases = SparqlGenerator.makeSparqlQueryForDarkEntitiesFromKs();
+            /// @TODO
+            // Variant that is doing count searches
+            /// String sparqlPhrases = SparqlGenerator.makeSparqlQueryForDarkEntitiesFromKsCount();
             if (DEBUG)  System.out.println("Reading hiearchy mapping file = " + hierarchyMappingFile);
             HashMap<String, String> map = Util.ReadFileToStringStringHashMap(hierarchyMappingFile);
             if (DEBUG) System.out.println("Nr. of hierarchy mappings = " + map.size());

@@ -915,22 +915,6 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
     }
 
 
-    public static String makeSparqlQueryForDarkEntitiesFromKs() {
-        String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
-                "SELECT  ?label ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
-                "WHERE {\n" +
-                "?a gaf:denotedBy ?m .\n" +
-                "?a rdfs:label ?label .\n" +
-                "OPTIONAL {?a a ?type . }\n" +
-                "FILTER (CONTAINS(STR(?a), \"/entities/\"))\n" +
-                "}\n" +
-                "group by  ?label ?a ?type\n" +
-                "order by DESC(?count)";
-      //  System.out.println("sparqQuery = " + sparqQuery);
-        return sparqQuery;
-    }
-
     /**
      * "?a nwr:phrasecount ?phrasecount .\n" +
        "?phrasecount rdfs:label ?label .\n" +
@@ -952,6 +936,31 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
                 "group by  ?label ?a ?type\n" +
                 "order by DESC(?count)";
         System.out.println("sparqQuery = " + sparqQuery);
+        return sparqQuery;
+    }
+
+
+    public static String makeSparqlQueryForDarkEntitiesFromKs() {
+        String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
+                "PREFIX nwr: <http://www.newsreader-project.eu/> \n" +
+                "PREFIX nwrontology: <http://www.newsreader-project.eu/ontologies/>\n"+
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
+                "SELECT  ?label ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
+                "WHERE {\n" +
+                "?a gaf:denotedBy ?m .\n" +
+                "?a rdfs:label ?label .\n" +
+                "{?ent rdf:type nwrontology:PER}\n" +
+                "UNION\n" +
+                "{?ent rdf:type nwrontology:LOC}\n" +
+                "UNION\n" +
+                "{?ent rdf:type nwrontology:ORG}\n" +
+                "UNION\n" +
+                "{?ent rdf:type nwrontology:MISC}\n"+
+                "}\n" +
+                "group by  ?label ?a ?type\n" +
+                "order by DESC(?count)";
+       // System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
     }
 
