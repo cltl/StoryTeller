@@ -965,6 +965,7 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
         String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
                 "PREFIX nwr: <http://www.newsreader-project.eu/> \n" +
                 "PREFIX nwrontology: <http://www.newsreader-project.eu/ontologies/>\n"+
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n" +
                 "SELECT  ?label ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
                 "WHERE {\n" +
