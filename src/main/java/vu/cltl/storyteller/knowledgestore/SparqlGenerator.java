@@ -950,6 +950,7 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
                 "WHERE {\n" +
                 "?a gaf:denotedBy ?m .\n" +
                 "?a rdfs:label ?label .\n" +
+                "?a rdf:type ?type .\n" +
                 "{?ent rdf:type nwrontology:PER}\n" +
                 "UNION\n" +
                 "{?ent rdf:type nwrontology:LOC}\n" +
@@ -958,7 +959,7 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
                 "UNION\n" +
                 "{?ent rdf:type nwrontology:MISC}\n"+
                 "}\n" +
-                "group by  ?label ?a ?type\n" +
+                "group by ?label ?a ?type\n" +
                 "order by DESC(?count)";
        // System.out.println("sparqQuery = " + sparqQuery);
         return sparqQuery;
