@@ -262,6 +262,9 @@ public class JsonQueryHierarchy {
             }
 
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForDarkEntitiesFromKs();
+            if (DEBUG) {
+                System.out.println("sparql = " + sparqlPhrases);
+            }
             /// @TODO
             // Variant that is doing count searches
             /// String sparqlPhrases = SparqlGenerator.makeSparqlQueryForDarkEntitiesFromKsCount();

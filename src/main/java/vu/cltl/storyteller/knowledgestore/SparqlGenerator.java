@@ -951,13 +951,13 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
                 "?a gaf:denotedBy ?m .\n" +
                 "?a rdfs:label ?label .\n" +
                 "?a rdf:type ?type .\n" +
-                "{?ent rdf:type nwrontology:PER}\n" +
+                "{?a rdf:type nwrontology:PER}\n" +
                 "UNION\n" +
-                "{?ent rdf:type nwrontology:LOC}\n" +
+                "{?a rdf:type nwrontology:LOC}\n" +
                 "UNION\n" +
-                "{?ent rdf:type nwrontology:ORG}\n" +
+                "{?a rdf:type nwrontology:ORG}\n" +
                 "UNION\n" +
-                "{?ent rdf:type nwrontology:MISC}\n"+
+                "{?a rdf:type nwrontology:MISC}\n"+
                 "}\n" +
                 "group by ?label ?a ?type\n" +
                 "order by DESC(?count)";
@@ -996,15 +996,35 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
         return sparqQuery;
     }
 
+    /**
+     *
+     *
+     PREFIX gaf: <http://groundedannotationframework.org/gaf#>
+     PREFIX nwr: <http://www.newsreader-project.eu/>
+     PREFIX nwrontology: <http://www.newsreader-project.eu/ontologies/>
+     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+     SELECT  ?label ?a (COUNT (DISTINCT ?m) as ?count) ?type
+     WHERE {
+     ?a gaf:denotedBy ?m .
+     ?a rdfs:label ?label .
+     ?a rdf:type nwrontology:NONENTITY .
+     ?a skos:relatedMatch ?type .
+     }
+     group by ?label ?a ?type
+     order by DESC(?count)
+     *
+     * @return
+     */
     public static String makeSparqlQueryForPhraseSkosRelatedTypeCountsFromKs () {
         String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
                 "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
+                "PREFIX nwrontology: <http://www.newsreader-project.eu/ontologies/>\n" +
                 "SELECT ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
                 "WHERE {\n" +
                 "?a gaf:denotedBy ?m .\n" +
-                "OPTIONAL {?a skos:relatedMatch ?type . }\n" +
-                "FILTER (CONTAINS(STR(?type), \"dbpedia\"))\n"+
-                "FILTER (CONTAINS(STR(?a), \"/non-entities/\"))\n" +
+                "?a skos:relatedMatch ?type . \n" +
+                "?a rdf:type nwrontology:NONENTITY . \n" +
                 "}\n" +
                 "group by ?a ?type\n" +
                 "order by DESC(?count)";
