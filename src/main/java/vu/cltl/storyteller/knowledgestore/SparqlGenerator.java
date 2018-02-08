@@ -1019,6 +1019,7 @@ OPTIONAL { ?object rdf:type owltime:Interval ; owltime:hasEnd ?endtime }
     public static String makeSparqlQueryForPhraseSkosRelatedTypeCountsFromKs () {
         String sparqQuery = "PREFIX gaf: <http://groundedannotationframework.org/gaf#>\n"+
                 "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX nwrontology: <http://www.newsreader-project.eu/ontologies/>\n" +
                 "SELECT ?a (COUNT (DISTINCT ?m) as ?count) ?type \n" +
                 "WHERE {\n" +

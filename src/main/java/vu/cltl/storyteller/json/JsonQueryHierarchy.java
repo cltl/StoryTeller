@@ -322,6 +322,9 @@ public class JsonQueryHierarchy {
             }
 
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForPhraseSkosRelatedTypeCountsFromKs();
+            if (DEBUG) {
+                System.out.println("sparql = " + sparqlPhrases);
+            }
             HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getTypesAndInstanceCountsFromKnowledgeStore (sparqlPhrases);
             if (DEBUG) System.out.println("Nr. of instances with types and phrases, cntTypedPredicates.size() = " + cntTypedPredicates.size());
             //HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getTypesAndLabelCountsFromKnowledgeStore (sparqlPhrases);
@@ -391,6 +394,9 @@ public class JsonQueryHierarchy {
             }
 
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForAuthorsFromKs();
+            if (DEBUG) {
+                System.out.println("sparql = " + sparqlPhrases);
+            }
             //HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getLabelsTypesAndInstanceCountsFromKnowledgeStore (sparqlPhrases, null);
             HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getInstanceCountsFromKnowledgeStore (sparqlPhrases);
             HashMap<String, ArrayList<PhraseCount>> cntPredicates = deriveTypePhraseCountsFromTypedPhrases(cntTypedPredicates, simpleTaxonomy);
@@ -439,6 +445,9 @@ public class JsonQueryHierarchy {
             }
 
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForCitedSourcesFromKs();
+            if (DEBUG) {
+                System.out.println("sparql = " + sparqlPhrases);
+            }
             //HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getLabelsTypesAndInstanceCountsFromKnowledgeStore (sparqlPhrases, null);
             HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getTypesAndInstanceCountsFromKnowledgeStore (sparqlPhrases, null);
             HashMap<String, ArrayList<PhraseCount>> cntPredicates = deriveTypePhraseCountsFromTypedPhrases(cntTypedPredicates, simpleTaxonomy);
@@ -514,6 +523,9 @@ public class JsonQueryHierarchy {
                 sparqlPhrases = SparqlGenerator.makeSparqlQueryForEventEsoFramenetTypeCountsFromKs();
             }
 
+            if (DEBUG) {
+                System.out.println("sparql = " + sparqlPhrases);
+            }
             HashMap<String, TypedPhraseCount> cntTypedPredicates = GetTriplesFromKnowledgeStore.getTypesAndLabelCountsFromKnowledgeStore (sparqlPhrases);
             //// Does not seem to work
             //cntTypedPredicates = mergeSynonyms(cntTypedPredicates);
@@ -575,6 +587,9 @@ public class JsonQueryHierarchy {
 
             String sparqlPhrases = SparqlGenerator.makeSparqlQueryForTopicCountsFromKs();
 
+            if (DEBUG) {
+                System.out.println("sparql = " + sparqlPhrases);
+            }
 
             ArrayList<String> tops = simpleTaxonomy.getTops();
             if (DEBUG) System.out.println("tops.toString() = " + tops.toString());
